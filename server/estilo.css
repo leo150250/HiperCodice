@@ -1,0 +1,99 @@
+body {
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+form {
+	background-color: #EEE;
+	padding: 10px;
+}
+form > * {
+	display: block;
+	margin: 10px 0;
+}
+
+button {
+	display: block;
+}
+
+#quantitativoCartas {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-evenly;
+}
+.quantitativoCarta {
+	border: 1px solid black;
+	border-radius: 5px;
+	padding: 5px;
+}
+.ok {
+	background-color: #4CAF5080;
+	padding: 10px 20px;
+}
+.erro {
+	background-color: #F4433680;
+	padding: 10px 20px;
+}
+
+.Atributo {
+	display: inline-block;
+	width: 200px;
+	margin: 5px;
+	padding: 5px;
+	border: 1px solid black;
+	border-radius: 5px;
+}
+.Atributo h3 {
+	margin: 0;
+	padding: 0;
+	font-size: 1em;
+}
+.Atributo p {
+	margin: 5px 0;
+	padding: 0;
+	text-align: justify;
+	font-size: 0.75em;
+}
+
+.Carta {
+	width: 300px;
+	border: 1px solid black;
+	border-radius: 10px;
+	margin: 10px;
+	padding: 10px;
+	display: inline-block;
+	vertical-align: top;
+}
+.Carta h3 {
+	margin: 0;
+	padding: 0;
+	text-align: center;
+}
+.Carta img {
+	width: 100%;
+	height: 200px;
+	object-fit: cover;
+	border-radius: 10px;
+}
+.Carta p {
+	margin: 10px 0;
+	padding: 0;
+	text-align: justify;
+	font-size: 0.75em;
+}
+
+.valoresCarta {
+	width: 100%;
+	border-collapse: collapse;
+}
+.valoresCarta tr:not(:last-child) td {
+	border-bottom: 1px solid black;
+}
+.valoresCarta td:first-child {
+	font-size: 0.9em;
+}
+.valoresCarta td:last-child {
+	font-size: 1em;
+	white-space: nowrap;
+	font-weight: bold;
+	text-align: right;
+}
