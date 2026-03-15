@@ -92,9 +92,27 @@ $Deque = BD_fetch($Deque);
 				echo "<p>Nenhuma carta encontrada.</p>";
 			} else {
 				while ($Carta = BD_fetch($Cartas)) {
-					echo "<div class='Carta'>";
-					echo "<h3>".$Carta['classe']." | ".$Carta['nome']." (".$Carta['categoria'].")</h3>";
-					echo "<img src='".$path."img/decks/".$Deque['id']."/".$Carta['id'].".jpg' alt='".$Carta['nome']."'><br>";
+					$classe = "";
+					switch ($Carta['classe']) {
+						case 1:
+							$classe = "A";
+							break;
+						case 2:
+							$classe = "B";
+							break;
+						case 3:
+							$classe = "C";
+							break;
+						case 4:
+							$classe = "D";
+							break;
+					}
+					echo "<div class='Carta classe$classe'>";
+					echo "<img class='fundo' src='".$path."img/decks/".$Deque['id']."/default.jpg' alt='Fundo da Carta'>";
+					echo "<h1>".$classe."</h1>";
+					echo "<h2>".$Carta['nome']."</h2>";
+					echo "<h3>".$Carta['categoria']."</h3>";
+					echo "<img class='imagem' src='".$path."img/decks/".$Deque['id']."/".$Carta['id'].".jpg' alt='".$Carta['nome']."'><br>";
 					$Valores = BD_query("SELECT * FROM Valores v JOIN Atributos a ON v.idAtributo = a.id WHERE v.idCarta = ".$Carta['id']);
 					echo "<table class='valoresCarta'>";
 					while ($Valor = BD_fetch($Valores)) {
