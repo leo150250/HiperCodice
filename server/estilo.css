@@ -67,16 +67,16 @@ button {
 }
 
 .Carta.classeA {
-	background-color: #2196F380;
+	background-color: #2196F3;
 }
 .Carta.classeB {
-	background-color: #4CAF5080;
+	background-color: #4CAF50;
 }
 .Carta.classeC {
-	background-color: #FF980080;
+	background-color: #FF9800;
 }
 .Carta.classeD {
-	background-color: #F4433680;
+	background-color: #F44336;
 }
 
 .Carta h1 {
@@ -84,60 +84,97 @@ button {
 	top: 0px;
 	right: 0px;
 	margin: 0px;
-	padding: 10px;
+	padding: 5px 10px;
+	background-color: inherit;
+	border-left: 1px solid #FFF;
+	border-bottom: 5px solid #FFF;
+	border-bottom-left-radius: 20px;
+	color: #FFF;
+	z-index: 5;
 }
 .Carta h2 {
 	margin: -10px;
 	padding: 10px;
-	padding-right: 2em;
+	padding-right: 4em;
 	background-color: #0008;
 	color: #FFF;
+	font-size: min(100%, 1rem);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	height: 2rem;
+	position: relative;
+	z-index: 3;
 }
 .Carta h3 {
-	flex-basis: 100%;
-}
-
-.Carta h3 {
+	color: #FFF;
 	margin: 0;
 	padding: 0;
-	text-align: center;
+	padding-right: 1em;
+	border-top-right-radius: 10px;
+	border-bottom-right-radius: 10px;
+	position: absolute;
+	z-index: 4;
+	background-color: inherit;
+	left: 0px;
 }
 .Carta img.fundo {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
-	opacity: 0.25;
+	opacity: 0.1;
 	position: absolute;
 	top: 0px;
 	left: 0px;
-	z-index: -1;
+	z-index: 0;
 }
 .Carta img.imagem {
 	width: 100%;
+	margin: 10px 0px;
 	height: 200px;
 	object-fit: cover;
-	border-radius: 10px;
+	position: relative;
+	z-index: 1;
 }
 .Carta p {
 	margin: 10px 0;
 	padding: 0;
 	text-align: justify;
 	font-size: 0.75em;
+	position: relative;
+	z-index: 1;
+	color: #FFF;
 }
 
 .valoresCarta {
 	width: 100%;
 	border-collapse: collapse;
+	background-color: #FFFD;
+	position: relative;
+	z-index: 1;
 }
-.valoresCarta tr:not(:last-child) td {
-	border-bottom: 1px solid black;
+.valoresCarta > div {
+	padding: 5px;
+	display: flex;
+	flex-wrap: wrap;
 }
-.valoresCarta td:first-child {
-	font-size: 0.9em;
+.valoresCarta > div:not(:last-child) {
+	border-bottom: 1px solid #0004;
 }
-.valoresCarta td:last-child {
+.valoresCarta > div div {
+	flex-grow: 2;
+}
+.valoresCarta > div div:first-child {
+	font-size: 0.75em;
+	margin: 0;
+	margin-bottom: -0.5rem;
+	padding: 0;
+}
+.valoresCarta > div div:last-child {
 	font-size: 1em;
+	margin: 0;
 	white-space: nowrap;
 	font-weight: bold;
 	text-align: right;
+	padding: 0;
 }

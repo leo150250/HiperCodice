@@ -114,7 +114,7 @@ $Deque = BD_fetch($Deque);
 					echo "<h3>".$Carta['categoria']."</h3>";
 					echo "<img class='imagem' src='".$path."img/decks/".$Deque['id']."/".$Carta['id'].".jpg' alt='".$Carta['nome']."'><br>";
 					$Valores = BD_query("SELECT * FROM Valores v JOIN Atributos a ON v.idAtributo = a.id WHERE v.idCarta = ".$Carta['id']);
-					echo "<table class='valoresCarta'>";
+					echo "<div class='valoresCarta'>";
 					while ($Valor = BD_fetch($Valores)) {
 						$valor = $Valor['valor'];
 						$inverterMedida = false;
@@ -123,12 +123,12 @@ $Deque = BD_fetch($Deque);
 							$valor = number_format($Valor['valor'], 2, ",", ".");
 						}
 						if ($inverterMedida) {
-							echo "<tr><td>".$Valor['nome'].": </td><td>".$Valor['medida']." ".$valor."</td></tr>";
+							echo "<div><div>".$Valor['nome'].": </div><div>".$Valor['medida']." ".$valor."</div></div>";
 						} else {
-							echo "<tr><td>".$Valor['nome'].": </td><td>".$valor." ".$Valor['medida']."</td></tr>";
+							echo "<div><div>".$Valor['nome'].": </div><div>".$valor." ".$Valor['medida']."</div></div>";
 						}
 					}
-					echo "</table>";
+					echo "</div>";
 					echo "<p>".$Carta['descricao']."</p>";
 					echo "</div>";
 				}
