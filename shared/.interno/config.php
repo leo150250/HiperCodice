@@ -30,6 +30,10 @@ if (isset($_GET['BD'])) {
 				if ($conn->connect_error) {
 					echo "Erro na conexão: " . $conn->connect_error;
 				} else {
+					$dbName = $dadosConexao->db;
+					$conn->query("DROP DATABASE IF EXISTS `$dbName`");
+					$conn->query("CREATE DATABASE `$dbName`");
+					$conn->select_db($dbName);
 					if ($conn->multi_query($sql)) {
 						echo "Banco de dados gerado com sucesso!";
 						while ($conn->next_result());

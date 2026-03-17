@@ -1,8 +1,3 @@
-drop database if exists HiperCodice;
-create database HiperCodice;
-
-use HiperCodice;
-
 create table Deques (
 	id int auto_increment primary key,
 	nome varchar(64) not null,
