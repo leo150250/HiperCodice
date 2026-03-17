@@ -25,6 +25,7 @@ jobs:
           password: ${{ secrets.SenhaFTP }}
           local-dir: "./shared/"
           server-dir: "/public_html/sistemas/hipercodice/"
+          delete-server-files: false
       - name: Deploy server
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -43,3 +44,4 @@ jobs:
           protocol: "ftps"
           local-dir: "./shared/"
           server-dir: "/var/www/html/hipercodice/"
+          delete-server-files: false
