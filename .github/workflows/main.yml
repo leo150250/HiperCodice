@@ -12,8 +12,8 @@ jobs:
       - name: Prepare public deploy
         run: |
           mkdir -p temp_public
-          cp -r public/* temp_public/
-          cp -r shared/* temp_public/
+          cp -r public/. temp_public/
+          cp -r shared/. temp_public/
       - name: Deploy public
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -25,8 +25,8 @@ jobs:
       - name: Prepare server deploy
         run: |
           mkdir -p temp_server
-          cp -r server/* temp_server/
-          cp -r shared/* temp_server/
+          cp -r server/. temp_server/
+          cp -r shared/. temp_server/
       - name: Deploy server
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
