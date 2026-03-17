@@ -10,14 +10,13 @@ create table Deques (
 );
 
 create table Atributos (
-	id int auto_increment not null,
+	id int auto_increment primary key,
 	idDeque int not null,
 	nome varchar(64) not null,
 	forma tinyint not null default 1, #0 = melhor menor, 1 = melhor maior
 	medida varchar(16) not null default "",
-	descricao text not null default "",
+	descricao text not null,
 	ativo boolean not null default false,
-	primary key (id, idDeque),
 	foreign key (idDeque) references Deques(id) on delete cascade on update cascade
 );
 
@@ -35,7 +34,7 @@ create table Valores (
 	idCarta int not null,
 	idAtributo int not null,
 	valor decimal(10,2) not null default 0,
-	primary key (idCarta, idAtributo),
+	constraint pk_valores primary key (idCarta, idAtributo),
 	foreign key (idCarta) references Cartas(id) on delete cascade on update cascade,
-	foreign key (idAtributo) references Atributos(id) on delete cascade on update cascade
+	constraint fk_valores_atributos foreign key (idAtributo) references Atributos(id) on delete cascade on update cascade
 );

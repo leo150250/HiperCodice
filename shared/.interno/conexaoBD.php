@@ -16,7 +16,12 @@ if (file_exists($path.".interno/conexaoBD.json")) {
 	$dadosConexao = file_get_contents($path.".interno/conexaoBD.json");
 	$dadosConexao = json_decode($dadosConexao);
 } else {
-	die("Arquivo de configuração de conexão com o banco de dados não encontrado.");
+	if (!isset($config)) {
+		header("Location: ".$path.".interno/config.php?BD");
+		exit();
+	} else {
+		die("Configurações de conexão com o banco de dados não encontradas.");
+	}
 }
 
 function BD_conectar() {
@@ -70,5 +75,7 @@ function BD_rollback() {
 	$conexaoDB->rollback();
 }
 
-BD_conectar();
+if (!isset($config)) {
+	BD_conectar();
+}
 ?>
