@@ -1,0 +1,45 @@
+name: Deploy to FTP
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Deploy public
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.ServidorFTP }}
+          username: ${{ secrets.UsuarioFTP }}
+          password: ${{ secrets.SenhaFTP }}
+          local-dir: "./public/"
+          server-dir: "/public_html/sistemas/hipercodice/"
+      - name: Deploy public - SHARED
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.ServidorFTP }}
+          username: ${{ secrets.UsuarioFTP }}
+          password: ${{ secrets.SenhaFTP }}
+          local-dir: "./shared/"
+          server-dir: "/public_html/sistemas/hipercodice/"
+      - name: Deploy server
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.ServidorFTPS01 }}
+          username: ${{ secrets.UsuarioFTPS01 }}
+          password: ${{ secrets.SenhaFTPS01 }}
+          protocol: "ftps"
+          local-dir: "./server/"
+          server-dir: "/var/www/html/hipercodice/"
+      - name: Deploy server - SHARED
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.ServidorFTPS01 }}
+          username: ${{ secrets.UsuarioFTPS01 }}
+          password: ${{ secrets.SenhaFTPS01 }}
+          protocol: "ftps"
+          local-dir: "./shared/"
+          server-dir: "/var/www/html/hipercodice/"
