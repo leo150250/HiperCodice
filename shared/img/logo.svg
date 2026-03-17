@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="136.96342mm"
+   height="91.75798mm"
+   viewBox="0 0 136.96342 91.757979"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="logo.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showguides="true"
+     inkscape:zoom="1.1447461"
+     inkscape:cx="311.42278"
+     inkscape:cy="386.54861"
+     inkscape:window-width="2560"
+     inkscape:window-height="1529"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Camada 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.8842px;font-family:'Tw Cen MT Condensed';-inkscape-font-specification:'Tw Cen MT Condensed,  Bold';font-variant-ligatures:discretionary-ligatures;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:3.10744"
+       x="31.963934"
+       y="54.466618"
+       id="text4"><tspan
+         sodipodi:role="line"
+         id="tspan4"
+         style="stroke-width:3.10744"
+         x="31.963934"
+         y="54.466618">HIPER</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:25.5956px;font-family:'Tw Cen MT Condensed';-inkscape-font-specification:'Tw Cen MT Condensed,  Bold';font-variant-ligatures:discretionary-ligatures;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:4"
+       x="8.2957296"
+       y="71.987946"
+       id="text5"><tspan
+         sodipodi:role="line"
+         id="tspan5"
+         style="stroke-width:4"
+         x="8.2957296"
+         y="71.987946">CÓDICE</tspan></text>
+    <path
+       style="baseline-shift:baseline;display:inline;overflow:visible;opacity:1;vector-effect:none;fill:#000000;enable-background:accumulate;stop-color:#000000;stop-opacity:1"
+       d="m 50.442248,74.076646 v 9.3967 H 84.719596 V 30.703816 H 50.442248 v 9.62809 h 4 v -5.62809 h 26.277348 v 44.76953 H 54.442248 v -5.3967 z"
+       id="rect6"
+       sodipodi:nodetypes="ccccccccccccc" />
+    <path
+       id="rect7"
+       style="baseline-shift:baseline;display:inline;overflow:visible;opacity:1;vector-effect:none;fill:#000000;enable-background:accumulate;stop-color:#000000;stop-opacity:1"
+       d="m 95.293079,19.567238 -33.109608,8.871807 0.204122,0.762231 12.405446,5e-6 17.671787,-4.735121 11.586374,43.242323 -17.829403,4.777488 1e-6,4.140835 22.728332,-6.090068 z"
+       sodipodi:nodetypes="cccccccccc" />
+    <path
+       id="rect8"
+       style="baseline-shift:baseline;display:inline;overflow:visible;opacity:1;vector-effect:none;fill:#000000;enable-background:accumulate;stop-color:#000000;stop-opacity:1"
+       d="m 102.62441,6.0693524 -29.685007,17.1390056 0.396359,0.686782 11.968778,-3.207041 15.85588,-9.154478 22.38468,38.771277 -15.98714,9.230444 1.07177,4.00027 20.37964,-11.766201 z"
+       sodipodi:nodetypes="cccccccccc" />
+  </g>
+</svg>
