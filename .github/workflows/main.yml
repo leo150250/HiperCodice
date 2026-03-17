@@ -9,23 +9,24 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Prepare public deploy
+        run: |
+          mkdir -p temp_public
+          cp -r public/* temp_public/
+          cp -r shared/* temp_public/
       - name: Deploy public
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.ServidorFTP }}
           username: ${{ secrets.UsuarioFTP }}
           password: ${{ secrets.SenhaFTP }}
-          local-dir: "./public/"
-          server-dir: "/public_html/sistemas/hipercodice/"
-      - name: Deploy public - SHARED
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.ServidorFTP }}
-          username: ${{ secrets.UsuarioFTP }}
-          password: ${{ secrets.SenhaFTP }}
-          local-dir: "./shared/"
-          server-dir: "/public_html/sistemas/hipercodice/"
-          delete-server-files: false
+          local-dir: "./temp_public/"
+          server-dir: "/public_html/sistemas/hipercodice/" 
+      - name: Prepare server deploy
+        run: |
+          mkdir -p temp_server
+          cp -r server/* temp_server/
+          cp -r shared/* temp_server/
       - name: Deploy server
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -33,15 +34,5 @@ jobs:
           username: ${{ secrets.UsuarioFTPS01 }}
           password: ${{ secrets.SenhaFTPS01 }}
           protocol: "ftps"
-          local-dir: "./server/"
+          local-dir: "./temp_server/"
           server-dir: "/var/www/html/hipercodice/"
-      - name: Deploy server - SHARED
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.ServidorFTPS01 }}
-          username: ${{ secrets.UsuarioFTPS01 }}
-          password: ${{ secrets.SenhaFTPS01 }}
-          protocol: "ftps"
-          local-dir: "./shared/"
-          server-dir: "/var/www/html/hipercodice/"
-          delete-server-files: false
