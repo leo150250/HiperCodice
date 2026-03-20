@@ -1,10 +1,14 @@
 <?php
 $idSala = 0;
-include "estrutura.php";
+$path = "";
+include $path.".interno/conexaoBD.php";
+include $path."estrutura.php";
 
 
 construirDeque(1,6);
 
+echo "<pre>";
 $Deque->info();
 echo $Deque->json();
+echo "</pre>";
 ?>

@@ -1,0 +1,38 @@
+name: Deploy to FTP
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Prepare public deploy
+        run: |
+          mkdir -p temp_public
+          cp -r public/. temp_public/
+          cp -r shared/. temp_public/
+      - name: Deploy public
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.ServidorFTP }}
+          username: ${{ secrets.UsuarioFTP }}
+          password: ${{ secrets.SenhaFTP }}
+          local-dir: "./temp_public/"
+          server-dir: "/public_html/sistemas/hipercodice/" 
+      - name: Prepare server deploy
+        run: |
+          mkdir -p temp_server
+          cp -r server/. temp_server/
+          cp -r shared/. temp_server/
+      - name: Deploy server
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.ServidorFTPS01 }}
+          username: ${{ secrets.UsuarioFTPS01 }}
+          password: ${{ secrets.SenhaFTPS01 }}
+          protocol: "ftps"
+          local-dir: "./temp_server/"
+          server-dir: "/var/www/html/hipercodice/"

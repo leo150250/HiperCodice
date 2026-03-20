@@ -9,12 +9,12 @@ class Deque {
 		$this->nome = $_nome;
 	}
 	public function info() {
-		echo "Deque: ".$this->nome." (ID: ".$this->id.")<br>";
-		echo "Atributos:<br>";
+		echo "Deque: ".$this->nome." (ID: ".$this->id.")\n";
+		echo "Atributos:\n";
 		foreach ($this->atributos as $atributo) {
 			$atributo->info();
 		}
-		echo "Cartas:<br>";
+		echo "Cartas:\n";
 		foreach ($this->cartas as $carta) {
 			$carta->info();
 		}
@@ -46,6 +46,15 @@ class Deque {
 		}
 		return json_encode($data);
 	}
+	public function organizarDeque() {
+		//Organiza as cartas por classe e número, mantendo tudo 1-1, 1-2...1-8,2-1,2-2... e assim por diante
+		usort($this->cartas, function($a, $b) {
+			if ($a->classe == $b->classe) {
+				return $a->numero - $b->numero;
+			}
+			return $a->classe - $b->classe;
+		});
+	}
 }
 class Atributo {
 	public function __construct($_deque, $_id) {
@@ -56,7 +65,7 @@ class Atributo {
 		$this->forma = 1; // 1 = Maior vence, -1 = Menor vence
 	}
 	public function info() {
-		echo "- ".$this->nome." (Medida: ".$this->medida.", Forma: ".($this->forma == 1 ? "Maior vence" : "Menor vence").")<br>";
+		echo "- ".$this->nome." (#".$this->id." - Medida: ".$this->medida.", Forma: ".($this->forma == 1 ? "Maior vence" : "Menor vence").")\n";
 	}
 }
 class Carta {
@@ -94,11 +103,11 @@ class Carta {
 		echo "</div>";
 	}
 	public function info() {
-		echo "- ".$this->nome." (Classe: ".$this->classe.", Categoria: ".$this->categoria.")<br>";
+		echo "- [".$this->classe."-".$this->numero."] #".$this->id." - ".$this->nome." - ".$this->categoria."\n";
 		for ($i = 0; $i < count($this->deque->atributos); $i++) {
 			$atributo = $this->deque->atributos[$i];
 			$valor = $this->valores[$i];
-			echo "  - ".$atributo->nome.": ".$valor." ".$atributo->medida."<br>";
+			echo "  - ".$atributo->nome.": ".$valor." ".$atributo->medida."\n";
 		}
 	}
 }
@@ -133,9 +142,14 @@ function construirDeque($_id,$_numAtributos=6) {
 		$carta->nome = $regCarta['nome'];
 		$carta->categoria = $regCarta['categoria'];
 		$carta->descricao = $regCarta['descricao'];
-		$resValores = BD_query("SELECT * FROM Valores WHERE idCarta = ".$regCarta['id']." ORDER BY idAtributo ASC");
+		$resValores = BD_query("SELECT * FROM Valores WHERE idCarta = ".$regCarta['id']." AND idAtributo IN (".implode(",", array_map(function($a) { return $a->id; }, $Deque->atributos)).")");
 		while ($regValor = BD_fetch($resValores)) {
-			$carta->valores[] = $regValor['valor'];
+			foreach ($Deque->atributos as $index => $atributo) {
+				if ($atributo->id == $regValor['idAtributo']) {
+					$carta->valores[$index] = $regValor['valor'];
+					break;
+				}
+			}
 		}
 		$cartas[] = $carta;
 	}
@@ -149,5 +163,6 @@ function construirDeque($_id,$_numAtributos=6) {
 			$carta->numero = $numCartasClasses[$carta->classe - 1];
 		}
 	}
+	$Deque->organizarDeque();
 }
 ?>
