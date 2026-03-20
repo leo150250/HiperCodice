@@ -19,6 +19,33 @@ class Deque {
 			$carta->info();
 		}
 	}
+	public function json() {
+		$data = [
+			"id" => $this->id,
+			"nome" => $this->nome,
+			"atributos" => [],
+			"cartas" => []
+		];
+		foreach ($this->atributos as $atributo) {
+			$data['atributos'][] = [
+				"id" => $atributo->id,
+				"nome" => $atributo->nome,
+				"medida" => $atributo->medida,
+				"forma" => $atributo->forma
+			];
+		}
+		foreach ($this->cartas as $carta) {
+			$data['cartas'][] = [
+				"id" => $carta->id,
+				"nome" => $carta->nome,
+				"classe" => $carta->classe,
+				"categoria" => $carta->categoria,
+				"descricao" => $carta->descricao,
+				"valores" => $carta->valores
+			];
+		}
+		return json_encode($data);
+	}
 }
 class Atributo {
 	public function __construct($_deque, $_id) {
