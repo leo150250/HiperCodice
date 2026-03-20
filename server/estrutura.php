@@ -27,22 +27,10 @@ class Deque {
 			"cartas" => []
 		];
 		foreach ($this->atributos as $atributo) {
-			$data['atributos'][] = [
-				"id" => $atributo->id,
-				"nome" => $atributo->nome,
-				"medida" => $atributo->medida,
-				"forma" => $atributo->forma
-			];
+			$data['atributos'][] = $atributo->json();
 		}
 		foreach ($this->cartas as $carta) {
-			$data['cartas'][] = [
-				"id" => $carta->id,
-				"nome" => $carta->nome,
-				"classe" => $carta->classe,
-				"categoria" => $carta->categoria,
-				"descricao" => $carta->descricao,
-				"valores" => $carta->valores
-			];
+			$data['cartas'][] = $carta->json();
 		}
 		return json_encode($data);
 	}
@@ -67,10 +55,19 @@ class Atributo {
 	public function info() {
 		echo "- ".$this->nome." (#".$this->id." - Medida: ".$this->medida.", Forma: ".($this->forma == 1 ? "Maior vence" : "Menor vence").")\n";
 	}
+	public function json() {
+		return [
+			"id" => $this->id,
+			"nome" => $this->nome,
+			"medida" => $this->medida,
+			"forma" => $this->forma
+		];
+	}
 }
 class Carta {
 	public $valores = [];
 	public $numero = 0;
+	public $especial = false;
 	public function __construct($_deque, $_id, $_classe) {
 		$this->deque = $_deque;
 		$this->id = $_id;
@@ -109,6 +106,46 @@ class Carta {
 			$valor = $this->valores[$i];
 			echo "  - ".$atributo->nome.": ".$valor." ".$atributo->medida."\n";
 		}
+	}
+	public function json() {
+		$data = [
+			"id" => $this->id,
+			"classe" => $this->classe,
+			"numero" => $this->numero,
+			"nome" => $this->nome,
+			"categoria" => $this->categoria,
+			"descricao" => $this->descricao,
+			"valores" => $this->valores
+		];
+		return $data;
+	}
+}
+$Jogadores = [];
+class Jogador {
+	public $nome = "Jogador";
+	public $cartas = [];
+	public function __construct($_nome) {
+		$this->nome = $_nome;
+		$Jogadores[] = $this;
+	}
+	public function info() {
+		echo "Jogador: ".$this->nome."\n";
+		echo "Cartas:\n";
+		foreach ($this->cartas as $carta) {
+			$carta->info();
+		}
+	}
+	public function cartaAtual() {
+		return $this->cartas[0];
+	}
+	public function removerCartaAtual() {
+		return array_shift($this->cartas);
+	}
+	public function adicionarCarta($carta) {
+		$this->cartas[] = $carta;
+	}
+	public function enviarCartaAoFinal() {
+		adicionarCarta(removerCartaAtual());
 	}
 }
 
@@ -164,5 +201,18 @@ function construirDeque($_id,$_numAtributos=6) {
 		}
 	}
 	$Deque->organizarDeque();
+	//Escolhe uma carta aleatória, de classe 2, 3 ou 4, para ser a carta especial. Se não houver nenhuma carta dessas classes, escolhe uma carta aleatória de qualquer classe
+	$cartasEspeciais = array_filter($Deque->cartas, function($carta) {
+		return $carta->classe >= 2;
+	});
+	if (!empty($cartasEspeciais)) {
+		$cartaEspecial = $cartasEspeciais[array_rand($cartasEspeciais)];
+		$cartaEspecial->especial = true;
+	}
+}
+
+$jogadorDaVez = 0;
+function rodada() {
+	
 }
 ?>
