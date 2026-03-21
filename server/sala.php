@@ -9,5 +9,12 @@ construirDeque(1,6);
 
 echo "<pre>";
 $Deque->info();
-echo "</pre>";
+echo "</pre>\n";
+
+iniciarJogoTeste();
+
+$jogoEmExecucao = true;
+while ($jogoEmExecucao) {
+	$jogoEmExecucao = rodada(true);
+}
 ?>
