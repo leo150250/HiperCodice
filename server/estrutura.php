@@ -9,12 +9,12 @@ class Deque {
 		$this->nome = $_nome;
 	}
 	public function info() {
-		echo "Deque: ".$this->nome." (ID: ".$this->id.")\n";
-		echo "Atributos:\n";
+		verbose("Deque: ".$this->nome." (ID: ".$this->id.")\n");
+		verbose("Atributos:\n");
 		foreach ($this->atributos as $atributo) {
 			$atributo->info();
 		}
-		echo "Cartas:\n";
+		verbose("Cartas:\n");
 		foreach ($this->cartas as $carta) {
 			$carta->info();
 		}
@@ -53,7 +53,7 @@ class Atributo {
 		$this->forma = 1; // 1 = Maior vence, -1 = Menor vence
 	}
 	public function info() {
-		echo "- ".$this->nome." (#".$this->id." - Medida: ".$this->medida.", Forma: ".($this->forma == 1 ? "Maior vence" : "Menor vence").")\n";
+		verbose("- ".$this->nome." (#".$this->id." - Medida: ".$this->medida.", Forma: ".($this->forma == 1 ? "Maior vence" : "Menor vence").")\n");
 	}
 	public function json() {
 		return [
@@ -113,14 +113,14 @@ class Carta {
 		echo "</div>";
 	}
 	public function info($_enumerar = false) {
-		echo "- [".$this->obterCodCarta()."] #".$this->id." - ".$this->nome." - ".$this->categoria."\n";
+		verbose("- [".$this->obterCodCarta()."] #".$this->id." - ".$this->nome." - ".$this->categoria."\n");
 		if ($this->especial) {
-			echo "### HIPER CODICE! ###\n";
+			verbose("#####===> HIPER CODICE! <===#####\n");
 		}
 		for ($i = 0; $i < count($this->deque->atributos); $i++) {
 			$atributo = $this->deque->atributos[$i];
 			$valor = $this->valores[$i];
-			echo "  ".($_enumerar?"[".($i+1)."]":"-")." ".$atributo->nome.": ".$valor." ".$atributo->medida."\n";
+			verbose("  ".($_enumerar?"[".($i+1)."]":"-")." ".$atributo->nome.": ".$valor." ".$atributo->medida."\n");
 		}
 	}
 	public function json() {
@@ -145,11 +145,11 @@ class Jogador {
 		global $Jogadores;
 		$this->nome = $_nome;
 		$Jogadores[] = $this;
-		echo "Jogador ".$this->nome." entrou!\n";
+		verbose("Jogador ".$this->nome." entrou!\n");
 	}
 	public function info() {
-		echo "Jogador: ".$this->nome."\n";
-		echo "Cartas:\n";
+		verbose("Jogador: ".$this->nome."\n");
+		verbose("Cartas:\n");
 		foreach ($this->cartas as $carta) {
 			$carta->info();
 		}
@@ -236,42 +236,42 @@ function rodada($_interativo = false) {
 	global $jogadorDaVez;
 	global $Deque;
 	$jogadorAtual = $Jogadores[$jogadorDaVez];
-	echo "\n------------------------------------------------------\n";
-	echo "É a vez de ".$jogadorAtual->nome."!\n";
-	echo "Carta atual:\n";
+	verbose("\n------------------------------------------------------\n");
+	verbose("É a vez de ".$jogadorAtual->nome."!\n");
+	verbose("Carta atual:\n");
 	$jogadorAtual->cartaAtual()->info(true);
 	$atributoEscolhido = -1;
 	if ($_interativo) {
 		while ($atributoEscolhido < 0 || $atributoEscolhido >= count($jogadorAtual->cartaAtual()->valores)) {
 			$atributoEscolhido = intval(readline("Digite o número do atributo (1 a ".count($Deque->atributos)."): ")) - 1;
 			if ($atributoEscolhido < 0 || $atributoEscolhido >= count($jogadorAtual->cartaAtual()->valores)) {
-				echo "Atributo inválido. Tente novamente.\n";
+				verbose("Atributo inválido. Tente novamente.\n");
 			}
 		}
+	} else {
+		$atributoEscolhido = rand(0, count($Deque->atributos) - 1);
 	}
-	echo "Atributo escolhido: ".$Deque->atributos[$atributoEscolhido]->nome." - ".$jogadorAtual->cartaAtual()->valores[$atributoEscolhido]."\n";
-	echo "Valores dos jogadores: \n";
+	verbose("Atributo escolhido: ".$Deque->atributos[$atributoEscolhido]->nome." - ".$jogadorAtual->cartaAtual()->valores[$atributoEscolhido]."\n");
+	verbose("Valores dos jogadores: \n");
 	$jogadorEspecial = null;
 	foreach ($Jogadores as $jogador) {
 		if (!$jogador->ativo) {
 			continue;
 		}
-		echo " - ".$jogador->nome.": ";
-		echo $jogador->cartaAtual()->valores[$atributoEscolhido]." (".$jogador->cartaAtual()->obterCodCarta().")";
+		verbose(" - ".$jogador->nome.": ");
+		verbose($jogador->cartaAtual()->valores[$atributoEscolhido]." (".$jogador->cartaAtual()->obterCodCarta().")");
 		if ($jogador->cartaAtual()->especial) {
-			echo " [Especial]";
+			verbose(" [Especial]");
 			$jogadorEspecial = $jogador;
 		}
-		echo "\n";
+		verbose("\n");
 	}
 	$jogadoresVencedores = [];
 	
-	if ($_interativo) {
-		sleep(2);
-	}
+	sleep(2);
 
 	if ($jogadorEspecial !== null) {
-		echo "Jogador ".$jogadorEspecial->nome." tem a carta especial";
+		verbose("Jogador ".$jogadorEspecial->nome." tem a carta especial");
 		sleep(2);
 		//Verifica se algum jogador (exceto o especial) possui uma carta de classe 1. Se sim, armazena os jogadores com carta de classe 1 como vencedores. Se não, o jogador com a carta especial é o vencedor
 		$jogadoresClasse1 = array_filter($Jogadores, function($jogador) use ($jogadorEspecial) {
@@ -281,15 +281,15 @@ function rodada($_interativo = false) {
 			return $jogador !== $jogadorEspecial && $jogador->cartaAtual()->classe == 1;
 		});
 		if (!empty($jogadoresClasse1)) {
-			echo " mas os jogadores com carta de classe 1 vencem: ";
+			verbose(" mas os jogadores com carta de classe 1 vencem: ");
 			foreach ($jogadoresClasse1 as $jogador) {
-				echo $jogador->nome." ";
+				verbose($jogador->nome." ");
 				$jogadoresVencedores[] = $jogador;
 			}
-			echo "\n";
+			verbose("\n");
 		} else {
 			$jogadoresVencedores[] = $jogadorEspecial;
-			echo " e vence a rodada!\n";
+			verbose(" e vence a rodada!\n");
 		}
 		sleep(1);
 	} else {
@@ -310,16 +310,16 @@ function rodada($_interativo = false) {
 		}
 	}
 	if (count($jogadoresVencedores) > 1) {
-		echo "Empate entre: ";
+		verbose("Empate entre: ");
 		foreach ($jogadoresVencedores as $jogador) {
-			echo $jogador->nome." ";
+			verbose($jogador->nome." ");
 		}
-		echo "\n";
+		verbose("\n");
 		
 		//Verifica qual deles tem a carta de menor classe. Se houver empate, verifica qual deles tem a carta de menor número. O que coincidir primeiro é o vencedor.
 		$vencedor = null;
 		foreach ($jogadoresVencedores as $jogador) {
-			echo " - ".$jogador->nome.": ".$jogador->cartaAtual()->obterCodCarta()."\n";
+			verbose(" - ".$jogador->nome.": ".$jogador->cartaAtual()->obterCodCarta()."\n");
 			if ($vencedor === null || $jogador->cartaAtual()->classe < $vencedor->cartaAtual()->classe || ($jogador->cartaAtual()->classe == $vencedor->cartaAtual()->classe && $jogador->cartaAtual()->numero < $vencedor->cartaAtual()->numero)) {
 				$vencedor = $jogador;
 			}
@@ -327,12 +327,12 @@ function rodada($_interativo = false) {
 		$jogadoresVencedores = [$vencedor];
 		sleep(2);
 	}
-	echo "Vencedor: ".$jogadoresVencedores[0]->nome;
+	verbose("Vencedor: ".$jogadoresVencedores[0]->nome);
 	if ($jogadoresVencedores[0] !== $jogadorAtual) {
-		echo ", com a seguinte carta:\n";
+		verbose(", com a seguinte carta:\n");
 		$jogadoresVencedores[0]->cartaAtual()->info();
 	}
-	echo "\n";
+	verbose("\n");
 	sleep(1);
 	//O vencedor da rodada recebe as cartas dos outros jogadores (primeiro as cartas dos outros jogadores, depois a sua própria carta) e as coloca no final do seu deque. Os outros jogadores perdem a carta da vez.
 	foreach ($Jogadores as $jogador) {
@@ -350,7 +350,7 @@ function rodada($_interativo = false) {
 	foreach ($Jogadores as $jogador) {
 		if ($jogador->ativo && count($jogador->cartas) == 0) {
 			$jogador->ativo = false;
-			echo "Jogador ".$jogador->nome." eliminado!\n";
+			verbose("Jogador ".$jogador->nome." eliminado!\n");
 			sleep(1);
 		}
 	}
@@ -360,7 +360,7 @@ function rodada($_interativo = false) {
 	});
 	if (count($jogadoresAtivos) == 1) {
 		$vencedor = array_values($jogadoresAtivos)[0];
-		echo "Jogador ".$vencedor->nome." venceu o jogo!\n";
+		verbose("Jogador ".$vencedor->nome." venceu o jogo!\n");
 		return false;
 	}
 	exibirCartasJogadores();
@@ -382,7 +382,7 @@ function iniciarJogoTeste() {
 	shuffle($dequeEmbaralhado);
 	//Distribui as cartas do deque entre os jogadores
 	$numJogadores = count($Jogadores);
-	echo "Embaralhando e distribuindo deque para ".$numJogadores." jogadores...\n";
+	verbose("Embaralhando e distribuindo deque para ".$numJogadores." jogadores...\n");
 	foreach ($dequeEmbaralhado as $index => $carta) {
 		$Jogadores[$index % $numJogadores]->adicionarCarta($carta);
 	}
@@ -390,16 +390,26 @@ function iniciarJogoTeste() {
 }
 function exibirCartasJogadores() {
 	global $Jogadores;
-	echo "Cartas dos jogadores:\n";
+	verbose("Cartas dos jogadores:\n");
 	foreach ($Jogadores as $jogador) {
-		echo $jogador->nome.": ";
+		verbose($jogador->nome.": ");
 		if (!$jogador->ativo) {
-			echo "Perdeu!";
+			verbose("Eliminado");
 		} else {
 			foreach ($jogador->cartas as $carta) {
-				echo "[".$carta->obterCodCarta()."] ";
+				verbose("[".$carta->obterCodCarta()."] ");
 			}
 		}
-		echo "\n";
+		verbose("\n");
+	}
+}
+function verbose($_verbose) {
+	global $path;
+	if ($_verbose === true) {
+		file_put_contents($path."logSala.txt","Iniciando log em ".date("Y-m-d H:i:s")."\n----------\n",LOCK_EX);
+	} else {
+		$conteudo = print_r($_verbose,true);
+		echo $conteudo;
+		file_put_contents($path."logSala.txt",$conteudo,FILE_APPEND | LOCK_EX);
 	}
 }

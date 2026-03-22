@@ -3,6 +3,9 @@ shared/.interno/*.json
 
 .vscode
 
+server/logSala.txt
+server/outBuffer.txt
+
 # Ignorar pastas e arquivos que estão em public e server, mas que já existem em shared, pois shared é uma junção de diretório em ambos.
 public/img
 server/img

@@ -1,0 +1,20 @@
+<?php
+$idSala = -1;
+$path = "";
+include $path.".interno/conexaoBD.php";
+include $path."estrutura.php";
+
+
+construirDeque(1,6);
+
+echo "<pre>";
+$Deque->info();
+echo "</pre>\n";
+
+iniciarJogoTeste();
+
+$jogoEmExecucao = true;
+while ($jogoEmExecucao) {
+	$jogoEmExecucao = rodada(true);
+}
+?>
