@@ -149,6 +149,8 @@ class Jogador {
 	public $nome = "Jogador";
 	public $cartas = [];
 	public $ativo = true;
+	public $pronto = false;
+	public $conexao = null;
 	public function __construct($_nome) {
 		global $Jogadores;
 		$this->nome = $_nome;

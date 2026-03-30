@@ -7,7 +7,13 @@ function iniciarWebSocket(_porta,_endereco,_seguro) {
 		console.log("Conectado ao servidor");
 	};
 	novoSocket.onmessage = (evento) => {
-		console.log("Mensagem recebida:", evento.data);
+		console.log("<== RECEBIDO\n", evento.data);
+		jsonServer = JSON.parse(evento.data);
+		switch (jsonServer.tipo) {
+			case "welcome": {
+				enviarMensagem("\\thnx")
+			}
+		}
 	};
 	novoSocket.onerror = (erro) => {
 		console.error("Erro na conexão:", erro);
@@ -26,8 +32,9 @@ function conectarServidor(_porta,_endereco="localhost",_seguro=true) {
 	}
 }
 
-function enviarMensagem(_mensagem) {
+function enviarMensagem(_texto) {
 	if (socket.readyState === WebSocket.OPEN) {
-		socket.send(_mensagem);
+		console.log("ENVIANDO ==>\n", _texto);
+		socket.send(_texto);
 	}
 };

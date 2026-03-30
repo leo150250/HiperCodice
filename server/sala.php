@@ -29,12 +29,8 @@ iniciarSala($porta);
 $emExecucao = true;
 while (true) {
 	checarConexoes();
-    
-
-	verificarNovasConexoes();
-	checarDesconexoes();
-	//$emExecucao = rodada();
-	$timer++;
+	checarRodada();
+	$timer=($timer+1)%60;
 	verbose("Timer: $timer\n");
 	sleep(1);
 }
