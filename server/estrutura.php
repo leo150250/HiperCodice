@@ -1,4 +1,13 @@
 <?php
+if (!isset($path)) {
+	$path = "";
+}
+require_once $path."funcoes.php";
+
+$Jogadores = [];
+$Deque = null;
+$jogadorDaVez = 0;
+
 class Deque {
 	public $atributos = [];
 	public $cartas = [];
@@ -136,7 +145,6 @@ class Carta {
 		return $data;
 	}
 }
-$Jogadores = [];
 class Jogador {
 	public $nome = "Jogador";
 	public $cartas = [];
@@ -168,7 +176,6 @@ class Jogador {
 	}
 }
 
-$Deque = null;
 function construirDeque($_id,$_numAtributos=6) {
 	global $Deque;
 	global $path;
@@ -229,8 +236,6 @@ function construirDeque($_id,$_numAtributos=6) {
 		$cartaEspecial->especial = true;
 	}
 }
-
-$jogadorDaVez = 0;
 function rodada($_interativo = false) {
 	global $Jogadores;
 	global $jogadorDaVez;
@@ -366,7 +371,6 @@ function rodada($_interativo = false) {
 	exibirCartasJogadores();
 	return true;
 }
-
 function iniciarJogoTeste() {
 	global $Jogadores;
 	global $Deque;
@@ -401,15 +405,5 @@ function exibirCartasJogadores() {
 			}
 		}
 		verbose("\n");
-	}
-}
-function verbose($_verbose) {
-	global $path;
-	if ($_verbose === true) {
-		file_put_contents($path."logSala.txt","Iniciando log em ".date("Y-m-d H:i:s")."\n----------\n",LOCK_EX);
-	} else {
-		$conteudo = print_r($_verbose,true);
-		echo $conteudo;
-		file_put_contents($path."logSala.txt",$conteudo,FILE_APPEND | LOCK_EX);
 	}
 }

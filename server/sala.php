@@ -2,38 +2,43 @@
 if (!isset($argv)) {
 	die("Este arquivo precisa ser executado diretamente no servidor.");
 }
-function outBuffer($_buffer) {
-	$_buffer = "Buffer ".date("Y-m-d H:i:s")."\n----------\n".$_buffer;
-	file_put_contents("outBuffer.txt",$_buffer);
-	return $_buffer;
-}
-ob_start("outBuffer");
+$path = "";
+include $path.".interno/conexaoBD.php";
+include $path."funcoes.php";
+include $path."estrutura.php";
+include $path."comunicacao.php";
+//registrarBuffer();
 //$logFile = $path . "logs/sala_" . date("Y-m-d_H-i-s") . ".txt";
 
 
 
 $idSala = 0;
-$path = "";
-include $path.".interno/conexaoBD.php";
-include $path."estrutura.php";
 
 verbose(true);
-
+$porta = 0;
 verbose($argv);
 foreach ($argv as $chave => $valor) {
-	
+	if ($valor == "-p") {
+		$porta = $argv[$chave+1];
+	}
 }
 $timer = 0;
 construirDeque(1,6);
-$Deque->info();
-iniciarJogoTeste();
-while ($timer < 10) {
-	if (rodada()) {
-		$timer = 0;
-	}
-	sleep(1);
+//$Deque->info();
+iniciarSala($porta);
+$emExecucao = true;
+while (true) {
+	checarConexoes();
+    
+
+	verificarNovasConexoes();
+	checarDesconexoes();
+	//$emExecucao = rodada();
 	$timer++;
-	verbose("Timer em $timer\n");
+	verbose("Timer: $timer\n");
+	sleep(1);
 }
+
+fclose($server);
 verbose("Fim da sala!");
 ?>

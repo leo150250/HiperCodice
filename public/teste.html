@@ -1,0 +1,17 @@
+<html>
+	<head>
+		<title>Teste de sala</title>
+		<meta charset="UTF-8">
+	</head>
+	<body>
+		<h1>Teste de sala</h1>
+		<p>Esta é uma página de teste para a sala.</p>
+		<label for="Porta">Porta:</label>
+		<input type="number" id="Porta" name="Porta" value="8080">
+		<button id="Conectar" onclick="conectarServidor(this.previousElementSibling.value,'localhost',false)">Conectar</button>
+		<p id="status">Desconectado.</p>
+		<hr>
+		<div id="debugServidor"></div>
+		<script src="sala.js"></script>
+	</body>
+</html>
