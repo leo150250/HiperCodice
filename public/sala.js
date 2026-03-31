@@ -1,4 +1,9 @@
+const btnPronto = document.getElementById("btnPronto");
+const pStatusDebug = document.getElementById("statusDebug");
+
 var socket = null;
+var pronto = false;
+var meuId = 0;
 
 function iniciarWebSocket(_porta,_endereco,_seguro) {
 	let protocolo = (_seguro?"wss":"ws");
@@ -10,9 +15,23 @@ function iniciarWebSocket(_porta,_endereco,_seguro) {
 		console.log("<== RECEBIDO\n", evento.data);
 		jsonServer = JSON.parse(evento.data);
 		switch (jsonServer.tipo) {
-			case "welcome": {
-				enviarMensagem("\\thnx")
-			}
+			case "welcome":
+				meuId = jsonServer.conteudo.resourceId;
+				pStatusDebug.innerHTML = "Conectado. ID de conexão: "+meuId;
+				enviarMensagem("\\thnx");
+				break;
+			case "ready":
+				if (jsonServer.conteudo.resourceId == meuId) {
+					pronto = true;
+					btnPronto.classList.add("ok");
+				}
+				break;
+			case "notready":
+				if (jsonServer.conteudo.resourceId == meuId) {
+					pronto = false;
+					btnPronto.classList.remove("ok");
+				}
+				break;
 		}
 	};
 	novoSocket.onerror = (erro) => {
@@ -38,3 +57,11 @@ function enviarMensagem(_texto) {
 		socket.send(_texto);
 	}
 };
+
+function enviarPronto() {
+	if (pronto) {
+		enviarMensagem("\\notready");
+	} else {
+		enviarMensagem("\\ready");
+	}
+}

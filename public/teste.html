@@ -9,7 +9,9 @@
 		<label for="Porta">Porta:</label>
 		<input type="number" id="Porta" name="Porta" value="8080">
 		<button id="Conectar" onclick="conectarServidor(this.previousElementSibling.value,'localhost',false)">Conectar</button>
-		<p id="status">Desconectado.</p>
+		<p id="statusDebug">Desconectado.</p>
+		<hr>
+		<button id="btnPronto" onclick="enviarPronto()">Pronto</button>
 		<hr>
 		<div id="debugServidor"></div>
 		<script src="sala.js"></script>

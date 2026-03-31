@@ -7,6 +7,8 @@ require_once $path."funcoes.php";
 $Jogadores = [];
 $Deque = null;
 $jogadorDaVez = 0;
+$emExecucao = false;
+$timerProntidao = -1;
 
 class Deque {
 	public $atributos = [];

@@ -26,7 +26,6 @@ $timer = 0;
 construirDeque(1,6);
 //$Deque->info();
 iniciarSala($porta);
-$emExecucao = true;
 while (true) {
 	checarConexoes();
 	checarRodada();

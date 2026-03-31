@@ -3,6 +3,7 @@ if (!isset($path)) {
 	$path = "";
 }
 require_once $path."funcoes.php";
+require_once $path."estrutura.php";
 
 $server = null;
 $clientes = array($server);
@@ -17,8 +18,18 @@ class Comm {
     }
 
     public function onOpen($conn) {
-        $this->clients[(int)$conn->resourceId] = $conn;
+        global $emExecucao;
+		$this->clients[(int)$conn->resourceId] = $conn;
 		verbose("Nova conexão: ({$conn->resourceId})\n");
+		if ($emExecucao) {
+			$conn->send(json_encode([
+				'tipo' => 'goaway',
+				'conteudo' => [
+					'msg' => 'Partida em andamento. Aguarde a próxima rodada.'
+				]
+			]));
+			return false;
+		}
 		$conn->send(json_encode([
 			'tipo' => 'welcome',
 			'conteudo' => [
@@ -26,38 +37,6 @@ class Comm {
 			]
 		]));
 		return true;
-		/*
-        global $tempoPlanejamento;
-        $conn->send(json_encode([
-            'tipo' => 'infoServer',
-            'conteudo' => [
-                'resourceId' => $conn->resourceId,
-                'timerPlan' => $tempoPlanejamento
-            ]
-        ]));
-        global $jogadores, $estadoPartida;
-        if ($estadoPartida === EstadoPartida::LOBBY) {
-            $jogadoresSemConexao = array_filter($jogadores, function($jogador) {
-                return $jogador->usuario === null;
-            });
-            if (!empty($jogadoresSemConexao)) {
-                $jogadorAleatorio = $jogadoresSemConexao[array_rand($jogadoresSemConexao)];
-                atribuirConexaoAJogador($conn, $jogadorAleatorio->id);
-            }
-            $status = json_encode([
-                'tipo' => 'status',
-                'conteudo' => json_decode(obterStatusPartida())
-            ]);
-            foreach ($this->clients as $client) {
-                $client->send($status);
-                $client->send(json_encode([
-                            "tipo"=>"msg",
-                            "conteudo"=>[
-                                "remetente"=>-1,
-                                "msg"=>"{$jogadorAleatorio->nome} entrou na sala"]]));
-            }
-        }
-		*/
     }
 
     public function onMessage($from, $msg) {
@@ -70,6 +49,30 @@ class Comm {
             switch ($command) {
 				case "thnx":
 					verbose("Conexão {$from->resourceId} está acordada e ativa.\n");
+					$novoJogador = new Jogador("Jogador {$from->resourceId}");
+					$novoJogador->conexao = $from;
+					break;
+				case "ready":
+					verbose("Jogador {$from->resourceId} está pronto para iniciar a partida.\n");
+					foreach ($this->clients as $client) {
+						$client->send(json_encode([
+							"tipo"=>"ready",
+							"conteudo"=>[
+								"resourceId"=>$from->resourceId
+							]
+						]));
+					}
+					break;
+				case "notready":
+					verbose("Jogador {$from->resourceId} não está mais pronto.\n");
+					foreach ($this->clients as $client) {
+						$client->send(json_encode([
+							"tipo"=>"notready",
+							"conteudo"=>[
+								"resourceId"=>$from->resourceId
+							]
+						]));
+					}
 					break;
                 default:
                     verbose("Comando desconhecido: $command\n");
@@ -101,6 +104,18 @@ class Comm {
         verbose("Erro: {$e->getMessage()}\n");
         $conn->close();
     }
+
+	public function enviarMensagemTodos($msg) {
+		foreach ($this->clients as $client) {
+			$client->send(json_encode([
+				"tipo"=>"msg",
+				"conteudo"=>[
+					"resourceId"=>-1,
+					"msg"=>$msg
+				]
+			]));
+		}
+	}
 
     public function obterClientes() {
         return $this->clients;
@@ -190,14 +205,46 @@ function heartBeat($_conn) {
 		$comm->onMessage($connection, $decoded_msg);
 	}
 }
+function checarRodada() {
+	global $emExecucao, $Jogadores, $timerProntidao, $comm;
+	if (!$emExecucao) {
+		$numJogadores = count($Jogadores);
+		$numProntos = count(array_filter($Jogadores, function($jogador) {
+			return $jogador->ativo;
+		}));
+		if ($numJogadores > 1 && $numProntos == $numJogadores) {
+			if ($timerProntidao == -1) {
+				verbose("Todos os jogadores estão prontos.\n");
+				$timerProntidao = 3;
+			} elseif ($timerProntidao > 0) {
+				verbose("Iniciando em $timerProntidao...\n");
+				$comm->enviarMensagemTodos("Iniciando em $timerProntidao...");
+				$timerProntidao--;
+			} else {
+				$comm->enviarMensagemTodos("Iniciando partida...");
+				$emExecucao = true;
+			}
+		} else {
+			if ($timerProntidao != -1) {
+				verbose("Iniciativa cancelada. Aguardando todos os jogadores ficarem prontos...\n");
+				$comm->enviarMensagemTodos("Iniciativa cancelada. Aguardando todos os jogadores ficarem prontos...");
+				$timerProntidao = -1;
+			}
+			return;
+		}
+	}
+}
 function checarDesconexoes() {
 
 }
 function receberMensagem($cliente) {
 
 }
-function enviarMensagem($cliente, $mensagem) {
-
+function enviarMensagemTodos($mensagem) {
+	global $clientes;
+	foreach ($clientes as $cliente) {
+		enviarMensagem($cliente, $mensagem);
+	}
 }
 
 function perform_handshaking($received_header, $client_conn, $host, $port) {
