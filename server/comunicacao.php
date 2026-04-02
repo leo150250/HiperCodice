@@ -51,6 +51,7 @@ class Comm {
 					verbose("Conexão {$from->resourceId} está acordada e ativa.\n");
 					$novoJogador = new Jogador("Jogador {$from->resourceId}");
 					$novoJogador->conexao = $from;
+					$from->jogador = $novoJogador;
 					break;
 				case "ready":
 					verbose("Jogador {$from->resourceId} está pronto para iniciar a partida.\n");
@@ -124,6 +125,7 @@ class Comm {
 class Conexao {
     public $resourceId;
     public $socket;
+	public $jogador;
 
     public function __construct($socket) {
         $this->socket = $socket;
@@ -231,6 +233,25 @@ function checarRodada() {
 				$timerProntidao = -1;
 			}
 			return;
+		}
+	} else {
+		//Teste: Envia uma carta aleatória a todos os jogadores a cada 10 segundos (através do timerProntidao)
+		if ($timerProntidao == 0) {
+			foreach ($Jogadores as $jogador) {
+				$numCarta = rand(0, count($Deque->cartas)-1);
+				$carta = $Deque->cartas[$numCarta];
+				$jsonEnvio = json_encode([
+					"tipo"=>"carta",
+					"conteudo"=>[
+						"resourceId"=>$jogador->conexao->resourceId,
+						"carta"=>$carta->json()
+					]
+				]);
+				$comm->enviarMensagem($jogador->conn, $jsonEnvio);
+			}
+			$timerProntidao = 10;
+		} else {
+			$timerProntidao--;
 		}
 	}
 }

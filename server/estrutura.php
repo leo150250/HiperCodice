@@ -135,15 +135,14 @@ class Carta {
 		}
 	}
 	public function json() {
-		$data = [
+		$data = json_encode([
 			"id" => $this->id,
 			"classe" => $this->classe,
-			"numero" => $this->numero,
 			"nome" => $this->nome,
 			"categoria" => $this->categoria,
 			"descricao" => $this->descricao,
-			"valores" => $this->valores
-		];
+			"valores" => $this->valores,
+			"especial" => $this->especial]);
 		return $data;
 	}
 }
