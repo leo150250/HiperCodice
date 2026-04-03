@@ -4,8 +4,8 @@ if (!isset($argv)) {
 }
 $path = "";
 include $path.".interno/conexaoBD.php";
-include $path."funcoes.php";
-include $path."estrutura.php";
+include $path.".interno/funcoes.php";
+include $path.".interno/estrutura.php";
 include $path."comunicacao.php";
 //registrarBuffer();
 //$logFile = $path . "logs/sala_" . date("Y-m-d_H-i-s") . ".txt";

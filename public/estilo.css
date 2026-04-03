@@ -66,16 +66,16 @@ button {
 	overflow: hidden;
 }
 
-.Carta.classeA {
+.Carta.classe1 {
 	background-color: #2196F3;
 }
-.Carta.classeB {
+.Carta.classe2 {
 	background-color: #4CAF50;
 }
-.Carta.classeC {
+.Carta.classe3 {
 	background-color: #FF9800;
 }
-.Carta.classeD {
+.Carta.classe4 {
 	background-color: #F44336;
 }
 

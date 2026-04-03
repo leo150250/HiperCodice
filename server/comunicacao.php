@@ -2,8 +2,8 @@
 if (!isset($path)) {
 	$path = "";
 }
-require_once $path."funcoes.php";
-require_once $path."estrutura.php";
+require_once $path.".interno/funcoes.php";
+require_once $path.".interno/estrutura.php";
 
 $server = null;
 $clientes = array($server);

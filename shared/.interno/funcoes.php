@@ -1,6 +1,6 @@
 <?php
 if (!isset($path)) {
-	$path = "";
+	$path = "../";
 }
 function verbose($_verbose) {
 	global $path;

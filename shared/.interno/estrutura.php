@@ -1,8 +1,8 @@
 <?php
 if (!isset($path)) {
-	$path = "";
+	$path = "../";
 }
-require_once $path."funcoes.php";
+require_once $path.".interno/funcoes.php";
 
 $Jogadores = [];
 $Deque = null;
@@ -32,18 +32,18 @@ class Deque {
 	}
 	public function json() {
 		$data = [
-			"id" => $this->id,
+			"id" => (int)$this->id,
 			"nome" => $this->nome,
 			"atributos" => [],
 			"cartas" => []
 		];
 		foreach ($this->atributos as $atributo) {
-			$data['atributos'][] = $atributo->json();
+			$data['atributos'][] = $atributo->json(false);
 		}
 		foreach ($this->cartas as $carta) {
-			$data['cartas'][] = $carta->json();
+			$data['cartas'][] = $carta->json(false);
 		}
-		return json_encode($data);
+		return json_encode($data, JSON_UNESCAPED_UNICODE);
 	}
 	public function organizarDeque() {
 		//Organiza as cartas por classe e número, mantendo tudo 1-1, 1-2...1-8,2-1,2-2... e assim por diante
@@ -66,13 +66,18 @@ class Atributo {
 	public function info() {
 		verbose("- ".$this->nome." (#".$this->id." - Medida: ".$this->medida.", Forma: ".($this->forma == 1 ? "Maior vence" : "Menor vence").")\n");
 	}
-	public function json() {
-		return [
-			"id" => $this->id,
+	public function json($_encodar = true) {
+		$data = [
+			"id" => (int)$this->id,
 			"nome" => $this->nome,
 			"medida" => $this->medida,
-			"forma" => $this->forma
+			"forma" => (int)$this->forma
 		];
+		if ($_encodar) {
+			return json_encode($data, JSON_UNESCAPED_UNICODE);
+		} else {
+			return $data;
+		}
 	}
 }
 class Carta {
@@ -84,6 +89,8 @@ class Carta {
 		$this->id = $_id;
 		$this->classe = $_classe;
 		$this->nome = "Carta ".$this->id;
+		$this->categoria = "Categoria";
+		$this->descricao = "";
 	}
 	public function obterCodCarta() {
 		$texto = "";
@@ -120,7 +127,8 @@ class Carta {
 				echo "<div><div>".$atributo->nome.": </div><div>".$valor." ".$atributo->medida."</div></div>";
 			}
 		}
-		echo "<p>".$Carta['descricao']."</p>";
+		echo "</div>";
+		echo "<p>".$this->descricao."</p>";
 		echo "</div>";
 	}
 	public function info($_enumerar = false) {
@@ -134,16 +142,21 @@ class Carta {
 			verbose("  ".($_enumerar?"[".($i+1)."]":"-")." ".$atributo->nome.": ".$valor." ".$atributo->medida."\n");
 		}
 	}
-	public function json() {
-		$data = json_encode([
-			"id" => $this->id,
-			"classe" => $this->classe,
+	public function json($_encodar = true) {
+		$data = [
+			"id" => (int)$this->id,
+			"classe" => (int)$this->classe,
 			"nome" => $this->nome,
 			"categoria" => $this->categoria,
 			"descricao" => $this->descricao,
-			"valores" => $this->valores,
-			"especial" => $this->especial]);
-		return $data;
+			"valores" => array_map('floatval', $this->valores),
+			"especial" => $this->especial
+			];
+		if ($_encodar) {
+			return json_encode($data, JSON_UNESCAPED_UNICODE);
+		} else {
+			return $data;
+		}
 	}
 }
 class Jogador {

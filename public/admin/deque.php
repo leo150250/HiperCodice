@@ -107,7 +107,7 @@ $Deque = BD_fetch($Deque);
 							$classe = "D";
 							break;
 					}
-					echo "<div class='Carta classe$classe'>";
+					echo "<div class='Carta classe{$Carta['classe']}'>";
 					echo "<img class='fundo' src='".$path."img/decks/".$Deque['id']."/default.jpg' alt='Fundo da Carta'>";
 					echo "<h1>".$classe."</h1>";
 					echo "<h2>".$Carta['nome']."</h2>";
