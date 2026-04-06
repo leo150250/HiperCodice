@@ -32,6 +32,14 @@ function iniciarWebSocket(_porta,_endereco,_seguro) {
 					btnPronto.classList.remove("ok");
 				}
 				break;
+			case "deque":
+				gerarDequeJSON(jsonServer.conteudo);
+				break;
+			case "carta":
+				if (jsonServer.conteudo.resourceId == meuId) {
+					exibirCarta(jsonServer.conteudo.carta);
+				}
+				break;
 		}
 	};
 	novoSocket.onerror = (erro) => {

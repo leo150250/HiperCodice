@@ -155,6 +155,10 @@ class Carta {
 
 function gerarDequeJSON(_json) {
 	console.log(_json);
+
+	if (typeof _json == "string") {
+		_json = JSON.parse(_json);
+	}
 	
 	deque = new Deque(_json.id,_json.nome);
 	_json.atributos.forEach(_atributo => {
@@ -174,5 +178,6 @@ function gerarDequeJSON(_json) {
 		deque.cartas.push(novaCarta);
 	});
 
+	console.log("Deque gerado!");
 	//deque.info();
 }

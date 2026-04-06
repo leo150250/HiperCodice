@@ -1,22 +1,20 @@
 <html>
 	<head>
-		<title>Teste de sala</title>
+		<title>Teste de comunicação</title>
 		<meta charset="UTF-8">
-		<link rel="stylesheet" href="estilo.css">
 	</head>
 	<body>
 		<h1>Teste de sala</h1>
 		<p>Esta é uma página de teste para a sala.</p>
-		<hr>
+		<label for="Porta">Porta:</label>
+		<input type="number" id="Porta" name="Porta" value="8080">
+		<button id="Conectar" onclick="conectarServidor(this.previousElementSibling.value,'localhost',false)">Conectar</button>
 		<p id="statusDebug">Desconectado.</p>
+		<hr>
 		<button id="btnPronto" onclick="enviarPronto()">Pronto</button>
 		<hr>
-		<div id="cartaJogador"></div>
+		<div id="debugServidor"></div>
 		<script src="estrutura.js"></script>
 		<script src="sala.js"></script>
-		<script src="jogo.js"></script>
-		<script>
-			conectarServidor(8080,'localhost',false);
-		</script>
 	</body>
 </html>

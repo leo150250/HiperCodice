@@ -55,6 +55,7 @@ class Comm {
 					break;
 				case "ready":
 					verbose("Jogador {$from->resourceId} está pronto para iniciar a partida.\n");
+					$this->jogadorConn($from)->pronto = true;
 					foreach ($this->clients as $client) {
 						$client->send(json_encode([
 							"tipo"=>"ready",
@@ -66,6 +67,7 @@ class Comm {
 					break;
 				case "notready":
 					verbose("Jogador {$from->resourceId} não está mais pronto.\n");
+					$from->jogador->pronto = false;
 					foreach ($this->clients as $client) {
 						$client->send(json_encode([
 							"tipo"=>"notready",
@@ -106,6 +108,23 @@ class Comm {
         $conn->close();
     }
 
+	public function enviarComm($conn,$tipo,$conteudo = new Object()) {
+		$conn->send(json_encode([
+			"tipo"=>$tipo,
+			"conteudo"=>$conteudo
+		]));
+	}
+
+	public function enviarMensagem($conn, $msg) {
+		$conn->send(json_encode([
+			"tipo"=>"msg",
+			"conteudo"=>[
+				"resourceId"=>-1,
+				"msg"=>$msg
+			]
+		]));
+	}
+
 	public function enviarMensagemTodos($msg) {
 		foreach ($this->clients as $client) {
 			$client->send(json_encode([
@@ -121,6 +140,15 @@ class Comm {
     public function obterClientes() {
         return $this->clients;
     }
+
+	public function jogadorConn($conn) {
+		global $Jogadores;
+		foreach ($Jogadores as $jogador) {
+			if ($jogador->conexao->resourceId === $conn->resourceId) {
+				return $jogador;
+			}
+		}
+	}
 }
 class Conexao {
     public $resourceId;
@@ -208,12 +236,13 @@ function heartBeat($_conn) {
 	}
 }
 function checarRodada() {
-	global $emExecucao, $Jogadores, $timerProntidao, $comm;
+	global $emExecucao, $Jogadores, $timerProntidao, $comm, $Deque;
 	if (!$emExecucao) {
 		$numJogadores = count($Jogadores);
 		$numProntos = count(array_filter($Jogadores, function($jogador) {
-			return $jogador->ativo;
+			return $jogador->pronto;
 		}));
+		verbose("Jogadores {$numProntos} / {$numJogadores}\n");
 		if ($numJogadores > 1 && $numProntos == $numJogadores) {
 			if ($timerProntidao == -1) {
 				verbose("Todos os jogadores estão prontos.\n");
@@ -225,6 +254,9 @@ function checarRodada() {
 			} else {
 				$comm->enviarMensagemTodos("Iniciando partida...");
 				$emExecucao = true;
+				foreach ($Jogadores as $jogador) {
+					$comm->enviarComm($jogador->conexao,"deque",$Deque->json());
+				}
 			}
 		} else {
 			if ($timerProntidao != -1) {
@@ -240,14 +272,10 @@ function checarRodada() {
 			foreach ($Jogadores as $jogador) {
 				$numCarta = rand(0, count($Deque->cartas)-1);
 				$carta = $Deque->cartas[$numCarta];
-				$jsonEnvio = json_encode([
-					"tipo"=>"carta",
-					"conteudo"=>[
-						"resourceId"=>$jogador->conexao->resourceId,
-						"carta"=>$carta->json()
-					]
+				$comm->enviarComm($jogador->conexao,"carta",[
+					"resourceId"=>$jogador->conexao->resourceId,
+					"carta"=>$numCarta
 				]);
-				$comm->enviarMensagem($jogador->conn, $jsonEnvio);
 			}
 			$timerProntidao = 10;
 		} else {
@@ -257,15 +285,6 @@ function checarRodada() {
 }
 function checarDesconexoes() {
 
-}
-function receberMensagem($cliente) {
-
-}
-function enviarMensagemTodos($mensagem) {
-	global $clientes;
-	foreach ($clientes as $cliente) {
-		enviarMensagem($cliente, $mensagem);
-	}
 }
 
 function perform_handshaking($received_header, $client_conn, $host, $port) {

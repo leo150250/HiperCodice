@@ -20,7 +20,16 @@ construirDeque(1,6);
 			var jsonDeque = <?php echo $Deque->json(); ?>;
 			gerarDequeJSON(jsonDeque);
 
-			document.getElementById("deque").appendChild(deque.cartas[0].desenhar());
+			var cartaAnterior = -1;
+			function gerarCarta(_id = 0) {
+				if (cartaAnterior != -1) {
+					document.getElementById("deque").innerHTML = "";
+					cartaAnterior = -1;
+				}
+				document.getElementById("deque").appendChild(deque.cartas[_id].desenhar());
+				cartaAnterior = _id;
+			}
+			gerarCarta(0);
 		</script>
 	</body>
 </html>
