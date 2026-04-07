@@ -67,7 +67,7 @@ class Comm {
 					break;
 				case "notready":
 					verbose("Jogador {$from->resourceId} não está mais pronto.\n");
-					$from->jogador->pronto = false;
+					$this->jogadorConn($from)->pronto = false;
 					foreach ($this->clients as $client) {
 						$client->send(json_encode([
 							"tipo"=>"notready",
@@ -77,6 +77,9 @@ class Comm {
 						]));
 					}
 					break;
+				case "escolha":
+					verbose("Jogador {$from->resourceId} escolheu!\n");
+
                 default:
                     verbose("Comando desconhecido: $command\n");
                     break;
@@ -99,6 +102,10 @@ class Comm {
     }
 
     public function onClose($conn) {
+		$jogadorSaiu = $this->jogadorConn($conn);
+		if ($jogadorSaiu !== null) {
+			$jogadorSaiu->quitar();
+		}
         unset($this->clients[(int)$conn->resourceId]);
         verbose("Conexão ({$conn->resourceId}) fechada\n");
     }
@@ -113,6 +120,15 @@ class Comm {
 			"tipo"=>$tipo,
 			"conteudo"=>$conteudo
 		]));
+	}
+
+	public function enviarCommTodos($tipo,$conteudo = new Object()) {
+		foreach ($this->clients as $client) {
+			$client->send(json_encode([
+				"tipo"=>$tipo,
+				"conteudo"=>$conteudo
+			]));
+		}
 	}
 
 	public function enviarMensagem($conn, $msg) {
@@ -148,6 +164,7 @@ class Comm {
 				return $jogador;
 			}
 		}
+		return null;
 	}
 }
 class Conexao {
@@ -236,8 +253,8 @@ function heartBeat($_conn) {
 	}
 }
 function checarRodada() {
-	global $emExecucao, $Jogadores, $timerProntidao, $comm, $Deque;
-	if (!$emExecucao) {
+	global $emExecucao, $Jogadores, $timerProntidao, $comm, $Deque, $encerrada, $jogadorDaVez, $atributoEscolhido;
+	if (!$emExecucao) { //Estamos no Lobby ainda, aguardando 2 ou mais ficarem prontos
 		$numJogadores = count($Jogadores);
 		$numProntos = count(array_filter($Jogadores, function($jogador) {
 			return $jogador->pronto;
@@ -257,6 +274,8 @@ function checarRodada() {
 				foreach ($Jogadores as $jogador) {
 					$comm->enviarComm($jogador->conexao,"deque",$Deque->json());
 				}
+				embaralharEDistribuirCartas();
+				exibirCartasJogadores();
 			}
 		} else {
 			if ($timerProntidao != -1) {
@@ -267,7 +286,48 @@ function checarRodada() {
 			return;
 		}
 	} else {
+		if (!$encerrada) { //O jogo tá acontecendo.
+			if ($timerProntidao == -1) {
+				//Envia os índices das cartas da vez para cada jogador
+				foreach ($Jogadores as $jogador) {
+					//Obtém o índice da carta no deque
+					foreach ($Deque->cartas as $indice => $carta) {
+						if ($carta === $jogador->cartaAtual()) {
+							$comm->enviarComm($jogador->conexao,"carta",[
+								"resourceId"=>$jogador->conexao->resourceId,
+								"carta"=>$indice
+							]);
+							break;
+						}
+					}
+				}
+				//Informa o jogador da vez que é a vez dele de jogar
+				$comm->enviarCommTodos("jogar",[
+					"resourceId"=>$Jogadores[$jogadorDaVez]->conexao->resourceId,
+				]);
+				$timerProntidao = 30;
+			} else {
+				if ($timerProntidao <= 5 && $timerProntidao > 0) {
+					verbose("Vai ser escolhido um atributo em {$timerProntidao}...");
+				}
+				if ($timerProntidao > 0) {
+					$timerProntidao--;
+				}
+				if ($timerProntidao == 0) {
+					if ($atributoEscolhido == -1) {
+						$atributoEscolhido = rand(0, count($Deque->atributos) - 1);
+					}
+					$comm->enviarCommTodos("escolha",[
+						"resourceId"=>$Jogadores[$jogadorDaVez]->conexao->resourceId,
+						"atributo"=>$atributoEscolhido
+					]);
+					$encerrada = !girarRodada($atributoEscolhido);
+				}
+			}
+		}
+		
 		//Teste: Envia uma carta aleatória a todos os jogadores a cada 10 segundos (através do timerProntidao)
+		/*
 		if ($timerProntidao == 0) {
 			foreach ($Jogadores as $jogador) {
 				$numCarta = rand(0, count($Deque->cartas)-1);
@@ -281,6 +341,7 @@ function checarRodada() {
 		} else {
 			$timerProntidao--;
 		}
+		*/
 	}
 }
 function checarDesconexoes() {

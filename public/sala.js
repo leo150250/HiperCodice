@@ -40,6 +40,12 @@ function iniciarWebSocket(_porta,_endereco,_seguro) {
 					exibirCarta(jsonServer.conteudo.carta);
 				}
 				break;
+			case "jogar":
+				if (jsonServer.conteudo.resourceId == meuId) {
+					minhaVez();
+				} else {
+					vezDeJogador(jsonServer.conteudo.resourceId);
+				}
 		}
 	};
 	novoSocket.onerror = (erro) => {

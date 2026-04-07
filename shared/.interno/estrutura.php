@@ -8,7 +8,9 @@ $Jogadores = [];
 $Deque = null;
 $jogadorDaVez = 0;
 $emExecucao = false;
+$encerrada = false;
 $timerProntidao = -1;
+$atributoEscolhido = -1;
 
 class Deque {
 	public $atributos = [];
@@ -190,6 +192,16 @@ class Jogador {
 	public function enviarCartaAoFinal() {
 		adicionarCarta(removerCartaAtual());
 	}
+	public function quitar() {
+		global $Jogadores;
+		foreach ($Jogadores as $index => $jogador) {
+			if ($jogador === $this) {
+				array_splice($Jogadores, $index, 1);
+				break;
+			}
+		}
+		verbose("Jogador {$this->nome} quitou da partida.\n");
+	}
 }
 
 function construirDeque($_id,$_numAtributos=6) {
@@ -272,7 +284,52 @@ function rodada($_interativo = false) {
 	} else {
 		$atributoEscolhido = rand(0, count($Deque->atributos) - 1);
 	}
-	verbose("Atributo escolhido: ".$Deque->atributos[$atributoEscolhido]->nome." - ".$jogadorAtual->cartaAtual()->valores[$atributoEscolhido]."\n");
+	girarRodada($atributoEscolhido);
+}
+function iniciarJogoTeste() {
+	global $Jogadores;
+	global $Deque;
+	if ($Deque === null) {
+		construirDeque(1,6);
+	}
+	new Jogador("Alice");
+	new Jogador("Bob");
+	new Jogador("Charlie");
+	new Jogador("Diana");
+
+	embaralharEDistribuirCartas();
+	exibirCartasJogadores();
+}
+function exibirCartasJogadores() {
+	global $Jogadores;
+	verbose("Cartas dos jogadores:\n");
+	foreach ($Jogadores as $jogador) {
+		verbose($jogador->nome.": ");
+		if (!$jogador->ativo) {
+			verbose("Eliminado");
+		} else {
+			foreach ($jogador->cartas as $carta) {
+				verbose("[".$carta->obterCodCarta()."] ");
+			}
+		}
+		verbose("\n");
+	}
+}
+function embaralharEDistribuirCartas() {
+	global $Jogadores, $Deque;
+	$dequeEmbaralhado = $Deque->cartas;
+	shuffle($dequeEmbaralhado);
+	//Distribui as cartas do deque entre os jogadores
+	$numJogadores = count($Jogadores);
+	verbose("Embaralhando e distribuindo deque para ".$numJogadores." jogadores...\n");
+	foreach ($dequeEmbaralhado as $index => $carta) {
+		$Jogadores[$index % $numJogadores]->adicionarCarta($carta);
+	}
+}
+
+function girarRodada($_atributoEscolhido) {
+	global $Deque,$Jogadores,$jogadorDaVez;
+	verbose("Atributo escolhido: ".$Deque->atributos[$_atributoEscolhido]->nome." - ".$Jogadores[$jogadorDaVez]->cartaAtual()->valores[$_atributoEscolhido]."\n");
 	verbose("Valores dos jogadores: \n");
 	$jogadorEspecial = null;
 	foreach ($Jogadores as $jogador) {
@@ -280,7 +337,7 @@ function rodada($_interativo = false) {
 			continue;
 		}
 		verbose(" - ".$jogador->nome.": ");
-		verbose($jogador->cartaAtual()->valores[$atributoEscolhido]." (".$jogador->cartaAtual()->obterCodCarta().")");
+		verbose($jogador->cartaAtual()->valores[$_atributoEscolhido]." (".$jogador->cartaAtual()->obterCodCarta().")");
 		if ($jogador->cartaAtual()->especial) {
 			verbose(" [Especial]");
 			$jogadorEspecial = $jogador;
@@ -321,8 +378,17 @@ function rodada($_interativo = false) {
 			if (!$jogador->ativo) {
 				continue;
 			}
-			$valor = $jogador->cartaAtual()->valores[$atributoEscolhido];
-			if ($melhorValor === null || ($Deque->atributos[$atributoEscolhido]->forma == 1 && $valor > $melhorValor) || ($Deque->atributos[$atributoEscolhido]->forma == 0 && $valor < $melhorValor)) {
+			$valor = $jogador->cartaAtual()->valores[$_atributoEscolhido];
+			if (
+				$melhorValor === null
+				|| (
+					$Deque->atributos[$_atributoEscolhido]->forma == 1
+					&& $valor > $melhorValor
+				) || (
+					$Deque->atributos[$_atributoEscolhido]->forma == 0
+					&& $valor < $melhorValor
+				)
+			) {
 				$melhorValor = $valor;
 				$jogadoresVencedores = [$jogador];
 			} elseif ($valor == $melhorValor) {
@@ -341,7 +407,14 @@ function rodada($_interativo = false) {
 		$vencedor = null;
 		foreach ($jogadoresVencedores as $jogador) {
 			verbose(" - ".$jogador->nome.": ".$jogador->cartaAtual()->obterCodCarta()."\n");
-			if ($vencedor === null || $jogador->cartaAtual()->classe < $vencedor->cartaAtual()->classe || ($jogador->cartaAtual()->classe == $vencedor->cartaAtual()->classe && $jogador->cartaAtual()->numero < $vencedor->cartaAtual()->numero)) {
+			if (
+				$vencedor === null
+				|| $jogador->cartaAtual()->classe < $vencedor->cartaAtual()->classe
+				|| (
+					$jogador->cartaAtual()->classe == $vencedor->cartaAtual()->classe
+					&& $jogador->cartaAtual()->numero < $vencedor->cartaAtual()->numero
+				)
+			) {
 				$vencedor = $jogador;
 			}
 		}
@@ -349,7 +422,7 @@ function rodada($_interativo = false) {
 		sleep(2);
 	}
 	verbose("Vencedor: ".$jogadoresVencedores[0]->nome);
-	if ($jogadoresVencedores[0] !== $jogadorAtual) {
+	if ($jogadoresVencedores[0] !== $Jogadores[$jogadorDaVez]) {
 		verbose(", com a seguinte carta:\n");
 		$jogadoresVencedores[0]->cartaAtual()->info();
 	}
@@ -386,40 +459,4 @@ function rodada($_interativo = false) {
 	}
 	exibirCartasJogadores();
 	return true;
-}
-function iniciarJogoTeste() {
-	global $Jogadores;
-	global $Deque;
-	if ($Deque === null) {
-		construirDeque(1,6);
-	}
-	new Jogador("Alice");
-	new Jogador("Bob");
-	new Jogador("Charlie");
-	new Jogador("Diana");
-
-	$dequeEmbaralhado = $Deque->cartas;
-	shuffle($dequeEmbaralhado);
-	//Distribui as cartas do deque entre os jogadores
-	$numJogadores = count($Jogadores);
-	verbose("Embaralhando e distribuindo deque para ".$numJogadores." jogadores...\n");
-	foreach ($dequeEmbaralhado as $index => $carta) {
-		$Jogadores[$index % $numJogadores]->adicionarCarta($carta);
-	}
-	exibirCartasJogadores();
-}
-function exibirCartasJogadores() {
-	global $Jogadores;
-	verbose("Cartas dos jogadores:\n");
-	foreach ($Jogadores as $jogador) {
-		verbose($jogador->nome.": ");
-		if (!$jogador->ativo) {
-			verbose("Eliminado");
-		} else {
-			foreach ($jogador->cartas as $carta) {
-				verbose("[".$carta->obterCodCarta()."] ");
-			}
-		}
-		verbose("\n");
-	}
 }

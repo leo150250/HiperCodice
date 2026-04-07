@@ -127,6 +127,9 @@ class Carta {
 			elDivValorCampo.textContent = textoValor;
 			elDivCampo.appendChild(elDivNomeCampo);
 			elDivCampo.appendChild(elDivValorCampo);
+			elDivCampo.onclick = ()=>{
+				escolherAtributo(i);
+			}
 			elValores.appendChild(elDivCampo);
 		}
 		el.appendChild(elValores);
