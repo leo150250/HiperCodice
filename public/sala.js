@@ -46,6 +46,10 @@ function iniciarWebSocket(_porta,_endereco,_seguro) {
 				} else {
 					vezDeJogador(jsonServer.conteudo.resourceId);
 				}
+				break;
+			case "escolha":
+				destacarAtributo(jsonServer.conteudo.atributo);
+				break;
 		}
 	};
 	novoSocket.onerror = (erro) => {
@@ -78,4 +82,8 @@ function enviarPronto() {
 	} else {
 		enviarMensagem("\\ready");
 	}
+}
+
+function enviarEscolha(_escolha) {
+	enviarMensagem(`\\escolha ${_escolha}`);
 }

@@ -10,6 +10,8 @@ function exibirCarta(_id) {
 function minhaVez() {
 	console.log("É A SUA VEZ DE JOGAR!");
 	vezDeJogar = true;
+	let divAtributos = document.getElementById("atributos");
+	divAtributos.classList.add("selecionar");
 }
 
 function vezDeJogador(_jogador) {
@@ -18,5 +20,14 @@ function vezDeJogador(_jogador) {
 }
 
 function escolherAtributo(_id) {
-	console.log(`Atributo escolhido: ${deque.atributos[_id].nome}`);
+	if (vezDeJogar) {
+		console.log(`Atributo escolhido: ${deque.atributos[_id].nome}`);
+		destacarAtributo(_id);
+		enviarEscolha(_id);
+	}
+}
+
+function destacarAtributo(_id) {
+	let divAtributo = document.getElementById(`atributo${_id}`);
+	divAtributo.classList.add("selecionado");
 }

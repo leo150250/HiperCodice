@@ -6,6 +6,7 @@ class Deque {
 		this.nome = _nome;
 		this.atributos = [];
 		this.cartas = [];
+		this.cartaEspecial = -1;
 	}
 	info() {
 		console.log(`Deque: ${this.nome} (ID ${this.id})`);
@@ -72,6 +73,19 @@ class Carta {
 		}
 		return texto;
 	}
+	definirEspecial() {
+		if (this.deque.cartaEspecial != -1) {
+			this.deque.cartas[this.deque.cartaEspecial].especial = false;
+			this.deque.cartaEspecial = -1;
+		}
+		this.especial = true;
+		for (let i = 0; i < this.deque.cartas.length; i++) {
+			if (this.deque.cartas[i] === this) {
+				this.deque.cartaEspecial = i;
+				break;
+			}
+		}
+	}
 	desenhar() {
 		let el = document.createElement("div");
 		el.classList.add("Carta",`classe${this.classe}`);
@@ -99,10 +113,19 @@ class Carta {
 		elImg.alt = this.nome;
 		el.appendChild(elImg);
 
+		if (this.especial) {
+			el.classList.add("especial");
+			let elEspecial = document.createElement("div");
+			elEspecial.classList.add("hiperCodice");
+			elEspecial.textContent = "HIPER-CÓDICE!";
+			el.appendChild(elEspecial);
+		}
+
 		el.appendChild(document.createElement("br"));
 
 		let elValores = document.createElement("div");
 		elValores.classList.add("valoresCarta");
+		elValores.id = "atributos";
 		for (let i = 0; i < this.deque.atributos.length; i++) {
 			let atributo = this.deque.atributos[i];
 			let valor = this.valores[i];
@@ -121,6 +144,7 @@ class Carta {
 				textoValor = `${valor} ${atributo.medida}`;
 			}
 			let elDivCampo = document.createElement("div");
+			elDivCampo.id = `atributo${i}`;
 			let elDivNomeCampo = document.createElement("div");
 			elDivNomeCampo.textContent = atributo.nome;
 			let elDivValorCampo = document.createElement("div");
@@ -157,7 +181,7 @@ class Carta {
 }
 
 function gerarDequeJSON(_json) {
-	console.log(_json);
+	//console.log(_json);
 
 	if (typeof _json == "string") {
 		_json = JSON.parse(_json);
@@ -178,9 +202,13 @@ function gerarDequeJSON(_json) {
 		novaCarta.especial = _carta.especial;
 		novaCarta.nome = _carta.nome;
 		novaCarta.valores = _carta.valores;
+		novaCarta.numero = (deque.cartas.length % 8) + 1;
 		deque.cartas.push(novaCarta);
+		if (novaCarta.especial) {
+			novaCarta.definirEspecial();
+		}
 	});
 
-	console.log("Deque gerado!");
+	console.log(deque);
 	//deque.info();
 }

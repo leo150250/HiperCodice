@@ -78,8 +78,25 @@ class Comm {
 					}
 					break;
 				case "escolha":
-					verbose("Jogador {$from->resourceId} escolheu!\n");
-
+					verbose("Jogador {$from->resourceId} escolheu atributo {$args[0]}\n");
+					global $Jogadores;
+					global $timerProntidao;
+					global $atributoEscolhido;
+					global $jogadorDaVez;
+					if ($this->jogadorConn($from) === $Jogadores[$jogadorDaVez]) {
+						$timerProntidao = 0;
+						$atributoEscolhido = $args[0];
+					}
+					foreach ($this->clients as $client) {
+						$client->send(json_encode([
+							"tipo"=>"escolha",
+							"conteudo"=>[
+								"resourceId"=>$from->resourceId,
+								"atributo"=>$atributoEscolhido
+							]
+						]));
+					}
+					break;
                 default:
                     verbose("Comando desconhecido: $command\n");
                     break;
@@ -271,6 +288,7 @@ function checarRodada() {
 			} else {
 				$comm->enviarMensagemTodos("Iniciando partida...");
 				$emExecucao = true;
+				$timerProntidao = -1;
 				foreach ($Jogadores as $jogador) {
 					$comm->enviarComm($jogador->conexao,"deque",$Deque->json());
 				}
@@ -285,6 +303,7 @@ function checarRodada() {
 			}
 			return;
 		}
+		return true;
 	} else {
 		if (!$encerrada) { //O jogo tá acontecendo.
 			if ($timerProntidao == -1) {
@@ -295,7 +314,8 @@ function checarRodada() {
 						if ($carta === $jogador->cartaAtual()) {
 							$comm->enviarComm($jogador->conexao,"carta",[
 								"resourceId"=>$jogador->conexao->resourceId,
-								"carta"=>$indice
+								"carta"=>$indice,
+								"qtd"=>count($jogador->cartas)
 							]);
 							break;
 						}
@@ -308,7 +328,7 @@ function checarRodada() {
 				$timerProntidao = 30;
 			} else {
 				if ($timerProntidao <= 5 && $timerProntidao > 0) {
-					verbose("Vai ser escolhido um atributo em {$timerProntidao}...");
+					verbose("Vai ser escolhido um atributo em {$timerProntidao}...\n");
 				}
 				if ($timerProntidao > 0) {
 					$timerProntidao--;
@@ -322,8 +342,12 @@ function checarRodada() {
 						"atributo"=>$atributoEscolhido
 					]);
 					$encerrada = !girarRodada($atributoEscolhido);
+					$timerProntidao = -1;
 				}
 			}
+			return true;
+		} else {
+			return false;
 		}
 		
 		//Teste: Envia uma carta aleatória a todos os jogadores a cada 10 segundos (através do timerProntidao)

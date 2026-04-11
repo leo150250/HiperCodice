@@ -26,11 +26,12 @@ $timer = 0;
 construirDeque(1,6);
 //$Deque->info();
 iniciarSala($porta);
-while (true) {
+$jogoRodando = true;
+while ($jogoRodando) {
 	checarConexoes();
-	checarRodada();
+	$jogoRodando = checarRodada();
 	$timer=($timer+1)%60;
-	verbose("Timer: $timer\n");
+	//verbose("Timer: $timer\n");
 	sleep(1);
 }
 

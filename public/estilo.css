@@ -20,6 +20,41 @@ button {
 	flex-wrap: wrap;
 	justify-content: space-evenly;
 }
+
+#atributos.selecionar {
+	animation: piscarBranco 1s infinite;
+}
+@keyframes piscarBranco {
+	0% {
+		background-color: #FFFF;
+	}
+	50% {
+		background-color: #FFF8;
+	}
+	100% {
+		background-color: #FFFF;
+	}
+}
+#atributos.selecionar .selecionado {
+	color: #FFF;
+	background-color: #000;
+	animation: bordaSelecionado 1s infinite;
+	outline-width: 5px;
+	outline-color: #FF0;
+	outline-style: solid;
+}
+@keyframes bordaSelecionado {
+	0% {
+		outline-offset: 0px;
+	}
+	50% {
+		outline-offset: 5px;
+	}
+	100% {
+		outline-offset: 0px;
+	}
+}
+
 .quantitativoCarta {
 	border: 1px solid black;
 	border-radius: 5px;
@@ -78,6 +113,20 @@ button {
 .Carta.classe4 {
 	background-color: #F44336;
 }
+.Carta.especial {
+	background-color: #EFC82D;
+	background-image: linear-gradient(to right, #FFF8, #FFF0, #FFF8);
+	background-size: 200% 100%;
+	animation: cartaEspecial 1s infinite linear;
+}
+@keyframes cartaEspecial {
+	0% {
+		background-position-x: 0%;
+	}
+	100% {
+		background-position-x: 200%;
+	}
+}
 
 .Carta h1 {
 	position: absolute;
@@ -135,6 +184,32 @@ button {
 	object-fit: cover;
 	position: relative;
 	z-index: 1;
+}
+.Carta.especial .hiperCodice {
+	background-color: #EFC82D;
+	background-image: linear-gradient(to right, #FFFF, #FFF0, #FFFF);
+	font-weight: bold;
+	position: absolute;
+	top: 50px;
+	right: 0px;
+	z-index: 6;
+	padding: 0.5em;
+	border-radius: 1em;
+	transform: rotate(20deg);
+	box-shadow: 0px 0px 10px #FFF;
+	animation: hiperCodiceCarta 0.71s infinite ease-in-out;
+	border: 1px solid #FFF;
+}
+@keyframes hiperCodiceCarta {
+	0% {
+		transform: rotate(15deg);
+	}
+	50% {
+		transform: rotate(25deg);
+	}
+	100% {
+		transform: rotate(15deg);
+	}
 }
 .Carta p {
 	margin: 10px 0;
