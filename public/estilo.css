@@ -1,5 +1,8 @@
 body {
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	margin: 0px;
+	width: 100vw;
+	height: 100vh;
 }
 
 form {
@@ -13,6 +16,87 @@ form > * {
 
 button {
 	display: block;
+}
+
+#wrapper {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	display: block;
+}
+
+#menu {
+	width: 400px;
+	height: 100%;
+	position: absolute;
+	left: 200px;
+	display: flex;
+    align-items: center;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+}
+#menu .faixa {
+	background-color: #F44336;
+	mix-blend-mode: overlay;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	z-index: -4;
+}
+
+#menu .logo {
+	max-width: 75vw;
+	filter: invert();
+}
+
+#menu .menu {
+	display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: nowrap;
+	width: 100%;
+	overflow-x: hidden;
+	
+}
+
+#menu button {
+	font-size: 2em;
+	border: none;
+	font-weight: bold;
+	background-color: transparent;
+	transition: 0.25s;
+	outline-width: 10px;
+	outline-style: solid;
+	outline-color: #0000;
+	padding: 0.5em;
+	color: #FFF;
+}
+#menu button:hover {
+	background-color: #FFF4;
+	outline-width: 1px;
+	outline-style: solid;
+	outline-color: #FFF4;
+	cursor: pointer;
+}
+
+#menuFundo {
+	background-color: #000;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	z-index: -5;
+}
+
+#menuFundo img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	opacity: 0.25;
+	filter: blur(5px);
 }
 
 #quantitativoCartas {
@@ -252,4 +336,12 @@ button {
 	font-weight: bold;
 	text-align: right;
 	padding: 0;
+}
+
+@media only screen and (max-width: 800px) {
+	#menu {
+		left: 0px;
+		position: relative;
+		margin: 0 auto;
+	}
 }

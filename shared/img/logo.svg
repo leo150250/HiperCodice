@@ -8,7 +8,7 @@
    version="1.1"
    id="svg1"
    sodipodi:docname="logo.svg"
-   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -25,11 +25,11 @@
      inkscape:document-units="mm"
      showguides="true"
      inkscape:zoom="1.1447461"
-     inkscape:cx="311.42278"
-     inkscape:cy="386.54861"
-     inkscape:window-width="2560"
-     inkscape:window-height="1529"
-     inkscape:window-x="-8"
+     inkscape:cx="263.37718"
+     inkscape:cy="175.14801"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="1912"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1" />
@@ -39,28 +39,16 @@
      inkscape:label="Camada 1"
      inkscape:groupmode="layer"
      id="layer1">
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:19.8842px;font-family:'Tw Cen MT Condensed';-inkscape-font-specification:'Tw Cen MT Condensed,  Bold';font-variant-ligatures:discretionary-ligatures;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:3.10744"
-       x="31.963934"
-       y="54.466618"
-       id="text4"><tspan
-         sodipodi:role="line"
-         id="tspan4"
-         style="stroke-width:3.10744"
-         x="31.963934"
-         y="54.466618">HIPER</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:25.5956px;font-family:'Tw Cen MT Condensed';-inkscape-font-specification:'Tw Cen MT Condensed,  Bold';font-variant-ligatures:discretionary-ligatures;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;stroke-width:4"
-       x="8.2957296"
-       y="71.987946"
-       id="text5"><tspan
-         sodipodi:role="line"
-         id="tspan5"
-         style="stroke-width:4"
-         x="8.2957296"
-         y="71.987946">CÓDICE</tspan></text>
+    <path
+       d="m 42.007138,43.79886 v 9.609423 h 2.0688 v -3.822781 h 3.403025 v 3.822781 h 2.068799 V 43.79886 h -2.068799 v 3.702851 H 44.075938 V 43.79886 Z m 9.429531,0 v 9.609423 h 2.0688 V 43.79886 Z m 6.07148,1.724 c 0.22487,-0.01499 0.374783,-0.02998 0.46473,-0.02998 1.019409,0 1.604069,0.449739 1.604069,1.229287 0,0.689599 -0.569669,1.259269 -1.259269,1.259269 h -0.80953 z m -2.023825,-1.724 v 9.609423 h 2.053808 v -3.717842 l 1.199304,-0.02998 c 0.58466,0 1.469147,-0.3448 1.96386,-0.734573 0.614643,-0.494713 1.019408,-1.394191 1.019408,-2.323652 0,-1.694017 -1.184312,-2.803373 -2.953286,-2.803373 z m 7.930399,0 v 9.609423 h 5.411859 v -1.903895 h -3.34306 v -1.993843 h 3.34306 v -1.873912 h -3.34306 v -1.933878 h 3.34306 V 43.79886 Z m 9.234641,1.709008 h 0.479722 c 0.989426,0 1.589078,0.449739 1.589078,1.184313 0,0.884487 -0.539687,1.319234 -1.619061,1.319234 H 72.649364 V 45.52286 Z m -2.08379,-1.709008 v 9.609423 h 2.068799 v -3.717842 h 0.239861 l 2.488556,3.717842 h 2.368625 l -2.683443,-4.002677 c 0.794539,-0.389774 1.079374,-0.629634 1.394191,-1.214295 0.254852,-0.479722 0.404765,-1.019408 0.404765,-1.574086 0,-1.738991 -1.199304,-2.818365 -3.11819,-2.818365 z"
+       id="text4"
+       style="font-weight:bold;font-size:14.9913px;font-family:'Tw Cen MT Std';-inkscape-font-specification:'Tw Cen MT Std Bold';font-variant-ligatures:discretionary-ligatures;stroke-width:2.34279"
+       aria-label="HIPER" />
+    <path
+       style="font-weight:bold;font-size:22.0563px;font-family:'Tw Cen MT Std';-inkscape-font-specification:'Tw Cen MT Std Bold';font-variant-ligatures:discretionary-ligatures;stroke-width:3.44688"
+       d="m 18.532229,57.399317 c -1.455716,-0.639632 -2.712925,-0.948421 -4.014247,-0.948421 -3.903965,0 -6.9697905,3.22022 -6.9697905,7.322692 0,4.036302 2.9996565,7.21241 6.8374525,7.21241 1.257209,0 2.20563,-0.198507 4.146585,-0.83814 v -3.418726 c -1.676279,0.948421 -2.668813,1.279265 -3.81574,1.279265 -2.426193,0 -3.99219,-1.632166 -3.99219,-4.16864 0,-2.668813 1.477772,-4.367148 3.793683,-4.367148 0.264676,0 0.529351,0.02206 0.771971,0.06617 1.014589,0.154394 1.720391,0.441126 3.242276,1.323378 z m 7.366808,-1.698335 h 1.918898 l 2.955544,-3.220219 h -3.374614 z m 1.102815,3.63929 c 0.154394,0 0.308788,-0.02206 0.485238,-0.02206 2.337968,0 3.926021,1.764504 3.926021,4.389204 0,2.668812 -1.565997,4.455372 -3.970133,4.455372 -2.271799,0 -3.903965,-1.852729 -3.903965,-4.367147 0,-2.448249 1.345434,-4.190697 3.462839,-4.455372 z m -0.24262,-2.823207 c -3.727514,0.374957 -6.396326,3.352558 -6.396326,7.190354 0,4.234809 2.955544,7.256522 7.080072,7.256522 4.146584,0 7.168297,-3.065825 7.168297,-7.234466 0,-4.190697 -3.043769,-7.234466 -7.256523,-7.234466 -0.198506,0 -0.397013,0.02206 -0.59552,0.02206 z m 13.388171,2.80115 h 1.124871 c 0.838139,0 1.963011,0.264676 2.6247,0.617577 1.080758,0.617576 1.742447,2.007123 1.742447,3.683402 0,1.477772 -0.397013,2.668812 -1.124871,3.352557 -0.661689,0.639633 -1.940954,1.080759 -3.154051,1.080759 h -1.213096 z m -3.065826,-2.668812 v 14.138088 h 4.565654 c 4.323035,0 7.124185,-2.779094 7.124185,-7.058016 0,-4.256866 -2.734981,-7.080072 -6.859509,-7.080072 z m 13.917531,0 v 14.138088 h 3.04377 V 56.649403 Z m 16.454004,0.749914 c -1.455716,-0.639632 -2.712925,-0.948421 -4.014247,-0.948421 -3.903965,0 -6.96979,3.22022 -6.96979,7.322692 0,4.036302 2.999656,7.21241 6.837452,7.21241 1.25721,0 2.20563,-0.198507 4.146585,-0.83814 v -3.418726 c -1.676279,0.948421 -2.668812,1.279265 -3.81574,1.279265 -2.426193,0 -3.99219,-1.632166 -3.99219,-4.16864 0,-2.668813 1.477772,-4.367148 3.793683,-4.367148 0.264676,0 0.529351,0.02206 0.771971,0.06617 1.014589,0.154394 1.720391,0.441126 3.242276,1.323378 z m 2.315914,-0.749914 v 14.138088 h 7.962324 v -2.80115 h -4.918554 v -2.933488 h 4.918554 v -2.757037 h -4.918554 v -2.845263 h 4.918554 v -2.80115 z"
+       id="text5"
+       aria-label="CÓDICE" />
     <path
        style="baseline-shift:baseline;display:inline;overflow:visible;opacity:1;vector-effect:none;fill:#000000;enable-background:accumulate;stop-color:#000000;stop-opacity:1"
        d="m 50.442248,74.076646 v 9.3967 H 84.719596 V 30.703816 H 50.442248 v 9.62809 h 4 v -5.62809 h 26.277348 v 44.76953 H 54.442248 v -5.3967 z"
