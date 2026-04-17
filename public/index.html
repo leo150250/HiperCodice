@@ -11,14 +11,41 @@
 		<div id="menu">
 			<div class="faixa"></div>
 			<img src="img/logo.svg" class="logo">
-			<div id="menuInicio" class="menu aberto">
-				<button>Jogar sozinho</button>
+			<div id="menuInicio" class="menu">
+				<button onclick="abrirMenu('SP')">Jogar sozinho</button>
 				<button>Multi-jogador</button>
-				<button>Opções</button>
-				<button>Sobre</button>
-				<button>Gerador de deques</button>
+				<button onclick="abrirMenu('Opcoes')">Opções</button>
+				<button onclick="exibirDialogo('dialogCreditos')">Créditos</button>
+				<button>Criador de deques</button>
+			</div>
+			<div id="menuSP" class="menu">
+				<button>Partida rápida</button>
+				<button onclick="exibirDialogo('dialogPersonalizarSP')">Personalizar</button>
+				<button onclick="abrirMenu('Inicio')">Voltar</button>
+			</div>
+			<div id="menuOpcoes" class="menu">
+				<label id="labelConfigSom" for="inputConfigSom">Sons:</label>
+				<input type="checkbox" id="inputConfigSom" onchange="alternarConfigSom(this.checked)">
+				<label id="labelConfigMusica" for="inputConfigMusica">Música:</label>
+				<input type="checkbox" id="inputConfigMusica" onchange="alternarConfigMusica(this.checked)">
+				<button onclick="abrirMenu('Inicio')">Voltar</button>
 			</div>
 		</div>
+		<dialog id="dialogCreditos">
+			<h1>Créditos</h1>
+			<p>Hiper-Códice é um jogo competitivo baseado em web que combina elementos de memorização e lógica para jogar entre amigos, presencialmente ou via on-line.</p>			
+			<p>Desenvolvido por <a href="https://leandrogabriel.net" target="_blank">LeandroGabriel.net</a></p>
+			<p>Repositório do Projeto: <a href="https://github.com/leo150250/HiperCodice" target="_blank">HiperCodice no GitHub</a></p>
+			<div class="botoes">
+				<button onclick="esconderDialogo('dialogCreditos')">OK</button>
+			</div>
+		</dialog>
+		<dialog id="dialogPersonalizarSP">
+			<h1>Jogo personalizado</h1>
+			<div class="botoes">
+				<button onclick="esconderDialogo('dialogPersonalizarSP')">Voltar</button>
+			</div>
+		</dialog>
 		<div id="menuFundo">
 			<img src="img/decks/1/default.jpg">
 		</div>
