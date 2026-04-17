@@ -6,21 +6,27 @@
 	<title>Hiper-Códice</title>
 	<link rel='stylesheet' href='estilo.css'>
 </head>
-<body>
+<body onload="paginaCarregada()">
 	<div id="wrapper">
 		<div id="menu">
 			<div class="faixa"></div>
 			<img src="img/logo.svg" class="logo">
 			<div id="menuInicio" class="menu">
 				<button onclick="abrirMenu('SP')">Jogar sozinho</button>
-				<button>Multi-jogador</button>
+				<button onclick="abrirMenu('MP')">Multi-jogador</button>
 				<button onclick="abrirMenu('Opcoes')">Opções</button>
 				<button onclick="exibirDialogo('dialogCreditos')">Créditos</button>
 				<button>Criador de deques</button>
 			</div>
 			<div id="menuSP" class="menu">
-				<button>Partida rápida</button>
+				<button onclick="carregarJogoSP()">Partida rápida</button>
 				<button onclick="exibirDialogo('dialogPersonalizarSP')">Personalizar</button>
+				<button onclick="abrirMenu('Inicio')">Voltar</button>
+			</div>
+			<div id="menuMP" class="menu">
+				<button>Entrar em sala</button>
+				<button>Iniciar sala</button>
+				<button>Iniciar modo party</button>
 				<button onclick="abrirMenu('Inicio')">Voltar</button>
 			</div>
 			<div id="menuOpcoes" class="menu">
@@ -31,25 +37,55 @@
 				<button onclick="abrirMenu('Inicio')">Voltar</button>
 			</div>
 		</div>
-		<dialog id="dialogCreditos">
-			<h1>Créditos</h1>
-			<p>Hiper-Códice é um jogo competitivo baseado em web que combina elementos de memorização e lógica para jogar entre amigos, presencialmente ou via on-line.</p>			
-			<p>Desenvolvido por <a href="https://leandrogabriel.net" target="_blank">LeandroGabriel.net</a></p>
-			<p>Repositório do Projeto: <a href="https://github.com/leo150250/HiperCodice" target="_blank">HiperCodice no GitHub</a></p>
-			<div class="botoes">
-				<button onclick="esconderDialogo('dialogCreditos')">OK</button>
-			</div>
-		</dialog>
-		<dialog id="dialogPersonalizarSP">
-			<h1>Jogo personalizado</h1>
-			<div class="botoes">
-				<button onclick="esconderDialogo('dialogPersonalizarSP')">Voltar</button>
-			</div>
-		</dialog>
 		<div id="menuFundo">
-			<img src="img/decks/1/default.jpg">
+		</div>
+		<div id="jogo">
 		</div>
 	</div>
+	<dialog id="dialogCreditos">
+		<h1>Créditos</h1>
+		<p>Hiper-Códice é um jogo competitivo baseado em web que combina elementos de memorização e lógica para jogar entre amigos, presencialmente ou via on-line.</p>			
+		<p>Desenvolvido por <a href="https://leandrogabriel.net" target="_blank">LeandroGabriel.net</a></p>
+		<p>Repositório do Projeto: <a href="https://github.com/leo150250/HiperCodice" target="_blank">HiperCodice no GitHub</a></p>
+		<div class="botoes">
+			<button onclick="esconderDialogo('dialogCreditos')">OK</button>
+		</div>
+	</dialog>
+	<dialog id="dialogPersonalizarSP">
+		<h1>Jogo personalizado</h1>
+		<p>
+			<label>Deque:</label><select>
+				<option></option>
+			</select>
+			<span>blablabla</span>
+		</p>
+		<p>
+			Atributos:
+			<div id="atributosDeque">
+				<div><input type="checkbox"><label>Atributo 1</label></div>
+				<div><input type="checkbox"><label>Atributo 2</label></div>
+				<div><input type="checkbox"><label>Atributo 3</label></div>
+				<div><input type="checkbox"><label>Atributo 4</label></div>
+				<div><input type="checkbox"><label>Atributo 5</label></div>
+				<div><input type="checkbox"><label>Atributo 6</label></div>
+				<div><input type="checkbox"><label>Atributo 7</label></div>
+				<div><input type="checkbox"><label>Atributo 8</label></div>
+			</div>
+		</p>
+		<p>
+			<label>Número de CPUs:</label>
+			<input type="number" min="1" max="7" value="3">
+		</p>
+		<div class="botoes">
+			<button>Iniciar jogo</button>
+			<button onclick="esconderDialogo('dialogPersonalizarSP')">Voltar</button>
+		</div>
+	</dialog>
+	<dialog id="carregando">
+		<h1>Carregando o Hiper-Códice</h1>
+		<p>Aguarde...</p>
+	</dialog>
+	<script src="estrutura.js"></script>
 	<script src="hiperCodice.js"></script>
 </body>
 </html>

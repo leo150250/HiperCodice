@@ -74,6 +74,9 @@ function BD_rollback() {
 	global $conexaoDB;
 	$conexaoDB->rollback();
 }
+function BD_seek($_resultado,$_offset) {
+	return $_resultado->data_seek($_offset);
+}
 
 if (!isset($config)) {
 	BD_conectar();

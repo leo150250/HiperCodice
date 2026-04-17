@@ -17,21 +17,31 @@ form > * {
 	margin: 10px 0;
 }
 
-button {
+input[type="text"], input[type="number"], select {
+	background-color: inherit;
+	border: 1px solid #8884;
+	vertical-align: baseline;
+	font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	color: #FFF;
+	padding: 0.5em;
+}
+
+button, input[type="button"], input[type="submit"] {
 	display: block;
 	border: none;
 	padding: 0.5em;
 	min-width: 5em;
+	transition: 0.25s;
 	font-weight: bold;
 	font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	cursor: pointer;
 	background-color: #F44336;
 	color: #FFF;
 }
-button:hover {
+button:hover, input:hover, select:hover {
 	filter: contrast(0.75);
 }
-button:active {
+button:active, input:active, select:active {
 	filter: brightness(0.75);
 }
 
@@ -60,8 +70,12 @@ dialog .botoes {
 .botoes {
 	display: flex;
 	flex-direction: row-reverse;
+	gap: 2px;
 }
 
+.botoes button:not(:first-of-type) {
+	background-color: inherit;
+}
 
 #wrapper {
 	position: relative;
@@ -85,12 +99,13 @@ dialog .botoes {
 }
 #menu .faixa {
 	background-color: #F44336;
-	mix-blend-mode: screen;
+	mix-blend-mode: multiply;
 	width: 100%;
 	height: 100%;
 	position: absolute;
 	z-index: -4;
 	animation: menuFaixa 0.5s forwards linear;
+	backdrop-filter: blur(5px);
 }
 @keyframes menuFaixa {
 	0% {
@@ -103,7 +118,7 @@ dialog .botoes {
 
 #menu .logo {
 	max-width: 75vw;
-	filter: invert();
+	filter: invert() drop-shadow(2px 2px 5px #000);
 }
 
 #menu .menu {
@@ -114,10 +129,18 @@ dialog .botoes {
     flex-wrap: nowrap;
 	width: 100%;
 	overflow-x: hidden;
-	transition: height 0.5s;
+	overflow-y: scroll;
+	transition: 0.5s;
+	padding: 0px 0px;
+	pointer-events: none;
+}
+#menu .menu::-webkit-scrollbar {
+	display: none;
 }
 #menu .menu.aberto {
 	height: auto;
+	pointer-events: all;
+	padding: 10px 0px;
 }
 
 #menu .menu > * {
@@ -153,15 +176,29 @@ dialog .botoes {
 	top: 0px;
 }
 
+#menuFundo .imagemFundo {
+	width: 100%;
+	height: 100%;
+	opacity: 1;
+}
+
 #menuFundo img {
 	width: calc(100% + 100px);
 	height: 100%;
 	object-fit: cover;
-	opacity: 0.25;
-	filter: blur(5px);
+	opacity: 1;
 	left: 0px;
 	position: relative;
-	animation: animPanFundo 10s linear infinite;
+	animation: animPanFundo 10s linear forwards;
+}
+#menuFundo p {
+	color: #FFF;
+	position: absolute;
+	right: 0px;
+	bottom: 0px;
+	text-align: right;
+	margin: 1em;
+	text-shadow: 1px 1px 3px #000;
 }
 @keyframes animPanFundo {
 	0% {
@@ -169,10 +206,10 @@ dialog .botoes {
 		left: 0px;
 	}
 	10% {
-		opacity: 0.25;
+		opacity: 1;
 	}
 	90% {
-		opacity: 0.25;
+		opacity: 1;
 	}
 	100% {
 		opacity: 0;
@@ -417,6 +454,11 @@ dialog .botoes {
 	font-weight: bold;
 	text-align: right;
 	padding: 0;
+}
+
+#atributosDeque {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
 @media only screen and (max-width: 800px) {
