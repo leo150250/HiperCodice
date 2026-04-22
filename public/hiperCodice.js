@@ -94,7 +94,8 @@ function paginaCarregada() {
 	setTimeout(()=>{
 		abrirMenu("Inicio");
 	},2000);
+	carregarJogoSP();
 }
 
 //Execução
-carregarImagensMenu();
+//carregarImagensMenu();
