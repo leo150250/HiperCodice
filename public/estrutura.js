@@ -1,4 +1,5 @@
 var deque = null;
+var jogadores = [];
 
 class Deque {
 	constructor(_id,_nome) {
@@ -177,6 +178,62 @@ class Carta {
 	}
 	json() {
 		return JSON.stringify(this);
+	}
+}
+
+class Jogador {
+	constructor(_nome,_cpu = true) {
+		this.nome = _nome;
+		this.cartas = [];
+		this.ativo = true;
+		this.pronto = false;
+		this.conexao = null;
+		this.cpu = _cpu;
+		jogadores.push(this);
+		console.log(`Jogador ${this.nome} entrou!`);
+		
+		this.elemento = document.createElement("div");
+		this.elemento.classList.add("cardJogador");
+		this.elementoImg = document.createElement("img");
+		this.elementoImg.src = (this.cpu?"img/cpu.svg":"img/jogador.svg");
+		this.elemento.appendChild(this.elementoImg);
+		this.elementoNome = document.createElement("h1");
+		this.elementoNome.textContent = this.nome;
+		this.elemento.appendChild(this.elementoNome);
+		this.elementoStatus = document.createElement("p");
+		this.elementoStatus.textContent = "Pronto!";
+		this.elemento.appendChild(this.elementoStatus);
+	}
+	info() {
+		console.log(`Jogador: ${this.nome}`);
+		console.log(`Cartas:`);
+		this.cartas.forEach(_carta => {
+			_carta.info();
+		});
+	}
+	cartaAtual() {
+		return this.cartas[0];
+	}
+	removerCartaAtual() {
+		return this.cartas.shift();
+	}
+	adicionarCarta(_carta) {
+		this.cartas.push(_carta);
+	}
+	enviarCartaAoFinal() {
+		this.adicionarCarta(this.removerCartaAtual());
+	}
+	quitar() {
+		for (let index = 0; index < jogadores.length; index++) {
+			if (jogadores[index] === this) {
+				jogadores.splice(index, 1);
+				break;
+			}
+		}
+		console.log(`Jogador ${this.nome} quitou da partida.`);
+	}
+	atualizarStatus(_status) {
+		this.elementoStatus.textContent = _status;
 	}
 }
 

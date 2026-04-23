@@ -190,7 +190,7 @@ class Jogador {
 		$this->cartas[] = $carta;
 	}
 	public function enviarCartaAoFinal() {
-		adicionarCarta(removerCartaAtual());
+		$this->adicionarCarta($this->removerCartaAtual());
 	}
 	public function quitar() {
 		global $Jogadores;

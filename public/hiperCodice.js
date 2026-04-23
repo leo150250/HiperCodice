@@ -6,6 +6,12 @@ const labelConfigMusica = document.getElementById("labelConfigMusica");
 const inputConfigSom = document.getElementById("inputConfigSom");
 const inputConfigMusica = document.getElementById("inputConfigMusica");
 
+var cores = [
+	["#F44336","#8b0000","#4f0000"],
+	["#FF9800","#4f2d00","#211300"],
+	["#4CAF50","#004700","#002500"],
+	["#2196F3","#002c8b","#00204f"]
+];
 var menuAberto = null;
 var configSom = true;
 var configMusica = true;
