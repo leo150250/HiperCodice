@@ -203,6 +203,10 @@ class Jogador {
 		this.elementoStatus = document.createElement("p");
 		this.elementoStatus.textContent = "Pronto!";
 		this.elemento.appendChild(this.elementoStatus);
+
+		this.posXPadrao = 50;
+		this.posYPadrao = 50;
+		this.posicionarElementoCentro();
 	}
 	info() {
 		console.log(`Jogador: ${this.nome}`);
@@ -218,7 +222,7 @@ class Jogador {
 		return this.cartas.shift();
 	}
 	adicionarCarta(_carta) {
-		this.cartas.push(_carta);
+		this.cartas.push(_carta);		
 	}
 	enviarCartaAoFinal() {
 		this.adicionarCarta(this.removerCartaAtual());
@@ -232,8 +236,27 @@ class Jogador {
 		}
 		console.log(`Jogador ${this.nome} quitou da partida.`);
 	}
+	obterListagemCartas() {
+		let listagemCartas="";
+		this.cartas.forEach(_carta=>{
+			listagemCartas+=`[${_carta.obterCodCarta()}] `;
+		});
+		return listagemCartas;
+	}
 	atualizarStatus(_status) {
 		this.elementoStatus.textContent = _status;
+	}
+	posicionarElementoPadrao() {
+		this.elemento.style.top = this.posYPadrao + "%";
+		this.elemento.style.left = this.posXPadrao + "%";
+	}
+	posicionarElementoCentro() {
+		this.elemento.style.top = "50%";
+		this.elemento.style.left = "50%";
+	}
+	definirPosicaoElementoPadrao(_posX,_posY) {
+		this.posXPadrao = _posX;
+		this.posYPadrao = _posY;
 	}
 }
 

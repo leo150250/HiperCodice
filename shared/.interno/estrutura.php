@@ -5,7 +5,7 @@ if (!isset($path)) {
 require_once $path.".interno/funcoes.php";
 
 $Jogadores = [];
-$Deque = null;
+$Deque = new Deque(-1,"null");
 $jogadorDaVez = 0;
 $emExecucao = false;
 $encerrada = false;
@@ -58,6 +58,11 @@ class Deque {
 	}
 }
 class Atributo {
+	public $deque;
+	public $id = 0;
+	public $nome = "Atributo";
+	public $medida = "un";
+	public $forma = 1;
 	public function __construct($_deque, $_id) {
 		$this->deque = $_deque;
 		$this->id = $_id;
@@ -86,6 +91,12 @@ class Carta {
 	public $valores = [];
 	public $numero = 0;
 	public $especial = false;
+	public $deque;
+	public $id;
+	public $classe = 1;
+	public $nome = "Carta";
+	public $categoria = "Categoria";
+	public $descricao = "";
 	public function __construct($_deque, $_id, $_classe) {
 		$this->deque = $_deque;
 		$this->id = $_id;
@@ -108,6 +119,7 @@ class Carta {
 		return $texto;
 	}
 	public function desenhar() {
+		global $path;
 		echo "<div class='Carta classe".$this->classe."'>";
 		echo "<img class='fundo' src='".$path."img/decks/".$this->deque->id."/default.jpg' alt='Fundo da Carta'>";
 		echo "<h1>".$this->obterCodCarta()."</h1>";
@@ -201,6 +213,13 @@ class Jogador {
 			}
 		}
 		verbose("Jogador {$this->nome} quitou da partida.\n");
+	}
+	public function obterListagemCartas() {
+		$listagemCartas="";
+		foreach ($this->cartas as $carta) {
+			$listagemCartas.="[".$carta->obterCodCarta()."] ";
+		}
+		return $listagemCartas;
 	}
 }
 
@@ -304,15 +323,7 @@ function exibirCartasJogadores() {
 	global $Jogadores;
 	verbose("Cartas dos jogadores:\n");
 	foreach ($Jogadores as $jogador) {
-		verbose($jogador->nome.": ");
-		if (!$jogador->ativo) {
-			verbose("Eliminado");
-		} else {
-			foreach ($jogador->cartas as $carta) {
-				verbose("[".$carta->obterCodCarta()."] ");
-			}
-		}
-		verbose("\n");
+		verbose($jogador->nome.": ".(!$jogador->ativo ? "Eliminado" : $jogador->obterListagemCartas())."\n");
 	}
 }
 function embaralharEDistribuirCartas() {

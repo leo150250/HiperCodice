@@ -7,10 +7,10 @@ const inputConfigSom = document.getElementById("inputConfigSom");
 const inputConfigMusica = document.getElementById("inputConfigMusica");
 
 var cores = [
-	["#F44336","#8b0000","#4f0000"],
-	["#FF9800","#4f2d00","#211300"],
-	["#4CAF50","#004700","#002500"],
-	["#2196F3","#002c8b","#00204f"]
+	["#F44336","#8b0000f8","#4f0000f8"],
+	["#FF9800","#4f2d00f8","#211300f8"],
+	["#4CAF50","#004700f8","#002500f8"],
+	["#2196F3","#002c8bf8","#00204ff8"]
 ];
 var menuAberto = null;
 var configSom = true;

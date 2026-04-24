@@ -1,8 +1,14 @@
 const divAmbiente = document.getElementById("ambiente");
 
+var jogadorDaVez = 0;
+var emExecucao = false;
+var encerrada = false;
+var timerProntidao = -1;
+var atributoEscolhido = -1;
+
 function defineFundo(_deck) {
 	let corSelecionada = Math.floor(Math.random()*cores.length);
-	divAmbiente.style.background = `radial-gradient(${cores[corSelecionada][1]}, ${cores[corSelecionada][2]})`;
+	divAmbiente.style.backgroundImage = `radial-gradient(${cores[corSelecionada][1]}, ${cores[corSelecionada][2]}), url("img/decks/${_deck}/default.jpg")`;
 }
 
 function iniciarJogoSP() {
@@ -13,10 +19,29 @@ function iniciarJogoSP() {
 	criarNovoJogador("Andréia");
 	criarNovoJogador("Ana");
 	criarNovoJogador("Elizabeth");
+	fetch('getDeque.php')
+		.then(response => response.json())
+		.then(data => {
+			gerarDequeJSON(data);
+			embaralharEDistribuirCartas();
+			exibirCartasJogadores();
+		})
+		.catch(error => console.error('Erro ao obter o deque:', error));
 }
 
-function posicionarJogadorPadrao(_jogador) {
-
+function embaralharEDistribuirCartas() {
+	if (deque.cartas.length < 32) {
+		console.error("Há um problema com o deque.",deque.cartas);
+		throw new Error("Interrompendo embaralhamento...");
+	}
+	let dequeEmbaralhado = deque.cartas;
+	dequeEmbaralhado.sort(()=>Math.random() - 0.5);
+	
+	//Distribui as cartas do deque entre os jogadores
+	console.log(`Embaralhando e distribuindo deque para ${jogadores.length} jogadores...`);
+	dequeEmbaralhado.forEach((carta, index) => {
+		jogadores[index % jogadores.length].adicionarCarta(carta);
+	});
 }
 
 function posicionarJogadores() {
@@ -27,8 +52,8 @@ function posicionarJogadores() {
 		let posY = 50;
 		posX += Math.cos(angulo * (Math.PI / 180)) * 25;
 		posY -= Math.sin(angulo * (Math.PI / 180)) * 35;
-		_jogador.elemento.style.top = posY + "%";
-		_jogador.elemento.style.left = posX + "%";
+		_jogador.definirPosicaoElementoPadrao(posX,posY);
+		_jogador.posicionarElementoPadrao();
 		angulo+=diferencaAngulo;
 	});
 }
@@ -38,4 +63,15 @@ function criarNovoJogador(_nome,_cpu=true) {
 	divAmbiente.appendChild(novoJogador.elemento);
 	posicionarJogadores();
 	return novoJogador;
+}
+
+function exibirCartasJogadores() {
+	console.log("Cartas dos jogadores:");
+	jogadores.forEach(_jogador=>{
+		console.log(`${_jogador.nome}: ${!_jogador.ativo?"Eliminado":_jogador.obterListagemCartas()}`);
+	})
+}
+
+function rodada() {
+
 }
