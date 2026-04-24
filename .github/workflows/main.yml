@@ -21,7 +21,7 @@ jobs:
           username: ${{ secrets.UsuarioFTP }}
           password: ${{ secrets.SenhaFTP }}
           local-dir: "./temp_public/"
-          server-dir: "/public_html/sistemas/hipercodice/" 
+          server-dir: "/public_html/hipercodice/" 
       - name: Prepare server deploy
         run: |
           mkdir -p temp_server
