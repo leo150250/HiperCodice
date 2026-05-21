@@ -189,6 +189,7 @@ class Jogador {
 		this.pronto = false;
 		this.conexao = null;
 		this.cpu = _cpu;
+		this.id = jogadores.length;
 		jogadores.push(this);
 		console.log(`Jogador ${this.nome} entrou!`);
 		
@@ -257,6 +258,12 @@ class Jogador {
 	definirPosicaoElementoPadrao(_posX,_posY) {
 		this.posXPadrao = _posX;
 		this.posYPadrao = _posY;
+	}
+	destacar() {
+		this.elemento.classList.add("jogadorDaVez");
+	}
+	restaurar() {
+		this.elemento.classList.remove("jogadorDaVez");
 	}
 }
 
