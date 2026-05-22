@@ -74,6 +74,14 @@ class Carta {
 		}
 		return texto;
 	}
+	obterIdDeque() {
+		for (let i = 0; i < this.deque.cartas.length; i++) {
+			if (this.deque.cartas[i] === this) {
+				return i;
+			}
+		}
+		return -1;
+	}
 	definirEspecial() {
 		if (this.deque.cartaEspecial != -1) {
 			this.deque.cartas[this.deque.cartaEspecial].especial = false;

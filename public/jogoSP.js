@@ -26,6 +26,7 @@ function iniciarJogoSP() {
 			gerarDequeJSON(data);
 			embaralharEDistribuirCartas();
 			exibirCartasJogadores();
+			exibirCarta(jogadores[idJogador].cartas[0].id);
 			rodada();
 		})
 		.catch(error => console.error('Erro ao obter o deque:', error));
@@ -92,7 +93,6 @@ function rodada() {
 	console.log(`Carta atual:`);
 	jogadorAtual.cartaAtual().info(true);
 	atributoEscolhido = -1;
-
 	if (!jogadorAtual.cpu) {
 		minhaVez();
 	} else {
