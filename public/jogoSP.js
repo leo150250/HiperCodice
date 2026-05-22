@@ -94,8 +94,9 @@ function rodada() {
 	atributoEscolhido = -1;
 
 	if (!jogadorAtual.cpu) {
-		
+		minhaVez();
 	} else {
+		vezDeJogador(jogadorAtual.nome);
 		//atributoEscolhido = Math.floor(Math.random() * (deque.atributos.length - 1));
 	}
 	//girarRodada(atributoEscolhido);

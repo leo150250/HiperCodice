@@ -81,20 +81,25 @@ function carregarImagensMenu() {
 		})
 		.catch(error => console.error('Erro ao carregar imagens do menu:', error));
 }
+function carregarScript(_script,_callback=()=>{}) {
+	let novoScript = document.createElement("script");
+    novoScript.src = _script+".js";
+    novoScript.onload = function() {
+        // Aqui você pode chamar uma função do script carregado, por exemplo:
+        console.log(`Script ${novoScript.src} carregado com sucesso.`);
+		_callback();
+    };
+    novoScript.onerror = function() {
+        console.error(`Erro ao carregar o script ${novoScript.src}`);
+    };
+    document.body.appendChild(novoScript);
+}
 function carregarJogoSP() {
 	fecharMenu();
 	exibirDialogo("carregando");
-    let novoScript = document.createElement("script");
-    novoScript.src = "jogoSP.js";
-    novoScript.onload = function() {
-        // Aqui você pode chamar uma função do script carregado, por exemplo:
-        console.log("Script jogoSP.js carregado com sucesso.");
-		iniciarJogoSP();
-    };
-    novoScript.onerror = function() {
-        console.error("Erro ao carregar o script jogoSP.js.");
-    };
-    document.body.appendChild(novoScript);
+	carregarScript("jogo",()=>{
+		carregarScript("jogoSP",()=>{iniciarJogoSP();});
+	});
 }
 function paginaCarregada() {
 	setTimeout(()=>{

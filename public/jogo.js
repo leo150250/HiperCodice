@@ -1,4 +1,5 @@
 const divCartaJogador = document.getElementById("cartaJogador");
+const divInterfaceJogador = document.getElementById("interfaceJogador");
 
 var vezDeJogar = false;
 
