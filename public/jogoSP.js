@@ -4,7 +4,6 @@ var jogadorDaVez = -1;
 var emExecucao = false;
 var encerrada = false;
 var timerProntidao = -1;
-var atributoEscolhido = -1;
 var idJogador = 0;
 
 function defineFundo(_deck) {
@@ -26,7 +25,9 @@ function iniciarJogoSP() {
 			gerarDequeJSON(data);
 			embaralharEDistribuirCartas();
 			exibirCartasJogadores();
-			exibirCarta(jogadores[idJogador].cartas[0].id);
+			//jogadores[idJogador].cartaAtual().info();
+			exibirCarta(jogadores[idJogador].cartaAtual().id);
+			//console.log(jogadores[idJogador].cartaAtual());
 			rodada();
 		})
 		.catch(error => console.error('Erro ao obter o deque:', error));
@@ -100,4 +101,8 @@ function rodada() {
 		//atributoEscolhido = Math.floor(Math.random() * (deque.atributos.length - 1));
 	}
 	//girarRodada(atributoEscolhido);
+}
+
+function executarEscolha() {
+
 }

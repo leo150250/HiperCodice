@@ -312,6 +312,27 @@ dialog .botoes {
 	flex-grow: 1;
 	min-height: 80vh;
 }
+#jogo #interfaceJogador #cartaJogador {
+	display: flex;
+	height: 100%;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	z-index: 1;
+}
+#jogo #interfaceJogador #cartaJogador .Carta {
+	animation: entradaCarta 1s forwards;
+}
+@keyframes entradaCarta {
+	0% {
+		opacity: 0;
+		transform: rotate(-10deg) translate(-50%,100%);
+	}
+	100% {
+		opacity: 1;
+		transform: rotate(0deg) translate(0%,0%);
+	}
+}
 
 #quantitativoCartas {
 	display: flex;
@@ -321,6 +342,7 @@ dialog .botoes {
 
 #atributos.selecionar {
 	animation: piscarBranco 1s infinite;
+	cursor: pointer;
 }
 @keyframes piscarBranco {
 	0% {
@@ -333,7 +355,7 @@ dialog .botoes {
 		background-color: #FFFF;
 	}
 }
-#atributos.selecionar .selecionado {
+#atributos .selecionado {
 	color: #FFF;
 	background-color: #000;
 	animation: bordaSelecionado 1s infinite;
