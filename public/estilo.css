@@ -305,6 +305,26 @@ dialog .botoes {
 	box-shadow: 1px 1px 3px inset #0004, 1px 1px 5px #0008;
 	z-index: 9;
 }
+#jogo #ambiente #elementosRodada {
+	position: absolute;
+	background-color: #FFF;
+	z-index: 11;
+	height: 0;
+	overflow: hidden;
+	transition: height 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	box-shadow: 3px 5px 10px #0008;
+}
+#jogo #ambiente #elementosRodada #tituloAtributoEscolhido {
+	color: #FFF;
+	background-color: #000;
+	padding: 0.5em;
+	font-weight: bold;
+	text-align: center;
+}
+#jogo #ambiente #elementosRodada .elementosRodada {
+	padding: 0.5em;
+	border-bottom: 1px solid #000;
+}
 #jogo #interfaceJogador {
 	background-color: #000;
 	flex-basis: 400px;

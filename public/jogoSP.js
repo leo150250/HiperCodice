@@ -19,6 +19,7 @@ function iniciarJogoSP() {
 	criarNovoJogador("CPU 1");
 	criarNovoJogador("CPU 2");
 	criarNovoJogador("CPU 3");
+	zerarElementosRodada();
 	fetch('getDeque.php')
 		.then(response => response.json())
 		.then(data => {
