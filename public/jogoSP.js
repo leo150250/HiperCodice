@@ -1,5 +1,3 @@
-const divAmbiente = document.getElementById("ambiente");
-
 var jogadorDaVez = -1;
 var emExecucao = false;
 var encerrada = false;
@@ -105,5 +103,51 @@ function rodada() {
 }
 
 function executarEscolha() {
+	//Comportamento de jogo Single-Player
+	//Faz cada CPU exibir os valores dos atributos de suas cartas atuais depois de algum tempo de espera
+	jogadores.forEach(_jogador=>{
+		if (_jogador.cpu) {
+			setTimeout(()=>{
+				new ElementoRodada(_jogador.cartaAtual(),_jogador);
+			},1000 + (Math.random()*1000));
+		}
+	});
+	//Executa a rodada após 2 segundos (com todo mundo exibindo)
+	setTimeout(executarRodada,2500);
+}
 
+function executarRodada() {
+	let jogadorEspecial = null;
+	console.log("Valores dos jogadores:");
+	jogadores.forEach(_jogador=>{
+		if (!_jogador.ativo) {
+			continue;
+		}
+		console.log(` - ${_jogador.nome}: ${_jogador.cartaAtual().valores[atributoEscolhido]} (${_jogador.cartaAtual().obterCodCarta()}) ${_jogador.cartaAtual().especial?" [Especial]":""}`);
+		if (_jogador.cartaAtual().especial) {
+			jogadorEspecial = _jogador;
+		}
+	})
+	let jogadoresVencedores = [];
+	if (jogadorEspecial != null) {
+		console.log(`Jogador ${jogadorEspecial.nome} tem a carta especial...`);
+		let jogadoresClasse1 = []
+		jogadores.forEach(_jogador=>{
+			if ((_jogador !== jogadorEspecial)
+			&& (_jogador.cartaAtual().classe == 1)) {
+				jogadoresClasse1.push(_jogador);
+			}
+		});
+		if (jogadoresClasse1.length > 0) {
+			let nomesVencedores = "";
+			jogadoresClasse1.forEach(_jogador=>{
+				nomesVencedores += " " + _jogador.nome;
+				jogadoresVencedores.push(_jogador);
+			})
+			console.log("...mas os jogadores com carta de classe 1 vencem:" + nomesVencedores);
+		} else {
+			console.log("...e vence a rodada!");
+			jogadoresVencedores.push(jogadorEspecial);
+		}
+	}
 }

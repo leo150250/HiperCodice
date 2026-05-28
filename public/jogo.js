@@ -1,3 +1,4 @@
+const divAmbiente = document.getElementById("ambiente");
 const divCartaJogador = document.getElementById("cartaJogador");
 const divInterfaceJogador = document.getElementById("interfaceJogador");
 const divElementosRodada = document.getElementById("elementosRodada");
@@ -12,11 +13,16 @@ class ElementoRodada {
 		this.jogador = _jogador;
 		this.elemento = document.createElement("div");
 		this.elemento.classList.add("elementosRodada");
-
-		this.elemento.textContent = `${this.carta.obterCodCarta()} | ${this.carta.valores[atributoEscolhido]}`;
+		this.elemento.textContent = _jogador.nome + ": " + this.carta.obterTextoAtributo(atributoEscolhido);
+		this.elemento.style.left = (divAmbiente.offsetWidth * (this.jogador.posXPadrao / 100)) - (divAmbiente.offsetWidth / 2) + "px";
+		this.elemento.style.top = (divAmbiente.offsetHeight * (this.jogador.posYPadrao / 100)) - (divAmbiente.offsetHeight / 2) + "px";
 
 		elementosRodada.push(this);
 		divElementosRodada.appendChild(this.elemento);
+		setTimeout(()=>{
+			this.elemento.style.left = "0px";
+			this.elemento.style.top = "0px";
+		},100);
 	}
 }
 
@@ -66,6 +72,7 @@ function destacarAtributo(_id) {
 }
 
 function zerarElementosRodada() {
+	divElementosRodada.style.width = "0";
 	divElementosRodada.style.height = "0";
 	setTimeout(()=>{
 		divElementosRodada.style.opacity = "0";
@@ -75,6 +82,7 @@ function zerarElementosRodada() {
 
 function exibirElementosRodada() {
 	tituloAtributoEscolhido.textContent = deque.atributos[atributoEscolhido].nome;
+	divElementosRodada.style.width = "auto";
 	divElementosRodada.style.height = "auto";
 	divElementosRodada.style.opacity = "1";
 }

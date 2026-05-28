@@ -137,27 +137,12 @@ class Carta {
 		elValores.id = "atributos";
 		for (let i = 0; i < this.deque.atributos.length; i++) {
 			let atributo = this.deque.atributos[i];
-			let valor = this.valores[i];
-			let inverterMedida = false;
-			if (atributo.medida.includes("$")) {
-				inverterMedida = true;
-				valor = valor.toLocaleString("pt-BR", {
-					minimumFractionDigits: 2,
-					maximumFractionDigits: 2
-				});
-			}
-			let textoValor = "";
-			if (inverterMedida) {
-				textoValor = `${atributo.medida} ${valor}`;
-			} else {
-				textoValor = `${valor} ${atributo.medida}`;
-			}
 			let elDivCampo = document.createElement("div");
 			elDivCampo.id = `atributo${i}`;
 			let elDivNomeCampo = document.createElement("div");
 			elDivNomeCampo.textContent = atributo.nome;
 			let elDivValorCampo = document.createElement("div");
-			elDivValorCampo.textContent = textoValor;
+			elDivValorCampo.textContent = this.obterTextoAtributo(i);
 			elDivCampo.appendChild(elDivNomeCampo);
 			elDivCampo.appendChild(elDivValorCampo);
 			elDivCampo.onclick = ()=>{
@@ -172,6 +157,25 @@ class Carta {
 		el.appendChild(elDesc);
 
 		return el;
+	}
+	obterTextoAtributo(_idAtributo) {
+		let atributo = this.deque.atributos[_idAtributo];
+		let valor = this.valores[_idAtributo];
+		let inverterMedida = false;
+		if (atributo.medida.includes("$")) {
+			inverterMedida = true;
+			valor = valor.toLocaleString("pt-BR", {
+				minimumFractionDigits: 2,
+				maximumFractionDigits: 2
+			});
+		}
+		let textoValor = "";
+		if (inverterMedida) {
+			textoValor = `${atributo.medida} ${valor}`;
+		} else {
+			textoValor = `${valor} ${atributo.medida}`;
+		}
+		return textoValor;
 	}
 	info(_enumerar = false) {
 		console.log(`- [${this.obterCodCarta()}] #${this.id} - ${this.nome} - ${this.categoria}`);
