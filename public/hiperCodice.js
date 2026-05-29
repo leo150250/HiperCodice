@@ -5,6 +5,7 @@ const labelConfigSom = document.getElementById("labelConfigSom");
 const labelConfigMusica = document.getElementById("labelConfigMusica");
 const inputConfigSom = document.getElementById("inputConfigSom");
 const inputConfigMusica = document.getElementById("inputConfigMusica");
+const divJogo = document.getElementById("jogo");
 
 var cores = [
 	["#F44336","#8b0000f8","#4f0000f8"],
@@ -98,15 +99,21 @@ function carregarJogoSP() {
 	fecharMenu();
 	exibirDialogo("carregando");
 	carregarScript("jogo",()=>{
-		carregarScript("jogoSP",()=>{iniciarJogoSP();});
+		carregarScript("jogoSP",()=>{
+			divJogo.style.display=null;
+			iniciarJogoSP();
+		});
 	});
 }
 function paginaCarregada() {
 	setTimeout(()=>{
 		abrirMenu("Inicio");
-	},2000);
-	carregarJogoSP();
+	},2000);	
+}
+function reiniciarJogo() {
+	document.location.reload();
 }
 
 //Execução
-//carregarImagensMenu();
+carregarImagensMenu();
+divJogo.style.display="none";

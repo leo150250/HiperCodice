@@ -3,8 +3,15 @@ const divCartaJogador = document.getElementById("cartaJogador");
 const divInterfaceJogador = document.getElementById("interfaceJogador");
 const divElementosRodada = document.getElementById("elementosRodada");
 
+const spanResultadoPartida = document.getElementById("spanResultadoPartida");
+const spanResultadoDeque = document.getElementById("spanResultadoDeque");
+const spanResultadoRodadas = document.getElementById("spanResultadoRodadas");
+const spanResultadoTempo = document.getElementById("spanResultadoTempo");
+
 var vezDeJogar = false;
 var atributoEscolhido = -1;
+var idJogador = 0;
+var numRodadas = 0;
 
 var elementosRodada = [];
 class ElementoRodada {
@@ -13,16 +20,27 @@ class ElementoRodada {
 		this.jogador = _jogador;
 		this.elemento = document.createElement("div");
 		this.elemento.classList.add("elementosRodada");
-		this.elemento.textContent = _jogador.nome + ": " + this.carta.obterTextoAtributo(atributoEscolhido);
+		this.elemento.textContent = this.jogador.nome + ": " + this.carta.obterTextoAtributo(atributoEscolhido);
 		this.elemento.style.left = (divAmbiente.offsetWidth * (this.jogador.posXPadrao / 100)) - (divAmbiente.offsetWidth / 2) + "px";
 		this.elemento.style.top = (divAmbiente.offsetHeight * (this.jogador.posYPadrao / 100)) - (divAmbiente.offsetHeight / 2) + "px";
 
+		if (this.jogador == jogadores[idJogador]) {
+			this.elemento.classList.add("jogador");
+		}
+
 		elementosRodada.push(this);
 		divElementosRodada.appendChild(this.elemento);
+		divElementosRodada.style.marginBottom = (-elementosRodada.length) + "em";
 		setTimeout(()=>{
 			this.elemento.style.left = "0px";
 			this.elemento.style.top = "0px";
 		},100);
+	}
+	destacar() {
+		this.elemento.classList.add("destaque");
+		if (this.carta.especial) {
+			this.elemento.classList.add("hiperCodice");
+		}
 	}
 }
 
@@ -36,20 +54,23 @@ function exibirCarta(_id) {
 			}
 		}
 	}
-	divCartaJogador.appendChild(_id.desenhar());
+	divCartaJogador.appendChild(_id.desenhar(true));
 }
 
 function minhaVez() {
 	console.log("É A SUA VEZ DE JOGAR!");
 	vezDeJogar = true;
-	let divAtributos = document.getElementById("atributos");
-	divAtributos.classList.add("selecionar");
+	setTimeout(()=>{
+		let divAtributos = document.getElementById("atributos");
+		divAtributos.classList.add("selecionar");
+	},100);
 	atributoEscolhido = -1;
 }
 
 function vezDeJogador(_jogador) {
-	console.log(`É A VEZ DE ${_jogador} JOGAR`);
+	console.log(`É A VEZ DE ${_jogador.nome} JOGAR`);
 	vezDeJogar = false;
+	executarJogador(_jogador);
 }
 
 function escolherAtributo(_id) {
@@ -74,8 +95,14 @@ function destacarAtributo(_id) {
 function zerarElementosRodada() {
 	divElementosRodada.style.width = "0";
 	divElementosRodada.style.height = "0";
+	divElementosRodada.style.opacity = "0";
+	divElementosRodada.style.bottom = null;
+	divElementosRodada.style.marginBottom = null;
 	setTimeout(()=>{
-		divElementosRodada.style.opacity = "0";
+		elementosRodada.forEach(_elementoRodada=>{
+			_elementoRodada.elemento.remove();
+		});
+		elementosRodada = [];
 		tituloAtributoEscolhido.textContent = "";
 	},1000);
 }
@@ -85,4 +112,15 @@ function exibirElementosRodada() {
 	divElementosRodada.style.width = "auto";
 	divElementosRodada.style.height = "auto";
 	divElementosRodada.style.opacity = "1";
+}
+
+function obterTempoDaPartida() {
+	let difMs = Math.abs(new Date() - dataHoraInicio);
+	let msSeg = 1000;
+	let msMin = msSeg * 60;
+	let msHor = msMin * 60;
+	let horas = Math.floor(difMs / msHor);
+	let minutos = Math.floor((difMs % msHor) / msMin);
+	let segundos = Math.floor((difMs % msMin) / msSeg);
+	return `${horas.toString()}:${minutos.toString().padStart(2,"0")}:${segundos.toString().padStart(2,"0")}`;
 }

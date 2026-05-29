@@ -34,14 +34,14 @@ button, input[type="button"], input[type="submit"] {
 	transition: 0.25s;
 	font-weight: bold;
 	font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-	cursor: pointer;
 	background-color: #F44336;
 	color: #FFF;
 }
-button:hover, input:hover, select:hover {
+button:hover:not(:disabled), input:hover, select:hover {
+	cursor: pointer;
 	filter: contrast(0.75);
 }
-button:active, input:active, select:active {
+button:active:not(:disabled), input:active, select:active {
 	filter: brightness(0.75);
 }
 
@@ -156,12 +156,15 @@ dialog .botoes {
 	color: #FFF;
 	text-align: center;
 }
-#menu .menu > *:hover {
+#menu .menu > *:hover:not(:disabled) {
 	background-color: #FFF4;
 	outline-width: 1px;
 	outline-style: solid;
 	outline-color: #FFF4;
 	cursor: pointer;
+}
+#menu .menu > *:disabled {
+	opacity: 0.25;
 }
 #menu input[type="checkbox"] {
 	display: none;
@@ -311,7 +314,8 @@ dialog .botoes {
 	z-index: 11;
 	width: 0;
 	height: 0;
-	transition: height 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), width 0.5s ease-out;
+	bottom: 50%;
+	transition: height 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), width 0.5s ease-out, bottom 0.5s ease-in-out, margin 0.5s ease-in-out, opacity 0.25s linear;
 	box-shadow: 3px 5px 10px #0008;
 	border: 3px solid #000;
 	border-radius: 10px;
@@ -332,15 +336,18 @@ dialog .botoes {
 #jogo #ambiente #elementosRodada .elementosRodada {
 	padding: 0em;
 	box-sizing: border-box;
+	border: 0px solid #000;
 	border-bottom: 1px solid #888;
 	white-space: nowrap;
 	overflow: hidden;
 	background-color: #FFF;
 	position: relative;
 	transition: 1s cubic-bezier(0.75, -0.1, 0.3, 1.1);
-	transition-property: top, left;
+	/* transition-property: top, left; */
 	height: 0px;
+	transform: scale(1);
 	animation: novoElementoRodada forwards 0.5s;
+	z-index: 20;
 }
 @keyframes novoElementoRodada {
 	0% {
@@ -351,6 +358,21 @@ dialog .botoes {
 		padding: 0.5em;
 		height: auto;
 	}
+}
+#jogo #ambiente #elementosRodada .elementosRodada.jogador {
+	background-color: #ffa;
+}
+#jogo #ambiente #elementosRodada .elementosRodada.destaque {
+	background-color: #26b32b;
+	color: #FFF;
+	font-weight: bold;
+	transform: scale(1.5);
+	border-radius: 0.5em;
+	border: 3px solid #FFF;
+	z-index: 22;
+}
+#jogo #ambiente #elementosRodada .elementosRodada.hiperCodice {
+	z-index: 21 !important;
 }
 #jogo #interfaceJogador {
 	background-color: #000;
@@ -368,7 +390,7 @@ dialog .botoes {
 	z-index: 1;
 }
 #jogo #interfaceJogador #cartaJogador .Carta {
-	animation: entradaCarta 1s forwards;
+	animation: entradaCarta 0.5s forwards;
 }
 @keyframes entradaCarta {
 	0% {
@@ -467,6 +489,33 @@ dialog .botoes {
 	position: relative;
 	overflow: hidden;
 }
+#ambiente .Carta {
+	position: absolute;
+	box-shadow: 5px 5px 13px #000;
+	transform: rotate(-3deg);
+	z-index: 30;
+	transition: 1s ease-in-out;
+	margin-bottom: 250px;
+	animation: exibirCartaVencedora 6s forwards;
+}
+@keyframes exibirCartaVencedora {
+	0% {
+		bottom: 100%;
+		transform: rotateY(180deg);
+	}
+	20% {
+		transform: rotate(-3deg);
+		bottom: 0%;
+	}
+	80% {
+		transform: rotate(3deg);
+		bottom: 0%;
+	}
+	100% {
+		transform: rotateY(-180deg);
+		bottom: 100%;
+	}
+}
 
 .Carta.classe1 {
 	background-color: #2196F3;
@@ -525,8 +574,7 @@ dialog .botoes {
 .Carta h3 {
 	color: #FFF;
 	margin: 0;
-	padding: 0;
-	padding-right: 1em;
+	padding: 0em 0.5em;
 	border-top-right-radius: 10px;
 	border-bottom-right-radius: 10px;
 	position: absolute;
@@ -552,9 +600,10 @@ dialog .botoes {
 	position: relative;
 	z-index: 1;
 }
-.Carta.especial .hiperCodice {
+.Carta.especial .hiperCodice, .elementosRodada.hiperCodice {
 	background-color: #EFC82D;
-	background-image: linear-gradient(to right, #FFFF, #FFF0, #FFFF);
+	background-image: linear-gradient(to right, #FFFF, #EFC82D, #FFFF);
+	color: #000 !important;
 	font-weight: bold;
 	position: absolute;
 	top: 50px;

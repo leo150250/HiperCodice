@@ -18,17 +18,17 @@
 				<button onclick="abrirMenu('MP')">Multi-jogador</button>
 				<button onclick="abrirMenu('Opcoes')">Opções</button>
 				<button onclick="exibirDialogo('dialogCreditos')">Créditos</button>
-				<button>Criador de deques</button>
+				<button disabled>Criador de deques</button>
 			</div>
 			<div id="menuSP" class="menu">
 				<button onclick="carregarJogoSP()">Partida rápida</button>
-				<button onclick="exibirDialogo('dialogPersonalizarSP')">Personalizar</button>
+				<button disabled onclick="exibirDialogo('dialogPersonalizarSP')">Personalizar</button>
 				<button onclick="abrirMenu('Inicio')">Voltar</button>
 			</div>
 			<div id="menuMP" class="menu">
-				<button>Entrar em sala</button>
-				<button>Iniciar sala</button>
-				<button>Iniciar modo party</button>
+				<button disabled>Entrar em sala</button>
+				<button disabled>Iniciar sala</button>
+				<button disabled>Iniciar modo party</button>
 				<button onclick="abrirMenu('Inicio')">Voltar</button>
 			</div>
 			<div id="menuOpcoes" class="menu">
@@ -90,6 +90,17 @@
 		<div class="botoes">
 			<button>Iniciar jogo</button>
 			<button onclick="esconderDialogo('dialogPersonalizarSP')">Voltar</button>
+		</div>
+	</dialog>
+	<dialog id="dialogPartidaEncerrada">
+		<h1>Partida encerrada</h1>
+		<p>Você <span id="spanResultadoPartida"></span>!</p>
+		<hr>
+		<p>Deque usado: <span id="spanResultadoDeque"></span></p>
+		<p>Número de rodadas: <span id="spanResultadoRodadas"></span></p>
+		<p>Tempo de jogo: <span id="spanResultadoTempo"></span></p>
+		<div class="botoes">
+			<button onclick="reiniciarJogo()">OK</button>
 		</div>
 	</dialog>
 	<dialog id="carregando">

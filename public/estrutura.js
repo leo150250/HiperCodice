@@ -95,7 +95,7 @@ class Carta {
 			}
 		}
 	}
-	desenhar() {
+	desenhar(_jogador = false) {
 		let el = document.createElement("div");
 		el.classList.add("Carta",`classe${this.classe}`);
 		let elFundo = document.createElement("img");
@@ -134,11 +134,15 @@ class Carta {
 
 		let elValores = document.createElement("div");
 		elValores.classList.add("valoresCarta");
-		elValores.id = "atributos";
+		if (_jogador) {
+			elValores.id = "atributos";
+		}
 		for (let i = 0; i < this.deque.atributos.length; i++) {
 			let atributo = this.deque.atributos[i];
 			let elDivCampo = document.createElement("div");
-			elDivCampo.id = `atributo${i}`;
+			if (_jogador) {
+				elDivCampo.id = `atributo${i}`;
+			}
 			let elDivNomeCampo = document.createElement("div");
 			elDivNomeCampo.textContent = atributo.nome;
 			let elDivValorCampo = document.createElement("div");
@@ -221,6 +225,11 @@ class Jogador {
 		this.posYPadrao = 50;
 		this.posicionarElementoCentro();
 	}
+	perder() {
+		this.ativo = false;
+		this.elemento.classList.add("perdeu");
+		this.atualizarStatus("Perdeu!");
+	}
 	info() {
 		console.log(`Jogador: ${this.nome}`);
 		console.log(`Cartas:`);
@@ -232,10 +241,13 @@ class Jogador {
 		return this.cartas[0];
 	}
 	removerCartaAtual() {
-		return this.cartas.shift();
+		let cartaRemovida = this.cartas.shift();
+		this.atualizarStatus(`${this.cartas.length} cartas`);
+		return cartaRemovida;
 	}
 	adicionarCarta(_carta) {
-		this.cartas.push(_carta);		
+		this.cartas.push(_carta);
+		this.atualizarStatus(`${this.cartas.length} cartas`);
 	}
 	enviarCartaAoFinal() {
 		this.adicionarCarta(this.removerCartaAtual());
