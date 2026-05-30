@@ -107,9 +107,9 @@ function carregarJogoSP() {
 }
 function paginaCarregada() {
 	setTimeout(()=>{
-		//abrirMenu("Inicio");
+		abrirMenu("Inicio");
 	},2000);
-	carregarJogoSP();
+	//carregarJogoSP();
 }
 function reiniciarJogo() {
 	document.location.reload();
