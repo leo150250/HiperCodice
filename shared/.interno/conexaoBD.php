@@ -34,6 +34,7 @@ function BD_conectar() {
 	if ($conexao->connect_error) {
 		die("Erro de conexão: " . $conexao->connect_error);
 	}
+	mysqli_set_charset($conexao, "utf8mb4");
 	$conexaoDB = $conexao;
 	return $conexao;
 }
