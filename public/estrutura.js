@@ -144,7 +144,7 @@ class Carta {
 				elDivCampo.id = `atributo${i}`;
 			}
 			let elDivNomeCampo = document.createElement("div");
-			elDivNomeCampo.textContent = atributo.nome;
+			elDivNomeCampo.textContent = (atributo.forma==1?"🔼":"🔽") + atributo.nome;
 			let elDivValorCampo = document.createElement("div");
 			elDivValorCampo.textContent = this.obterTextoAtributo(i);
 			elDivCampo.appendChild(elDivNomeCampo);

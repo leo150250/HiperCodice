@@ -17,8 +17,12 @@ function iniciarJogoSP() {
 	criarNovoJogador("CPU 1");
 	criarNovoJogador("CPU 2");
 	criarNovoJogador("CPU 3");
+	//criarNovoJogador("CPU 4");
 	numRodadas = 0;
 	dataHoraInicio = new Date();
+	setInterval(()=>{
+		divTimer.textContent = `⏱️${obterTempoDaPartida()}`;
+	},1000);
 	zerarElementosRodada();
 	fetch('getDeque.php')
 		.then(response => response.json())
@@ -27,9 +31,11 @@ function iniciarJogoSP() {
 			embaralharEDistribuirCartas();
 			exibirCartasJogadores();
 			//jogadores[idJogador].cartaAtual().info();
-			exibirCarta(jogadores[idJogador].cartaAtual().id);
+			cartaJogadorDesenhada = exibirCarta(jogadores[idJogador].cartaAtual().id);
+			divNumCartasJogador.textContent = `🃏${jogadores[idJogador].cartas.length}`;
+			divNumJogadores.textContent = `👥${jogadores.length}`;
 			//console.log(jogadores[idJogador].cartaAtual());
-			jogadorDaVez = 0;
+			destacarJogador(0);
 			rodada();
 		})
 		.catch(error => console.error('Erro ao obter o deque:', error));
@@ -98,8 +104,10 @@ function rodada() {
 	jogadorAtual.cartaAtual().info(true);
 	atributoEscolhido = -1;
 	if (!jogadorAtual.cpu) {
+		divMensagemJogador.textContent = "É a sua vez de jogar. Escolha um atributo:";
 		minhaVez();
 	} else {
+		divMensagemJogador.textContent = `É a vez de ${jogadorAtual.nome}.`
 		vezDeJogador(jogadorAtual);
 		//atributoEscolhido = Math.floor(Math.random() * (deque.atributos.length - 1));
 	}
@@ -109,6 +117,7 @@ function rodada() {
 function executarEscolha() {
 	//Comportamento de jogo Single-Player
 	//Faz cada CPU exibir os valores dos atributos de suas cartas atuais depois de algum tempo de espera
+	divMensagemJogador.textContent = "Aguardando os outros jogadores...";
 	jogadores.forEach(_jogador=>{
 		if (!_jogador.ativo) {
 			return;
@@ -172,9 +181,11 @@ function executarRodada() {
 			divAmbiente.appendChild(jogadorEspecial.cartaAtual().desenhar());
 			divElementosRodada.style.bottom = "20px";
 			divElementosRodada.style.marginBottom = "0em";
-			console.log("...mas os jogadores com carta de classe 1 vencem:" + nomesVencedores);
+			divMensagemJogador.textContent = `${jogadorEspecial.nome} tem o HÍPER-CODICE!`;
+			console.log("...mas os jogadores com carta de classe A vencem:" + nomesVencedores);
 			tempoExibirCartaVencedor += 2000;
 		} else {
+			divMensagemJogador.textContent = `${jogadorEspecial.nome} tem o HÍPER-CODICE!`;
 			jogadoresVencedores.push(jogadorEspecial);
 			console.log("...e vence a rodada!");
 		}
@@ -195,7 +206,9 @@ function executarRodada() {
 			}
 		});
 	}
+	let porEmpate = false;
 	if (jogadoresVencedores.length > 1) { //Se houver mais de um vencedor, é um empate
+		porEmpate = true;
 		nomesVencedores = "";
 		jogadoresVencedores.forEach(_jogador=>{
 			nomesVencedores += " " + _jogador.nome;
@@ -220,6 +233,15 @@ function executarRodada() {
 	jogadoresVencedores[0].cartaAtual().info();
 	let cartaVencedora = jogadoresVencedores[0].cartaAtual();
 	setTimeout(()=>{
+		if (jogadorEspecial !== null) {
+			if (jogadorEspecial !== jogadoresVencedores[0]) {
+				divMensagemJogador.textContent = `...mas ${jogadoresVencedores[0].nome} tem uma carta classe A, e vence${porEmpate?" por empate!":"!"}`;
+			} else {
+				divMensagemJogador.textContent = `${jogadoresVencedores[0].nome} tem o HÍPER-CODICE!`;
+			}
+		} else {
+			divMensagemJogador.textContent = `${jogadoresVencedores[0].nome} venceu${porEmpate?" por empate!":"!"}`;
+		}
 		elementosRodada.forEach(_elementoRodada=>{
 			if (_elementoRodada.jogador == jogadoresVencedores[0]) {
 				_elementoRodada.destacar();
@@ -234,17 +256,26 @@ function executarRodada() {
 				break;
 			}
 		}
+		divNumCartasJogador.textContent = `🃏${jogadores[idJogador].cartas.length}`;
+		if (jogadoresVencedores[0] == jogadores[idJogador]) {
+			cartaJogadorDesenhada.classList.add("venceu");
+		} else {
+			cartaJogadorDesenhada.classList.add("perdeu");
+		}
 	},tempoExibirCartaVencedor);
 	setTimeout(zerarElementosRodada,tempoExecucao);
 
 	//Enviar as cartas dos perdedores para o vencedor
 	let numJogadoresAtivos = 0;
+	let cartasGanhas = [];
 	jogadores.forEach(_jogador=>{
 		if (!_jogador.ativo) {
 			return;
 		}
+		let numDiferencaCartas = -_jogador.cartas.length;
 		numJogadoresAtivos++;
 		if (_jogador !== jogadoresVencedores[0]) {
+			cartasGanhas.push(_jogador.cartaAtual());
 			jogadoresVencedores[0].adicionarCarta(_jogador.removerCartaAtual());
 			if (_jogador.cartas.length == 0) {
 				_jogador.perder();
@@ -252,19 +283,59 @@ function executarRodada() {
 				numJogadoresAtivos--;
 			}
 		}
-	})
+		numDiferencaCartas += _jogador.cartas.length;
+		setTimeout(()=>{
+			if (_jogador == jogadores[idJogador]) {
+				if (jogadores[idJogador] == jogadoresVencedores[0]) {
+					numDiferencaCartas = numJogadoresAtivos-1;
+					for (let i = 0; i < cartasGanhas.length; i++) {
+						let divCartaGanha = divCartaJogador.appendChild(cartasGanhas[i].desenhar());
+						divCartaGanha.classList.add("adquirida");
+						divCartaGanha.style.animationDelay = (i/4) + "s";
+						let posicaoCarta = (-(cartasGanhas.length - 1) / 2) + i;
+						posicaoCarta *= 100;
+						console.log(`Posição: ${posicaoCarta}`);
+						divCartaGanha.style.transform = `rotate(${-5+(Math.random()*10)}deg) scale(0.8) translate(${posicaoCarta}%,0%)`;
+					};
+				}
+				if (numDiferencaCartas>0) {
+					divFxDifCartasJogador.textContent = "+";
+					divFxDifCartasJogador.style.backgroundColor = "#26b32b";
+				} else {
+					divFxDifCartasJogador.textContent = "-";
+					divFxDifCartasJogador.style.backgroundColor = "#b32626";
+				}
+				divFxDifCartasJogador.style.display = "block";
+				setTimeout(()=>{
+					divFxDifCartasJogador.style.display = null;
+				},2500);
+				divFxDifCartasJogador.textContent += Math.abs(numDiferencaCartas);
+				divNumCartasJogador.textContent = `🃏${_jogador.cartas.length}`;
+			}
+		},100);
+	});
 	jogadoresVencedores[0].adicionarCarta(jogadoresVencedores[0].removerCartaAtual());
 	
 	if (numJogadoresAtivos == 1) {
 		console.log(`Jogador ${jogadoresVencedores[0].nome} venceu a partida!`);
+		if (jogadoresVencedores[0] == jogadores[idJogador]) {
+			divMensagemJogador.textContent = `Você venceu!`;
+			spanResultadoPartida.textContent = "venceu";
+			spanResultadoDeque.textContent = `${deque.nome} (#${deque.id})`;
+			spanResultadoRodadas.textContent = numRodadas;
+			spanResultadoTempo.textContent = obterTempoDaPartida();
+			exibirDialogo('dialogPartidaEncerrada');
+		}
 	} else {
 		setTimeout(()=>{
 			exibirCartasJogadores();
+			divNumJogadores.textContent = `👥${numJogadoresAtivos}`;
 			if (jogadores[idJogador].ativo) {
-				exibirCarta(jogadores[idJogador].cartaAtual().id);
+				cartaJogadorDesenhada = exibirCarta(jogadores[idJogador].cartaAtual().id);
 				rodada();
 			} else {
 				jogadores[idJogador].perder();
+				divMensagemJogador.textContent = `Você perdeu!`;
 				console.log("GAME OVER!! Você perdeu!");
 				spanResultadoPartida.textContent = "perdeu";
 				spanResultadoDeque.textContent = `${deque.nome} (#${deque.id})`;
@@ -282,6 +353,7 @@ function executarJogador(_jogadorCPU) {
 	console.log(`Atributo escolhido: ${deque.atributos[atributoEscolhido].nome}`);
 	//1,5 segundos pra exibir os atributos escolhidos
 	setTimeout(()=>{
+		divMensagemJogador.textContent = `${_jogadorCPU.nome} escolheu ${deque.atributos[atributoEscolhido].nome}`;
 		exibirElementosRodada();
 		new ElementoRodada(_jogadorCPU.cartaAtual(),_jogadorCPU);
 		destacarAtributo(atributoEscolhido);

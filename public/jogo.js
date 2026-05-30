@@ -8,10 +8,17 @@ const spanResultadoDeque = document.getElementById("spanResultadoDeque");
 const spanResultadoRodadas = document.getElementById("spanResultadoRodadas");
 const spanResultadoTempo = document.getElementById("spanResultadoTempo");
 
+const divMensagemJogador = document.getElementById("mensagemJogador");
+const divNumCartasJogador = document.getElementById("numCartasJogador");
+const divNumJogadores = document.getElementById("numJogadores");
+const divTimer = document.getElementById("timer");
+const divFxDifCartasJogador = document.getElementById("fxDifCartasJogador");
+
 var vezDeJogar = false;
 var atributoEscolhido = -1;
 var idJogador = 0;
 var numRodadas = 0;
+var cartaJogadorDesenhada = null;
 
 var elementosRodada = [];
 class ElementoRodada {
@@ -54,7 +61,9 @@ function exibirCarta(_id) {
 			}
 		}
 	}
-	divCartaJogador.appendChild(_id.desenhar(true));
+	let cartaDesenhada = _id.desenhar(true);
+	divCartaJogador.appendChild(cartaDesenhada);
+	return cartaDesenhada;
 }
 
 function minhaVez() {
