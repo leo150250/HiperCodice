@@ -10,7 +10,6 @@ function defineFundo(_deck) {
 }
 
 function iniciarJogoSP() {
-	esconderDialogo("carregando");
 	divMenu.style.display="none";
 	defineFundo(1);
 	criarNovoJogador("Jogador",false);
@@ -37,6 +36,7 @@ function iniciarJogoSP() {
 			//console.log(jogadores[idJogador].cartaAtual());
 			destacarJogador(0);
 			rodada();
+			esconderDialogo("carregando");
 		})
 		.catch(error => console.error('Erro ao obter o deque:', error));
 }
