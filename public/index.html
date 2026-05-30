@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang='pt-br'>
+<head>
+	<meta charset='utf-8'>
+	<meta name='viewport' content='width=device-width, initial-scale=1'>
+	<title>Hiper-Códice</title>
+	<link rel='stylesheet' href='estilo.css'>
+</head>
+<body onload="paginaCarregada()">
+	<div id="wrapper">
+		<div id="menu">
+			<div id="menuFundo">
+			</div>
+			<div class="faixa"></div>
+			<img src="img/logo.svg" class="logo">
+			<div id="menuInicio" class="menu">
+				<button onclick="abrirMenu('SP')">Jogar sozinho</button>
+				<button onclick="abrirMenu('MP')">Multi-jogador</button>
+				<button onclick="abrirMenu('Opcoes')">Opções</button>
+				<button onclick="exibirDialogo('dialogCreditos')">Créditos</button>
+				<button disabled>Criador de deques</button>
+			</div>
+			<div id="menuSP" class="menu">
+				<button onclick="carregarJogoSP()">Partida rápida</button>
+				<button disabled onclick="exibirDialogo('dialogPersonalizarSP')">Personalizar</button>
+				<button onclick="abrirMenu('Inicio')">Voltar</button>
+			</div>
+			<div id="menuMP" class="menu">
+				<button disabled>Entrar em sala</button>
+				<button disabled>Iniciar sala</button>
+				<button disabled>Iniciar modo party</button>
+				<button onclick="abrirMenu('Inicio')">Voltar</button>
+			</div>
+			<div id="menuOpcoes" class="menu">
+				<label id="labelConfigSom" for="inputConfigSom">Sons:</label>
+				<input type="checkbox" id="inputConfigSom" onchange="alternarConfigSom(this.checked)">
+				<label id="labelConfigMusica" for="inputConfigMusica">Música:</label>
+				<input type="checkbox" id="inputConfigMusica" onchange="alternarConfigMusica(this.checked)">
+				<button onclick="abrirMenu('Inicio')">Voltar</button>
+			</div>
+		</div>
+		
+		<div id="jogo">
+			<div id="ambiente">
+				<img class="fundo" src="img/logo.svg">
+				<div id="elementosRodada">
+					<div id="tituloAtributoEscolhido"></div>
+				</div>
+			</div>
+			<div id="interfaceJogador">
+				<div id="mensagemJogador">Mensagem</div>
+				<div id="cartaJogador">
+				</div>
+				<div id="statusJogador">
+					<div>
+						<div id="numCartasJogador">🃏0</div>
+						<div id="fxDifCartasJogador">+0</div>
+					</div>
+					<div id="numJogadores">👥0</div>
+					<div id="timer">⏱️0:00:00</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<dialog id="dialogCreditos">
+		<h1>Créditos</h1>
+		<p>Hiper-Códice é um jogo competitivo baseado em web que combina elementos de memorização e lógica para jogar entre amigos, presencialmente ou via on-line.</p>			
+		<p>Desenvolvido por <a href="https://leandrogabriel.net" target="_blank">LeandroGabriel.net</a></p>
+		<p>Repositório do Projeto: <a href="https://github.com/leo150250/HiperCodice" target="_blank">HiperCodice no GitHub</a></p>
+		<div class="botoes">
+			<button onclick="esconderDialogo('dialogCreditos')">OK</button>
+		</div>
+	</dialog>
+	<dialog id="dialogPersonalizarSP">
+		<h1>Jogo personalizado</h1>
+		<p>
+			<label>Deque:</label><select>
+				<option></option>
+			</select>
+			<span>blablabla</span>
+		</p>
+		<p>
+			Atributos:
+			<div id="atributosDeque">
+				<div><input type="checkbox"><label>Atributo 1</label></div>
+				<div><input type="checkbox"><label>Atributo 2</label></div>
+				<div><input type="checkbox"><label>Atributo 3</label></div>
+				<div><input type="checkbox"><label>Atributo 4</label></div>
+				<div><input type="checkbox"><label>Atributo 5</label></div>
+				<div><input type="checkbox"><label>Atributo 6</label></div>
+				<div><input type="checkbox"><label>Atributo 7</label></div>
+				<div><input type="checkbox"><label>Atributo 8</label></div>
+			</div>
+		</p>
+		<p>
+			<label>Número de CPUs:</label>
+			<input type="number" min="1" max="7" value="3">
+		</p>
+		<div class="botoes">
+			<button>Iniciar jogo</button>
+			<button onclick="esconderDialogo('dialogPersonalizarSP')">Voltar</button>
+		</div>
+	</dialog>
+	<dialog id="dialogPartidaEncerrada">
+		<h1>Partida encerrada</h1>
+		<p>Você <span id="spanResultadoPartida"></span>!</p>
+		<hr>
+		<p>Deque usado: <span id="spanResultadoDeque"></span></p>
+		<p>Número de rodadas: <span id="spanResultadoRodadas"></span></p>
+		<p>Tempo de jogo: <span id="spanResultadoTempo"></span></p>
+		<div class="botoes">
+			<button onclick="reiniciarJogo()">OK</button>
+		</div>
+	</dialog>
+	<dialog id="carregando">
+		<h1>Carregando o Hiper-Códice</h1>
+		<p>Aguarde...</p>
+	</dialog>
+	<script src="estrutura.js"></script>
+	<script src="hiperCodice.js"></script>
+</body>
+</html>

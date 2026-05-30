@@ -1,4 +1,5 @@
 var deque = null;
+var jogadores = [];
 
 class Deque {
 	constructor(_id,_nome) {
@@ -73,6 +74,14 @@ class Carta {
 		}
 		return texto;
 	}
+	obterIdDeque() {
+		for (let i = 0; i < this.deque.cartas.length; i++) {
+			if (this.deque.cartas[i] === this) {
+				return i;
+			}
+		}
+		return -1;
+	}
 	definirEspecial() {
 		if (this.deque.cartaEspecial != -1) {
 			this.deque.cartas[this.deque.cartaEspecial].especial = false;
@@ -86,7 +95,7 @@ class Carta {
 			}
 		}
 	}
-	desenhar() {
+	desenhar(_jogador = false) {
 		let el = document.createElement("div");
 		el.classList.add("Carta",`classe${this.classe}`);
 		let elFundo = document.createElement("img");
@@ -125,30 +134,19 @@ class Carta {
 
 		let elValores = document.createElement("div");
 		elValores.classList.add("valoresCarta");
-		elValores.id = "atributos";
+		if (_jogador) {
+			elValores.id = "atributos";
+		}
 		for (let i = 0; i < this.deque.atributos.length; i++) {
 			let atributo = this.deque.atributos[i];
-			let valor = this.valores[i];
-			let inverterMedida = false;
-			if (atributo.medida.includes("$")) {
-				inverterMedida = true;
-				valor = valor.toLocaleString("pt-BR", {
-					minimumFractionDigits: 2,
-					maximumFractionDigits: 2
-				});
-			}
-			let textoValor = "";
-			if (inverterMedida) {
-				textoValor = `${atributo.medida} ${valor}`;
-			} else {
-				textoValor = `${valor} ${atributo.medida}`;
-			}
 			let elDivCampo = document.createElement("div");
-			elDivCampo.id = `atributo${i}`;
+			if (_jogador) {
+				elDivCampo.id = `atributo${i}`;
+			}
 			let elDivNomeCampo = document.createElement("div");
-			elDivNomeCampo.textContent = atributo.nome;
+			elDivNomeCampo.textContent = (atributo.forma==1?"🔼":"🔽") + atributo.nome;
 			let elDivValorCampo = document.createElement("div");
-			elDivValorCampo.textContent = textoValor;
+			elDivValorCampo.textContent = this.obterTextoAtributo(i);
 			elDivCampo.appendChild(elDivNomeCampo);
 			elDivCampo.appendChild(elDivValorCampo);
 			elDivCampo.onclick = ()=>{
@@ -164,6 +162,25 @@ class Carta {
 
 		return el;
 	}
+	obterTextoAtributo(_idAtributo) {
+		let atributo = this.deque.atributos[_idAtributo];
+		let valor = this.valores[_idAtributo];
+		let inverterMedida = false;
+		if (atributo.medida.includes("$")) {
+			inverterMedida = true;
+			valor = valor.toLocaleString("pt-BR", {
+				minimumFractionDigits: 2,
+				maximumFractionDigits: 2
+			});
+		}
+		let textoValor = "";
+		if (inverterMedida) {
+			textoValor = `${atributo.medida} ${valor}`;
+		} else {
+			textoValor = `${valor} ${atributo.medida}`;
+		}
+		return textoValor;
+	}
 	info(_enumerar = false) {
 		console.log(`- [${this.obterCodCarta()}] #${this.id} - ${this.nome} - ${this.categoria}`);
 		if (this.especial) {
@@ -177,6 +194,100 @@ class Carta {
 	}
 	json() {
 		return JSON.stringify(this);
+	}
+}
+
+class Jogador {
+	constructor(_nome,_cpu = true) {
+		this.nome = _nome;
+		this.cartas = [];
+		this.ativo = true;
+		this.pronto = false;
+		this.conexao = null;
+		this.cpu = _cpu;
+		this.id = jogadores.length;
+		jogadores.push(this);
+		console.log(`Jogador ${this.nome} entrou!`);
+		
+		this.elemento = document.createElement("div");
+		this.elemento.classList.add("cardJogador");
+		this.elementoImg = document.createElement("img");
+		this.elementoImg.src = (this.cpu?"img/cpu.svg":"img/jogador.svg");
+		this.elemento.appendChild(this.elementoImg);
+		this.elementoNome = document.createElement("h1");
+		this.elementoNome.textContent = this.nome;
+		this.elemento.appendChild(this.elementoNome);
+		this.elementoStatus = document.createElement("p");
+		this.elementoStatus.textContent = "Pronto!";
+		this.elemento.appendChild(this.elementoStatus);
+
+		this.posXPadrao = 50;
+		this.posYPadrao = 50;
+		this.posicionarElementoCentro();
+	}
+	perder() {
+		this.ativo = false;
+		this.elemento.classList.add("perdeu");
+		this.atualizarStatus("Perdeu!");
+	}
+	info() {
+		console.log(`Jogador: ${this.nome}`);
+		console.log(`Cartas:`);
+		this.cartas.forEach(_carta => {
+			_carta.info();
+		});
+	}
+	cartaAtual() {
+		return this.cartas[0];
+	}
+	removerCartaAtual() {
+		let cartaRemovida = this.cartas.shift();
+		this.atualizarStatus(`${this.cartas.length} cartas`);
+		return cartaRemovida;
+	}
+	adicionarCarta(_carta) {
+		this.cartas.push(_carta);
+		this.atualizarStatus(`${this.cartas.length} cartas`);
+	}
+	enviarCartaAoFinal() {
+		this.adicionarCarta(this.removerCartaAtual());
+	}
+	quitar() {
+		for (let index = 0; index < jogadores.length; index++) {
+			if (jogadores[index] === this) {
+				jogadores.splice(index, 1);
+				break;
+			}
+		}
+		console.log(`Jogador ${this.nome} quitou da partida.`);
+	}
+	obterListagemCartas() {
+		let listagemCartas="";
+		this.cartas.forEach(_carta=>{
+			listagemCartas+=`[${_carta.obterCodCarta()}] `;
+		});
+		return listagemCartas;
+	}
+	atualizarStatus(_status) {
+		this.elementoStatus.textContent = _status;
+	}
+	posicionarElementoPadrao() {
+		this.elemento.style.top = this.posYPadrao + "%";
+		this.elemento.style.left = this.posXPadrao + "%";
+	}
+	posicionarElementoCentro() {
+		this.elemento.style.top = "50%";
+		this.elemento.style.left = "50%";
+	}
+	definirPosicaoElementoPadrao(_posX,_posY) {
+		this.posXPadrao = _posX;
+		this.posYPadrao = _posY;
+	}
+	destacar() {
+		this.elemento.classList.add("jogadorDaVez");
+	}
+	restaurar() {
+		this.elemento.classList.remove("jogadorDaVez");
 	}
 }
 

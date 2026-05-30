@@ -1,5 +1,11 @@
+* {
+	interpolate-size: allow-keywords;
+}
 body {
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	margin: 0px;
+	width: 100vw;
+	height: 100vh;
 }
 
 form {
@@ -11,8 +17,450 @@ form > * {
 	margin: 10px 0;
 }
 
-button {
+input[type="text"], input[type="number"], select {
+	background-color: inherit;
+	border: 1px solid #8884;
+	vertical-align: baseline;
+	font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	color: #FFF;
+	padding: 0.5em;
+}
+
+button, input[type="button"], input[type="submit"] {
 	display: block;
+	border: none;
+	padding: 0.5em;
+	min-width: 5em;
+	transition: 0.25s;
+	font-weight: bold;
+	font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	background-color: #F44336;
+	color: #FFF;
+}
+button:hover:not(:disabled), input:hover, select:hover {
+	cursor: pointer;
+	filter: contrast(0.75);
+}
+button:active:not(:disabled), input:active, select:active {
+	filter: brightness(0.75);
+}
+
+dialog {
+	background-color: #000C;
+	color: #FFF;
+	padding: 1em;
+	border: none;
+	max-width: 90vw;
+}
+dialog::backdrop {
+	backdrop-filter: blur(10px);
+	background-color: #0008;
+}
+dialog h1 {
+	background-color: #F44336;
+	padding: 0.25em 0.5em;
+	margin: 0em -0.5em;
+}
+dialog .botoes {
+	background-color: #8884;
+	margin: 0em -1em -1em;
+	padding: 0.5em;
+}
+
+.botoes {
+	display: flex;
+	flex-direction: row-reverse;
+	gap: 2px;
+}
+
+.botoes button:not(:first-of-type) {
+	background-color: inherit;
+}
+
+#wrapper {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	display: block;
+}
+
+#menu {
+	width: 400px;
+	max-width: 100%;
+	height: 100%;
+	position: absolute;
+	left: 200px;
+	display: flex;
+    align-items: center;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+}
+#menu .faixa {
+	background-color: #F44336;
+	mix-blend-mode: multiply;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	z-index: -4;
+	animation: menuFaixa 0.5s forwards linear;
+	backdrop-filter: blur(5px);
+}
+@keyframes menuFaixa {
+	0% {
+		height: 0%;
+	}
+	100% {
+		height: 100%;
+	}
+}
+
+#menu .logo {
+	max-width: 75vw;
+	filter: invert() drop-shadow(2px 2px 5px #000);
+}
+
+#menu .menu {
+	display: flex;
+	height: 0;
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: nowrap;
+	width: 100%;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	transition: 0.5s;
+	padding: 0px 0px;
+	pointer-events: none;
+}
+#menu .menu::-webkit-scrollbar {
+	display: none;
+}
+#menu .menu.aberto {
+	height: auto;
+	pointer-events: all;
+	padding: 10px 0px;
+}
+
+#menu .menu > * {
+	font-size: 2em;
+	border: none;
+	font-weight: bold;
+	background-color: transparent;
+	transition: 0.25s;
+	outline-width: 10px;
+	outline-style: solid;
+	outline-color: #0000;
+	padding: 0.5em;
+	color: #FFF;
+	text-align: center;
+}
+#menu .menu > *:hover:not(:disabled) {
+	background-color: #FFF4;
+	outline-width: 1px;
+	outline-style: solid;
+	outline-color: #FFF4;
+	cursor: pointer;
+}
+#menu .menu > *:disabled {
+	opacity: 0.25;
+}
+#menu input[type="checkbox"] {
+	display: none;
+}
+
+#menuFundo {
+	background-color: #000;
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	z-index: -5;
+	top: 0px;
+	left: 0px;
+}
+
+#menuFundo .imagemFundo {
+	width: 100%;
+	height: 100%;
+	opacity: 1;
+}
+
+#menuFundo img {
+	width: calc(100% + 100px);
+	height: 100%;
+	object-fit: cover;
+	opacity: 1;
+	left: 0px;
+	position: relative;
+	animation: animPanFundo 10s linear forwards;
+}
+#menuFundo p {
+	color: #FFF;
+	position: absolute;
+	right: 0px;
+	bottom: 0px;
+	text-align: right;
+	margin: 1em;
+	text-shadow: 1px 1px 3px #000;
+}
+@keyframes animPanFundo {
+	0% {
+		opacity: 0;
+		left: 0px;
+	}
+	10% {
+		opacity: 1;
+	}
+	90% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		left: -100px;
+	}
+}
+
+#jogo {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+#jogo #ambiente {
+	flex-basis: 50%;
+	flex-grow: 1;
+	flex-shrink: 1;
+	height: 100%;
+	display: flex;
+    align-items: center;
+    justify-content: center;
+	user-select: none;
+	position: relative;
+	background-size: cover;
+	background-position: center;
+}
+#jogo #ambiente img.fundo {
+	mix-blend-mode: luminosity;
+	filter:
+		blur(1px)
+		opacity(0.2)
+		contrast(0.5)
+		brightness(0)
+		drop-shadow(-2px -2px 10px rgba(0,0,0,1))
+		drop-shadow(2px 2px 2px rgba(255,255,255,0.25));
+	width: 100%;
+	-webkit-user-drag: none;
+}
+#jogo #ambiente .cardJogador {
+	width: 200px;
+	height: 70px;
+	margin-left: -100px;
+	margin-top: -35px;
+	background-color: #FFF;
+	border: 3px solid #000;
+	border-radius: 10px;
+	padding: 0.2em;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	box-shadow: 3px 5px 10px #0008;
+}
+#jogo #ambiente .cardJogador.jogadorDaVez {
+	animation: animJogadorDaVez 1s infinite;
+	border-color: #F44336;
+}
+#jogo #ambiente .cardJogador.perdeu {
+	background-color: #888;
+}
+#jogo #ambiente .cardJogador.perdeu h1 {
+	text-decoration: line-through solid #F44336;
+}
+@keyframes animJogadorDaVez {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.1);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+#jogo #ambiente .cardJogador * {
+	margin: 0px;
+	z-index: 10;
+	position: relative;
+}
+#jogo #ambiente .cardJogador h1 {
+	text-shadow: 2px 2px 5px #8888;
+}
+#jogo #ambiente .cardJogador img {
+	position: absolute;
+	right: 3px;
+	top: 3px;
+	border-radius: 7px;
+	border: 2px solid #FFF;
+	box-shadow: 1px 1px 3px inset #0004, 1px 1px 5px #0008;
+	z-index: 9;
+}
+#jogo #ambiente #elementosRodada {
+	position: absolute;
+	background-color: #FFF;
+	z-index: 11;
+	width: 0;
+	height: 0;
+	bottom: 50%;
+	transition: height 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), width 0.5s ease-out, bottom 0.5s ease-in-out, margin 0.5s ease-in-out, opacity 0.25s linear;
+	box-shadow: 3px 5px 10px #0008;
+	border: 3px solid #000;
+	border-radius: 10px;
+	opacity: 0;
+}
+#jogo #ambiente #elementosRodada #tituloAtributoEscolhido {
+	color: #FFF;
+	background-color: #000;
+	padding: 0.5em;
+	overflow: hidden;
+	font-weight: bold;
+	text-align: center;
+	position: relative;
+	height: auto;
+	max-height: 100%;
+	white-space: nowrap;
+}
+#jogo #ambiente #elementosRodada .elementosRodada {
+	padding: 0em;
+	box-sizing: border-box;
+	border: 0px solid #000;
+	border-bottom: 1px solid #888;
+	white-space: nowrap;
+	overflow: hidden;
+	background-color: #FFF;
+	position: relative;
+	transition: 1s cubic-bezier(0.75, -0.1, 0.3, 1.1);
+	/* transition-property: top, left; */
+	height: 0px;
+	transform: scale(1);
+	animation: novoElementoRodada forwards 0.5s;
+	z-index: 20;
+}
+@keyframes novoElementoRodada {
+	0% {
+		padding: 0em;
+		height: 0px;
+	}
+	100% {
+		padding: 0.5em;
+		height: auto;
+	}
+}
+#jogo #ambiente #elementosRodada .elementosRodada.jogador {
+	background-color: #ffa;
+}
+#jogo #ambiente #elementosRodada .elementosRodada.destaque {
+	background-color: #26b32b;
+	color: #FFF;
+	font-weight: bold;
+	transform: scale(1.5);
+	border-radius: 0.5em;
+	border: 3px solid #FFF;
+	z-index: 22;
+}
+#jogo #ambiente #elementosRodada .elementosRodada.hiperCodice {
+	z-index: 21 !important;
+}
+#jogo #interfaceJogador {
+	background-color: #000;
+	flex-basis: 400px;
+	flex-shrink: 0;
+	flex-grow: 1;
+	min-height: 80vh;
+	color: #FFF;
+	position: relative;
+}
+#jogo #interfaceJogador #cartaJogador {
+	display: flex;
+	height: 100%;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	z-index: 1;
+}
+#jogo #interfaceJogador #cartaJogador .Carta {
+	animation: entradaCarta 0.5s forwards;
+	position: absolute;
+}
+@keyframes entradaCarta {
+	0% {
+		opacity: 0;
+		transform: rotate(-10deg) translate(-50%,100%);
+	}
+	100% {
+		opacity: 1;
+		transform: rotate(0deg) translate(0%,0%);
+	}
+}
+#interfaceJogador #mensagemJogador {
+	position: absolute;
+	top: 0px;
+	text-align: center;
+	width: stretch;
+	font-size: 3rem;
+	font-weight: bold;
+	padding: 0.5rem;
+}
+#interfaceJogador #statusJogador {
+	position: absolute;
+	bottom: 0px;
+	width: stretch;
+	font-size: 2em;
+	background-color: #8884;
+	display: flex;
+	justify-content: space-around;
+}
+#interfaceJogador #statusJogador > div {
+	position: relative;
+	white-space: nowrap;
+	min-width: 3em;
+	text-align: center;
+	display: flex;
+	justify-content: center;
+}
+#interfaceJogador #statusJogador #numCartasJogador {
+	position: absolute;
+}
+#interfaceJogador #statusJogador #fxDifCartasJogador {
+	position: absolute;
+	padding: 0em 0.5em;
+	background-color: #000;
+	font-weight: bold;
+	border-radius: 0.5em;
+	display: none;
+	animation: fxDifCartas 2s forwards;
+}
+@keyframes fxDifCartas {
+	0% {
+		opacity: 0;
+		top: -3em;
+	}
+	20% {
+		opacity: 1;
+		top: -2em;
+	}
+	80% {
+		opacity: 1;
+		top: -1em;
+	}
+	100% {
+		opacity: 0;
+		top: 0em;
+	}
 }
 
 #quantitativoCartas {
@@ -23,6 +471,7 @@ button {
 
 #atributos.selecionar {
 	animation: piscarBranco 1s infinite;
+	cursor: pointer;
 }
 @keyframes piscarBranco {
 	0% {
@@ -35,7 +484,7 @@ button {
 		background-color: #FFFF;
 	}
 }
-#atributos.selecionar .selecionado {
+#atributos .selecionado {
 	color: #FFF;
 	background-color: #000;
 	animation: bordaSelecionado 1s infinite;
@@ -99,6 +548,34 @@ button {
 	vertical-align: top;
 	position: relative;
 	overflow: hidden;
+	color: #000;
+}
+#ambiente .Carta {
+	position: absolute;
+	box-shadow: 5px 5px 13px #000;
+	transform: rotate(-3deg);
+	z-index: 30;
+	transition: 1s ease-in-out;
+	margin-bottom: 250px;
+	animation: exibirCartaVencedora 6s forwards;
+}
+@keyframes exibirCartaVencedora {
+	0% {
+		transform: rotateY(180deg) translate(0%,-100%);
+		opacity: 0;
+	}
+	20% {
+		transform: rotate(-3deg) translate(0%,0%);;
+		opacity: 1;
+	}
+	80% {
+		transform: rotate(3deg) translate(0%,0%);
+		opacity: 1;
+	}
+	100% {
+		transform: rotateY(-180deg) translate(0%,-100%);
+		opacity: 0;
+	}
 }
 
 .Carta.classe1 {
@@ -158,8 +635,7 @@ button {
 .Carta h3 {
 	color: #FFF;
 	margin: 0;
-	padding: 0;
-	padding-right: 1em;
+	padding: 0em 0.5em;
 	border-top-right-radius: 10px;
 	border-bottom-right-radius: 10px;
 	position: absolute;
@@ -185,9 +661,10 @@ button {
 	position: relative;
 	z-index: 1;
 }
-.Carta.especial .hiperCodice {
+.Carta.especial .hiperCodice, .elementosRodada.hiperCodice {
 	background-color: #EFC82D;
-	background-image: linear-gradient(to right, #FFFF, #FFF0, #FFFF);
+	background-image: linear-gradient(to right, #FFFF, #EFC82D, #FFFF);
+	color: #000 !important;
 	font-weight: bold;
 	position: absolute;
 	top: 50px;
@@ -219,6 +696,89 @@ button {
 	position: relative;
 	z-index: 1;
 	color: #FFF;
+}
+.Carta.perdeu {
+	animation: cartaPerdeu 4s forwards !important;
+	filter: grayscale(100%);
+	opacity: 0.9;
+}
+@keyframes cartaPerdeu {
+	0% {
+		transform: translate(0%,0%);
+	}
+	2% {
+		transform: translate(-5%,0%);
+	}
+	4% {
+		transform: translate(5%,0%);
+	}
+	6% {
+		transform: translate(-5%,0%);
+	}
+	8% {
+		transform: translate(5%,0%);
+	}
+	10% {
+		transform: translate(0%,0%);
+		opacity: 0.9;
+	}
+	100% {
+		transform: translate(0%,-100%);
+		opacity: 0;
+	}
+}
+.Carta.venceu {
+	animation: cartaVenceu 4s forwards !important;
+}
+@keyframes cartaVenceu {
+	0% {
+		transform: scale(1) translate(0%,0%);
+	}
+	2% {
+		filter: drop-shadow(0px 0px 50px #26b32b) brightness(1.25);
+		transform: scale(1.2) translate(0%,0%);
+	}
+	10% {
+		filter: drop-shadow(0px 0px 50px #26b32b) brightness(1.25);
+		transform: scale(1) translate(0%,0%);
+	}
+	50% {
+		filter: drop-shadow(0px 0px 50px #26b32b) brightness(1);
+	}
+	75% {
+		transform: translate(0%,0%);
+		opacity: 1;
+	}
+	100% {
+		transform: translate(50%,100%) rotate(10deg);
+		opacity: 0;
+	}
+}
+.Carta.adquirida {
+	animation-duration: 3s !important;
+	animation-name: cartaAdquirida !important;
+	animation-timing-function: ease-in-out !important;
+	animation-fill-mode: forwards !important;
+	animation-delay: 0s;
+	bottom: 100%;
+}
+@keyframes cartaAdquirida {
+	0% {
+		bottom: 100%;
+		opacity: 0;
+	}
+	25% {
+		bottom: 50px;
+		opacity: 1;
+	}
+	75% {
+		bottom: 50px;
+		opacity: 1;
+	}
+	100% {
+		bottom: -100%;
+		opacity: 0;
+	}
 }
 
 .valoresCarta {
@@ -252,4 +812,17 @@ button {
 	font-weight: bold;
 	text-align: right;
 	padding: 0;
+}
+
+#atributosDeque {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+@media only screen and (max-width: 800px) {
+	#menu {
+		left: 0px;
+		position: relative;
+		margin: 0 auto;
+	}
 }

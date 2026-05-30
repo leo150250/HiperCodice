@@ -1,4 +1,7 @@
 <?php
+
+use Pdo\Mysql;
+
 if (!isset($path)) {
 	$path = "../";
 }
@@ -10,7 +13,7 @@ $dadosConexao = (object) [
 	"senha" => "",
 	"db" => "HiperCodice"
 ];
-$conexaoDB = null;
+$conexaoDB = new mysqli();
 
 if (file_exists($path.".interno/conexaoBD.json")) {
 	$dadosConexao = file_get_contents($path.".interno/conexaoBD.json");
@@ -73,6 +76,9 @@ function BD_commit() {
 function BD_rollback() {
 	global $conexaoDB;
 	$conexaoDB->rollback();
+}
+function BD_seek($_resultado,$_offset) {
+	return $_resultado->data_seek($_offset);
 }
 
 if (!isset($config)) {
