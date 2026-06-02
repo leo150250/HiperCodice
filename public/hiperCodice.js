@@ -14,12 +14,93 @@ var cores = [
 	["#2196F3","#002c8bf8","#00204ff8"]
 ];
 var menuAberto = null;
+
+var sons = [];
+var indSons = {};
+var musicas = [];
+var musicaEmExecucao = null;
 var configSom = true;
 var configMusica = true;
+
+var cookies = decodeURIComponent(document.cookie).split(";");
+cookies.forEach(_cookie=>{
+	let cookieAtual = _cookie.split("=");
+	cookieAtual[0] = cookieAtual[0].trim();
+	console.log(cookieAtual);
+	switch (cookieAtual[0]) {
+		case "configSom": {
+			if (parseInt(cookieAtual[1])==1) {
+				configSom = true;
+			} else {
+				configSom = false;
+			}
+		} break;
+		case "configMusica": {
+			if (parseInt(cookieAtual[1])==1) {
+				configMusica = true;
+			} else {
+				configMusica = false;
+			}
+		} break;
+	}
+});
+
 inputConfigSom.checked = configSom;
 inputConfigMusica.checked = configMusica;
 labelConfigSom.textContent = "Sons: "+(inputConfigSom.checked?"SIM":"NÃO");
 labelConfigMusica.textContent = "Música: "+(inputConfigMusica.checked?"SIM":"NÃO");
+
+class Som {
+	constructor(_arquivo,_musica=false) {
+		this.arquivo = _arquivo;
+		this.musica = _musica;
+		sons.push(this);
+		indSons[this.arquivo] = this;
+
+		this.elemento = document.createElement("audio");
+		this.elemento.preload = "auto";
+
+		if (this.musica) {
+			musicas.push(this);
+			this.elemento.loop = true;
+		}
+		
+		this.elementoSrc = document.createElement("source");
+		this.elementoSrc.src = "sfx/" + this.arquivo;
+		switch (this.arquivo.slice(this.arquivo.lastIndexOf(".") + 1)) {
+			case "wav": this.elementoSrc.type = "audio/wav";
+			case "mp3": this.elementoSrc.type = "audio/mpeg";
+			case "ogg": this.elementoSrc.type = "audio/ogg";
+		}
+		this.elemento.appendChild(this.elementoSrc);
+		
+		document.body.appendChild(this.elemento);
+		console.log(`Som ${this.arquivo} carregado`);
+	}
+	executar() {
+		if (configSom && !this.musica) {
+			this.elemento.currentTime = 0;
+			this.elemento.play();
+		}
+		if (configMusica && this.musica) {
+			if (musicaEmExecucao != null) {
+				musicaEmExecucao.parar();
+			}
+			this.elemento.currentTime = 0;
+			this.elemento.play();
+			musicaEmExecucao = this;
+		}
+	}
+	parar() {
+		if (!this.elemento.paused) {
+			this.elemento.pause();
+			if (this.musica && musicaEmExecucao == this) {
+				musicaEmExecucao = null;
+			}
+		}
+	}
+}
+
 var imagensMenu = [];
 var indiceImagemMenu = 0;
 var atualizacaoImagemMenu = null;
@@ -28,6 +109,7 @@ function abrirMenu(_menu) {
 	fecharMenu();
 	menuAberto = document.getElementById("menu"+_menu);
 	menuAberto.classList.add("aberto");
+	executarSom('menu.wav');
 }
 function fecharMenu() {
 	if (menuAberto!=null) {
@@ -38,13 +120,27 @@ function fecharMenu() {
 function alternarConfigSom(_valor) {
 	configSom = _valor;
 	labelConfigSom.textContent = "Sons: "+(configSom?"SIM":"NÃO");
+	if (configSom) {
+		executarSom("attrib.wav");
+	}
+	document.cookie = `configSom=${configSom?1:0}`;
 }
 function alternarConfigMusica(_valor) {
 	configMusica = _valor;
 	labelConfigMusica.textContent = "Música: "+(configMusica?"SIM":"NÃO");
+	if (!configMusica && musicaEmExecucao != null) {
+		musicaEmExecucao.parar();
+	} else if (configMusica && musicaEmExecucao == null) {
+		executarMusicaAleatoria();
+	}
+	if (!configMusica) {
+		musicaEmExecucao = null;
+	}
+	document.cookie = `configMusica=${configMusica?1:0}`;
 }
 function exibirDialogo(_id) {
 	let dialogo = document.getElementById(_id);
+	executarSom('attrib.wav');
 	dialogo.showModal();
 }
 function esconderDialogo(_id) {
@@ -106,6 +202,7 @@ function carregarJogoSP() {
 	});
 }
 function paginaCarregada() {
+	executarMusicaAleatoria();
 	setTimeout(()=>{
 		abrirMenu("Inicio");
 	},2000);
@@ -114,7 +211,38 @@ function paginaCarregada() {
 function reiniciarJogo() {
 	document.location.reload();
 }
+function executarSom(_nomeSom) {
+	indSons[_nomeSom].executar();
+}
+function executarMusicaAleatoria() {
+	//console.log(musicas);
+	let musicasParaExecutar = [...musicas];
+	if (musicaEmExecucao != null) {
+		//console.log("Tem música executando...");
+		for (let i = 0; i < musicasParaExecutar.length; i++) {
+			if (musicaEmExecucao == musicasParaExecutar[i]) {
+				musicasParaExecutar.splice(i,1);
+				break;
+			}
+		}
+	}
+	//console.log(musicasParaExecutar);
+	//console.log(musicas);
+	let idMusicaAleatoria = Math.floor(Math.random()*musicasParaExecutar.length);
+	musicasParaExecutar[idMusicaAleatoria].executar();
+}
 
 //Execução
 carregarImagensMenu();
+
+new Som("attrib.wav");
+new Som("cardAdd.wav");
+new Som("cardRem.wav");
+new Som("gameStart.wav");
+new Som("hover.wav");
+new Som("menu.wav");
+new Som("Ether Disco.mp3",true);
+new Som("Inspired.mp3",true);
+new Som("Rising Tide.mp3",true);
+
 divJogo.style.display="none";

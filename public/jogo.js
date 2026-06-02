@@ -38,6 +38,7 @@ class ElementoRodada {
 		elementosRodada.push(this);
 		divElementosRodada.appendChild(this.elemento);
 		divElementosRodada.style.marginBottom = (-elementosRodada.length) + "em";
+		executarSom("menu.wav");
 		setTimeout(()=>{
 			this.elemento.style.left = "0px";
 			this.elemento.style.top = "0px";
@@ -63,6 +64,7 @@ function exibirCarta(_id) {
 	}
 	let cartaDesenhada = _id.desenhar(true);
 	divCartaJogador.appendChild(cartaDesenhada);
+	executarSom("gameStart.wav");
 	return cartaDesenhada;
 }
 
@@ -85,7 +87,7 @@ function vezDeJogador(_jogador) {
 function escolherAtributo(_id) {
 	if (vezDeJogar && atributoEscolhido == -1) {
 		console.log(`Atributo escolhido: ${deque.atributos[_id].nome}`);
-
+		executarSom("attrib.wav");
 		atributoEscolhido = _id;
 		destacarAtributo(_id);
 		executarEscolha(_id);

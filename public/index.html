@@ -14,29 +14,29 @@
 			<div class="faixa"></div>
 			<img src="img/logo.svg" class="logo">
 			<div id="menuInicio" class="menu">
-				<button onclick="abrirMenu('SP')">Jogar sozinho</button>
-				<button onclick="abrirMenu('MP')">Multi-jogador</button>
-				<button onclick="abrirMenu('Opcoes')">Opções</button>
-				<button onclick="exibirDialogo('dialogCreditos')">Créditos</button>
-				<button disabled>Criador de deques</button>
+				<button onclick="abrirMenu('SP')" onmouseenter="executarSom('hover.wav')">Jogar sozinho</button>
+				<button onclick="abrirMenu('MP')" onmouseenter="executarSom('hover.wav')">Multi-jogador</button>
+				<button onclick="abrirMenu('Opcoes')" onmouseenter="executarSom('hover.wav')">Opções</button>
+				<button onclick="exibirDialogo('dialogCreditos')" onmouseenter="executarSom('hover.wav')">Créditos</button>
+				<button disabled onmouseenter="executarSom('hover.wav')">Criador de deques</button>
 			</div>
 			<div id="menuSP" class="menu">
-				<button onclick="carregarJogoSP()">Partida rápida</button>
-				<button disabled onclick="exibirDialogo('dialogPersonalizarSP')">Personalizar</button>
-				<button onclick="abrirMenu('Inicio')">Voltar</button>
+				<button onclick="carregarJogoSP()" onmouseenter="executarSom('hover.wav')">Partida rápida</button>
+				<button disabled onclick="exibirDialogo('dialogPersonalizarSP')" onmouseenter="executarSom('hover.wav')">Personalizar</button>
+				<button onclick="abrirMenu('Inicio')" onmouseenter="executarSom('hover.wav')">Voltar</button>
 			</div>
 			<div id="menuMP" class="menu">
-				<button disabled>Entrar em sala</button>
-				<button disabled>Iniciar sala</button>
-				<button disabled>Iniciar modo party</button>
-				<button onclick="abrirMenu('Inicio')">Voltar</button>
+				<button disabled onmouseenter="executarSom('hover.wav')">Entrar em sala</button>
+				<button disabled onmouseenter="executarSom('hover.wav')">Iniciar sala</button>
+				<button disabled onmouseenter="executarSom('hover.wav')">Iniciar modo party</button>
+				<button onclick="abrirMenu('Inicio')" onmouseenter="executarSom('hover.wav')">Voltar</button>
 			</div>
 			<div id="menuOpcoes" class="menu">
-				<label id="labelConfigSom" for="inputConfigSom">Sons:</label>
+				<label id="labelConfigSom" for="inputConfigSom" onmouseenter="executarSom('hover.wav')">Sons:</label>
 				<input type="checkbox" id="inputConfigSom" onchange="alternarConfigSom(this.checked)">
-				<label id="labelConfigMusica" for="inputConfigMusica">Música:</label>
+				<label id="labelConfigMusica" for="inputConfigMusica" onmouseenter="executarSom('hover.wav')">Música:</label>
 				<input type="checkbox" id="inputConfigMusica" onchange="alternarConfigMusica(this.checked)">
-				<button onclick="abrirMenu('Inicio')">Voltar</button>
+				<button onclick="abrirMenu('Inicio')" onmouseenter="executarSom('hover.wav')">Voltar</button>
 			</div>
 		</div>
 		
