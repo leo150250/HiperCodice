@@ -4,7 +4,7 @@ include_once $path.".interno/conexaoBD.php";
 include_once $path.".interno/funcoes.php";
 
 function obterImagem() {
-	$resDeques = BD_query("SELECT id,nome FROM Deques");
+	$resDeques = BD_query("SELECT id,nome FROM Deques WHERE situacao = 'c'");
 	BD_seek($resDeques,rand(0,BD_num_rows($resDeques)-1));
 	$deque = BD_fetch($resDeques);
 
