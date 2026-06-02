@@ -10,7 +10,6 @@ function defineFundo(_deck) {
 }
 
 function iniciarJogoSP() {
-	esconderDialogo("carregando");
 	divMenu.style.display="none";
 	defineFundo(1);
 	criarNovoJogador("Jogador",false);
@@ -37,6 +36,8 @@ function iniciarJogoSP() {
 			//console.log(jogadores[idJogador].cartaAtual());
 			destacarJogador(0);
 			rodada();
+			executarMusicaAleatoria();
+			esconderDialogo("carregando");
 		})
 		.catch(error => console.error('Erro ao obter o deque:', error));
 }
@@ -260,6 +261,7 @@ function executarRodada() {
 		if (jogadoresVencedores[0] == jogadores[idJogador]) {
 			cartaJogadorDesenhada.classList.add("venceu");
 		} else {
+			executarSom("cardRem.wav");
 			cartaJogadorDesenhada.classList.add("perdeu");
 		}
 	},tempoExibirCartaVencedor);
@@ -292,6 +294,9 @@ function executarRodada() {
 						let divCartaGanha = divCartaJogador.appendChild(cartasGanhas[i].desenhar());
 						divCartaGanha.classList.add("adquirida");
 						divCartaGanha.style.animationDelay = (i/4) + "s";
+						setTimeout(()=>{
+							executarSom("cardAdd.wav");
+						},500 + ((i/4) * 1000));
 						let posicaoCarta = (-(cartasGanhas.length - 1) / 2) + i;
 						posicaoCarta *= 100;
 						console.log(`Posição: ${posicaoCarta}`);
