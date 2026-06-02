@@ -21,6 +21,30 @@ var musicas = [];
 var musicaEmExecucao = null;
 var configSom = true;
 var configMusica = true;
+
+var cookies = decodeURIComponent(document.cookie).split(";");
+cookies.forEach(_cookie=>{
+	let cookieAtual = _cookie.split("=");
+	cookieAtual[0] = cookieAtual[0].trim();
+	console.log(cookieAtual);
+	switch (cookieAtual[0]) {
+		case "configSom": {
+			if (parseInt(cookieAtual[1])==1) {
+				configSom = true;
+			} else {
+				configSom = false;
+			}
+		} break;
+		case "configMusica": {
+			if (parseInt(cookieAtual[1])==1) {
+				configMusica = true;
+			} else {
+				configMusica = false;
+			}
+		} break;
+	}
+});
+
 inputConfigSom.checked = configSom;
 inputConfigMusica.checked = configMusica;
 labelConfigSom.textContent = "Sons: "+(inputConfigSom.checked?"SIM":"NÃO");
@@ -54,12 +78,16 @@ class Som {
 		console.log(`Som ${this.arquivo} carregado`);
 	}
 	executar() {
-		this.elemento.currentTime = 0;
-		this.elemento.play();
-		if (this.musica) {
+		if (configSom && !this.musica) {
+			this.elemento.currentTime = 0;
+			this.elemento.play();
+		}
+		if (configMusica && this.musica) {
 			if (musicaEmExecucao != null) {
 				musicaEmExecucao.parar();
 			}
+			this.elemento.currentTime = 0;
+			this.elemento.play();
 			musicaEmExecucao = this;
 		}
 	}
@@ -81,6 +109,7 @@ function abrirMenu(_menu) {
 	fecharMenu();
 	menuAberto = document.getElementById("menu"+_menu);
 	menuAberto.classList.add("aberto");
+	executarSom('menu.wav');
 }
 function fecharMenu() {
 	if (menuAberto!=null) {
@@ -91,13 +120,27 @@ function fecharMenu() {
 function alternarConfigSom(_valor) {
 	configSom = _valor;
 	labelConfigSom.textContent = "Sons: "+(configSom?"SIM":"NÃO");
+	if (configSom) {
+		executarSom("attrib.wav");
+	}
+	document.cookie = `configSom=${configSom?1:0}`;
 }
 function alternarConfigMusica(_valor) {
 	configMusica = _valor;
 	labelConfigMusica.textContent = "Música: "+(configMusica?"SIM":"NÃO");
+	if (!configMusica && musicaEmExecucao != null) {
+		musicaEmExecucao.parar();
+	} else if (configMusica && musicaEmExecucao == null) {
+		executarMusicaAleatoria();
+	}
+	if (!configMusica) {
+		musicaEmExecucao = null;
+	}
+	document.cookie = `configMusica=${configMusica?1:0}`;
 }
 function exibirDialogo(_id) {
 	let dialogo = document.getElementById(_id);
+	executarSom('attrib.wav');
 	dialogo.showModal();
 }
 function esconderDialogo(_id) {
@@ -172,10 +215,10 @@ function executarSom(_nomeSom) {
 	indSons[_nomeSom].executar();
 }
 function executarMusicaAleatoria() {
-	console.log(musicas);
+	//console.log(musicas);
 	let musicasParaExecutar = [...musicas];
 	if (musicaEmExecucao != null) {
-		console.log("Tem música executando...");
+		//console.log("Tem música executando...");
 		for (let i = 0; i < musicasParaExecutar.length; i++) {
 			if (musicaEmExecucao == musicasParaExecutar[i]) {
 				musicasParaExecutar.splice(i,1);
@@ -183,8 +226,8 @@ function executarMusicaAleatoria() {
 			}
 		}
 	}
-	console.log(musicasParaExecutar);
-	console.log(musicas);
+	//console.log(musicasParaExecutar);
+	//console.log(musicas);
 	let idMusicaAleatoria = Math.floor(Math.random()*musicasParaExecutar.length);
 	musicasParaExecutar[idMusicaAleatoria].executar();
 }

@@ -142,6 +142,11 @@ class Carta {
 			let elDivCampo = document.createElement("div");
 			if (_jogador) {
 				elDivCampo.id = `atributo${i}`;
+				elDivCampo.onmouseenter = ()=>{
+					if (jogadores[jogadorDaVez] == jogadores[idJogador]) {
+						executarSom("hover.wav");
+					}
+				}
 			}
 			let elDivNomeCampo = document.createElement("div");
 			elDivNomeCampo.textContent = (atributo.forma==1?"🔼":"🔽") + atributo.nome;
