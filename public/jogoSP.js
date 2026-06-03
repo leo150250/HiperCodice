@@ -11,7 +11,6 @@ function defineFundo(_deck) {
 
 function iniciarJogoSP() {
 	divMenu.style.display="none";
-	defineFundo(1);
 	criarNovoJogador("Jogador",false);
 	criarNovoJogador("CPU 1");
 	criarNovoJogador("CPU 2");
@@ -27,6 +26,7 @@ function iniciarJogoSP() {
 		.then(response => response.json())
 		.then(data => {
 			gerarDequeJSON(data);
+			defineFundo(deque.id);
 			embaralharEDistribuirCartas();
 			exibirCartasJogadores();
 			//jogadores[idJogador].cartaAtual().info();
@@ -179,7 +179,11 @@ function executarRodada() {
 				jogadoresVencedores.push(_jogador);
 			})
 			tempoExecucao += 2000;
-			divAmbiente.appendChild(jogadorEspecial.cartaAtual().desenhar());
+			let cartaAmbiente = jogadorEspecial.cartaAtual().desenhar();
+			setTimeout(()=>{
+				cartaAmbiente.remove();
+			},7000);
+			divAmbiente.appendChild(cartaAmbiente);
 			divElementosRodada.style.bottom = "20px";
 			divElementosRodada.style.marginBottom = "0em";
 			divMensagemJogador.textContent = `${jogadorEspecial.nome} tem o HÍPER-CODICE!`;
@@ -248,7 +252,11 @@ function executarRodada() {
 				_elementoRodada.destacar();
 			}
 		});
-		divAmbiente.appendChild(cartaVencedora.desenhar());
+		let cartaAmbienteVencedora = cartaVencedora.desenhar();
+		setTimeout(()=>{
+			cartaAmbienteVencedora.remove();
+		},7000);
+		divAmbiente.appendChild(cartaAmbienteVencedora);
 		divElementosRodada.style.bottom = "20px";
 		divElementosRodada.style.marginBottom = "0em";
 		for (let i = 0; i < jogadores.length; i++) {
