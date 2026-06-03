@@ -11,7 +11,6 @@ function defineFundo(_deck) {
 
 function iniciarJogoSP() {
 	divMenu.style.display="none";
-	defineFundo(1);
 	criarNovoJogador("Jogador",false);
 	criarNovoJogador("CPU 1");
 	criarNovoJogador("CPU 2");
@@ -27,6 +26,7 @@ function iniciarJogoSP() {
 		.then(response => response.json())
 		.then(data => {
 			gerarDequeJSON(data);
+			defineFundo(deque.id);
 			embaralharEDistribuirCartas();
 			exibirCartasJogadores();
 			//jogadores[idJogador].cartaAtual().info();
