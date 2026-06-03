@@ -5,6 +5,7 @@ const labelConfigSom = document.getElementById("labelConfigSom");
 const labelConfigMusica = document.getElementById("labelConfigMusica");
 const inputConfigSom = document.getElementById("inputConfigSom");
 const inputConfigMusica = document.getElementById("inputConfigMusica");
+const inputDequesPesquisa = document.getElementById("inputDequesPesquisa");
 const divJogo = document.getElementById("jogo");
 
 var cores = [
@@ -14,6 +15,7 @@ var cores = [
 	["#2196F3","#002c8bf8","#00204ff8"]
 ];
 var menuAberto = null;
+var timerDequePesquisa = null;
 
 var sons = [];
 var indSons = {};
@@ -231,9 +233,13 @@ function executarMusicaAleatoria() {
 	let idMusicaAleatoria = Math.floor(Math.random()*musicasParaExecutar.length);
 	musicasParaExecutar[idMusicaAleatoria].executar();
 }
+function listarDequesPesquisa() {
+	
+}
 
 //Execução
 carregarImagensMenu();
+listarDequesPesquisa();
 
 new Som("attrib.wav");
 new Som("cardAdd.wav");
@@ -246,3 +252,5 @@ new Som("Inspired.mp3",true);
 new Som("Rising Tide.mp3",true);
 
 divJogo.style.display="none";
+
+exibirDialogo('dialogPersonalizarSP');

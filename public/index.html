@@ -22,7 +22,7 @@
 			</div>
 			<div id="menuSP" class="menu">
 				<button onclick="carregarJogoSP()" onmouseenter="executarSom('hover.wav')">Partida rápida</button>
-				<button disabled onclick="exibirDialogo('dialogPersonalizarSP')" onmouseenter="executarSom('hover.wav')">Personalizar</button>
+				<button onclick="exibirDialogo('dialogPersonalizarSP')" onmouseenter="executarSom('hover.wav')">Personalizar</button>
 				<button onclick="abrirMenu('Inicio')" onmouseenter="executarSom('hover.wav')">Voltar</button>
 			</div>
 			<div id="menuMP" class="menu">
@@ -73,12 +73,18 @@
 	</dialog>
 	<dialog id="dialogPersonalizarSP">
 		<h1>Jogo personalizado</h1>
-		<p>
-			<label>Deque:</label><select>
-				<option></option>
-			</select>
-			<span>blablabla</span>
-		</p>
+		<p><input id="inputDequesPesquisa" type="search" placeholder="Digite o nome ou o ID do deque para pesquisar" oninput="listarDequesPesquisa()"></p>
+			<div id="listagemDequesPesquisa">
+				<div class="Deque">
+					<img class="fundo" src="img/decks/1/default.jpg">
+					<img class="logo" src="img/logo.svg">
+					<p class="identificadorDeque">#1</p>
+					<div class="titulo">
+						<h1>Nome</h1>
+						<p>Descrição</p>
+					</div>
+				</div>
+			</div>
 		<p>
 			Atributos:
 			<div id="atributosDeque">
@@ -97,7 +103,7 @@
 			<input type="number" min="1" max="7" value="3">
 		</p>
 		<div class="botoes">
-			<button>Iniciar jogo</button>
+			<button disabled id="buttonIniciarSPPersonalizado">Iniciar jogo</button>
 			<button onclick="esconderDialogo('dialogPersonalizarSP')">Voltar</button>
 		</div>
 	</dialog>
