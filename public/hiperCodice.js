@@ -266,11 +266,19 @@ function listarDequesPesquisa(_espera = true) {
 		dequeSelecionadoSPPers = 0;
 	}
 	timerDequePesquisa = setTimeout(()=>{
-		fetch('getListaDeques.php')
-			.then(response => response.json())
+		fetch('getListaDeques.php', {
+			method: "POST",
+			headers: { "Content-Type": "application/x-www-form-urlencoded" },
+			body: new URLSearchParams({
+				pesquisaDeque: inputDequesPesquisa.value,
+			})
+		}).then(response => response.json())
 			.then(data => {
 				if (loader != null) {
 					loader.remove();
+				}
+				if (data.length == 0) {
+					divListagemDequesPesquisa.textContent = "Nenhum deque encontrado. Por favor, refine a busca acima.";
 				}
 				for (let i = 0; i < data.length; i++) {
 					const dequePesquisa = data[i];
