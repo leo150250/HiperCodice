@@ -6,6 +6,7 @@ const labelConfigMusica = document.getElementById("labelConfigMusica");
 const inputConfigSom = document.getElementById("inputConfigSom");
 const inputConfigMusica = document.getElementById("inputConfigMusica");
 const inputDequesPesquisa = document.getElementById("inputDequesPesquisa");
+const divListagemDequesPesquisa = document.getElementById("listagemDequesPesquisa");
 const divJogo = document.getElementById("jogo");
 
 var cores = [
@@ -233,13 +234,45 @@ function executarMusicaAleatoria() {
 	let idMusicaAleatoria = Math.floor(Math.random()*musicasParaExecutar.length);
 	musicasParaExecutar[idMusicaAleatoria].executar();
 }
-function listarDequesPesquisa() {
-	
+function gerarLoader(_elemento = null) {
+	let novoLoader = document.createElement("div");
+	novoLoader.classList.add("loader");
+	novoLoader.textContent="HC";
+	if (_elemento != null) {
+		_elemento.appendChild(novoLoader);
+	}
+	return novoLoader;
+}
+function listarDequesPesquisa(_espera = true) {
+	let loader = null;
+	if (timerDequePesquisa != null) {
+		clearTimeout(timerDequePesquisa);
+		loader = divListagemDequesPesquisa.getElementsByClassName("loader")[0];
+	} else {
+		divListagemDequesPesquisa.innerHTML = "";
+		loader = gerarLoader(divListagemDequesPesquisa);
+	}
+	timerDequePesquisa = setTimeout(()=>{
+		fetch('getListaDeques.php')
+			.then(response => response.json())
+			.then(data => {
+				if (loader != null) {
+					loader.remove();
+				}
+				for (let i = 0; i < data.length; i++) {
+					const dequePesquisa = data[i];
+					let novoDeque = new Deque(dequePesquisa["id"],dequePesquisa["nome"],dequePesquisa["descricao"]);
+					divListagemDequesPesquisa.appendChild(novoDeque.desenhar());
+				}
+				timerDequePesquisa = null;
+			})
+			.catch(error => console.error('Erro ao carregar os deques:', error));
+	},_espera?1000:0);
 }
 
 //Execução
 carregarImagensMenu();
-listarDequesPesquisa();
+listarDequesPesquisa(true);
 
 new Som("attrib.wav");
 new Som("cardAdd.wav");

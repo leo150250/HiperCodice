@@ -104,6 +104,7 @@ dialog .botoes {
 	border-bottom-left-radius: 10px;
 	box-shadow: 0px 0px 10px inset #000F;
 	user-select: none;
+	box-sizing: border-box;
 }
 .Deque * {
 	padding: 0.25em;
@@ -128,6 +129,8 @@ dialog .botoes {
 	padding: 0px;
 	overflow: hidden;
 	border-top-left-radius: 2em;
+	max-width: 90%;
+	font-size: 0.75em;
 }
 .Deque .titulo * {
 	position: relative;
@@ -139,6 +142,11 @@ dialog .botoes {
 	position: absolute;
 	z-index: 5;
 	padding: 0px;
+}
+#listagemDequesPesquisa {
+	height: 320px;
+	width: 100%;
+	overflow-x: scroll;
 }
 
 #wrapper {
@@ -888,5 +896,26 @@ dialog .botoes {
 		left: 0px;
 		position: relative;
 		margin: 0 auto;
+	}
+}
+
+.loader {
+	border: 5px solid #FFF;
+	width: 1.5em;
+	height: 2.5em;
+	text-align: center;
+	margin: 1em auto;
+	font-size: 0.75em;
+	animation: loader 1s linear infinite;
+}
+@keyframes loader {
+	0% {
+		transform: rotateY(0deg) rotateZ(0deg);
+	}
+	50% {
+		transform: rotateY(180deg) rotateZ(180deg);
+	}
+	100% {
+		transform: rotateY(360deg) rotateZ(360deg);
 	}
 }
