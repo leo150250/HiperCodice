@@ -7,6 +7,16 @@ body {
 	width: 100vw;
 	height: 100vh;
 }
+#menu ins.adsbygoogle {
+	position: fixed;
+	top: 0px;
+	right: 0px;
+}
+#jogo ins.adsbygoogle {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+}
 
 form {
 	background-color: #EEE;
