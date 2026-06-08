@@ -7,6 +7,8 @@ const inputConfigSom = document.getElementById("inputConfigSom");
 const inputConfigMusica = document.getElementById("inputConfigMusica");
 const inputDequesPesquisa = document.getElementById("inputDequesPesquisa");
 const divListagemDequesPesquisa = document.getElementById("listagemDequesPesquisa");
+const divListagemAtributosDeque = document.getElementById("listagemAtributosDeque");
+const buttonIniciarSPPersonalizado = document.getElementById("buttonIniciarSPPersonalizado");
 const divJogo = document.getElementById("jogo");
 
 var cores = [
@@ -17,6 +19,7 @@ var cores = [
 ];
 var menuAberto = null;
 var timerDequePesquisa = null;
+var atributosSelecionados = [];
 
 var sons = [];
 var indSons = {};
@@ -251,6 +254,8 @@ function listarDequesPesquisa(_espera = true) {
 	} else {
 		divListagemDequesPesquisa.innerHTML = "";
 		loader = gerarLoader(divListagemDequesPesquisa);
+		divListagemAtributosDeque.innerHTML = "Selecione um deque";
+		divDequeSelecionado = null;
 	}
 	timerDequePesquisa = setTimeout(()=>{
 		fetch('getListaDeques.php')
@@ -262,17 +267,47 @@ function listarDequesPesquisa(_espera = true) {
 				for (let i = 0; i < data.length; i++) {
 					const dequePesquisa = data[i];
 					let novoDeque = new Deque(dequePesquisa["id"],dequePesquisa["nome"],dequePesquisa["descricao"]);
-					divListagemDequesPesquisa.appendChild(novoDeque.desenhar());
+					elementoDeque = novoDeque.desenhar();
+					elementoDeque.onclick = ()=>{
+						if (divDequeSelecionado != null) {
+							divDequeSelecionado.classList.remove("selecionado");
+						}
+						divDequeSelecionado = elementoDeque;
+						divDequeSelecionado.classList.add("selecionado");
+						listarAtributosDeque(dequePesquisa["atributos"]);
+					}
+					divListagemDequesPesquisa.appendChild(elementoDeque);
 				}
 				timerDequePesquisa = null;
 			})
 			.catch(error => console.error('Erro ao carregar os deques:', error));
 	},_espera?1000:0);
 }
+function listarAtributosDeque(_atributos) {
+	divListagemAtributosDeque.innerHTML = "";
+	atributosSelecionados = [];
+	for (let i = 0; i < _atributos.length; i++) {
+		let atributo = _atributos[i];
+		let divNovoAtributo = document.createElement("div");
+		divNovoAtributo.classList.add("atributo");
+		let inputNovoAtributo = document.createElement("input");
+		inputNovoAtributo.type = "checkbox";
+		inputNovoAtributo.name = inputNovoAtributo.id = `atributoPers${atributo["id"]}`;
+		inputNovoAtributo.onchange = ()=>{
+			inputNovoAtributo.checked?atributosSelecionados.push(atributo["id"]):atributosSelecionados.splice(atributosSelecionados.indexOf(atributo["id"]),1);
+			atributosSelecionados.length>=6?buttonIniciarSPPersonalizado.removeAttribute("disabled"):buttonIniciarSPPersonalizado.setAttribute("disabled",true);
+		};
+		divNovoAtributo.appendChild(inputNovoAtributo);
+		let labelNovoAtributo = document.createElement("label");
+		labelNovoAtributo.textContent = `${atributo["nome"]} (${atributo["medida"]})`;
+		labelNovoAtributo.setAttribute("for",`atributoPers${atributo["id"]}`);
+		divNovoAtributo.appendChild(labelNovoAtributo);
+		divListagemAtributosDeque.appendChild(divNovoAtributo);
+	}
+}
 
 //Execução
 carregarImagensMenu();
-listarDequesPesquisa(true);
 
 new Som("attrib.wav");
 new Som("cardAdd.wav");

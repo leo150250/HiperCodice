@@ -1,7 +1,8 @@
 create table Deques (
 	id int auto_increment primary key,
 	nome varchar(64) not null,
-	descricao text not null
+	descricao text not null,
+	situacao char(1) not null default 'a' #a = aguardando aprovação, b = aprovado, c = exibível, d = reprovado
 );
 
 create table Atributos (

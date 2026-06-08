@@ -1,4 +1,4 @@
-INSERT INTO `Deques` VALUES (1,'Carros','Um deque geral de carros, contendo deste esportivos até populares!');
+INSERT INTO `Deques` VALUES (1,'Carros','Um deque geral de carros, contendo deste esportivos até populares!','c');
 
 INSERT INTO `Atributos` VALUES (1,1,'Velocidade Máxima',1,'km/h','A velocidade máxima do carro',0),
 (2,1,'Aceleração',0,'s','O tempo que o carro leva para acelerar de 0 a 100 km/h',0),
