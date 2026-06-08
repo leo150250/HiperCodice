@@ -7,14 +7,9 @@ body {
 	width: 100vw;
 	height: 100vh;
 }
-#menu ins.adsbygoogle {
+ins.adsbygoogle {
 	position: fixed;
-	top: 0px;
-	right: 0px;
-}
-#jogo ins.adsbygoogle {
-	position: fixed;
-	top: 0px;
+	bottom: 0px;
 	left: 0px;
 }
 
@@ -27,7 +22,7 @@ form > * {
 	margin: 10px 0;
 }
 
-input[type="text"], input[type="number"], select {
+input[type="text"], input[type="number"], input[type="search"], select {
 	background-color: inherit;
 	border: 1px solid #8884;
 	vertical-align: baseline;
@@ -86,7 +81,102 @@ dialog .botoes {
 .botoes button:not(:first-of-type) {
 	background-color: inherit;
 }
-
+.botoes button[disabled] {
+	background-color: #0004;
+	color: #888;
+}
+.Deque {
+	width: 200px;
+	height: 300px;
+	overflow: hidden;
+	position: relative;
+	border-top: 1px #AAA;
+	border-left: 1px #888;
+	border-bottom: 10px #666;
+	border-right: 10px #888;
+	border-style: solid;
+	border-top-right-radius: 10px;
+	border-bottom-left-radius: 10px;
+	box-shadow: 0px 0px 10px inset #000F;
+	user-select: none;
+	box-sizing: border-box;
+	transform: scale(0.9);
+	transition: transform 0.25s ease-in-out;
+}
+.Deque:hover {
+	transform: scale(1);
+	cursor: pointer;
+}
+.Deque.selecionado {
+	animation: bordaSelecionado 1s infinite;
+	outline-width: 5px;
+	outline-color: #FF0;
+	outline-style: solid;
+}
+.Deque * {
+	padding: 0.25em;
+	margin: 0px;
+	position: absolute;
+	z-index: 6;
+}
+.Deque .identificadorDeque {
+	text-shadow: 1px 2px 3px #000F;
+}
+.Deque img.logo {
+	right: 0px;
+	width: 75px;
+	background-color: #FFFC;
+	border-bottom-left-radius: 2em;
+}
+.Deque .titulo {
+	right: 0px;
+	bottom: 0px;
+	text-align: right;
+	background-color: #000C;
+	padding: 0px;
+	overflow: hidden;
+	border-top-left-radius: 2em;
+	max-width: 90%;
+	font-size: 0.75em;
+}
+.Deque .titulo * {
+	position: relative;
+}
+.Deque img.fundo {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	position: absolute;
+	z-index: 5;
+	padding: 0px;
+}
+#listagemDequesPesquisa {
+	height: 320px;
+	padding: 1em;
+	min-width: 80vw;
+	overflow-x: scroll;
+}
+#listagemAtributosDeque {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+#listagemAtributosDeque .atributo label {
+	border: 1px solid #8884;
+	border-radius: 5px;
+	padding: 0.25em 0.5em;
+	margin: 0.25em;
+	font-size: 0.75em;
+	display: inline-block;
+	cursor: pointer;
+	width: stretch;
+	text-align: center;
+}
+input[type="checkbox"]:has(+ label) {
+	display: none;
+}
+input[type="checkbox"]:checked + label {
+	background-color: #26b32b;
+}
 #wrapper {
 	position: relative;
 	width: 100%;
@@ -834,5 +924,26 @@ dialog .botoes {
 		left: 0px;
 		position: relative;
 		margin: 0 auto;
+	}
+}
+
+.loader {
+	border: 5px solid #FFF;
+	width: 1.5em;
+	height: 2.5em;
+	text-align: center;
+	margin: 1em auto;
+	font-size: 0.75em;
+	animation: loader 1s linear infinite;
+}
+@keyframes loader {
+	0% {
+		transform: rotateY(0deg) rotateZ(0deg);
+	}
+	50% {
+		transform: rotateY(180deg) rotateZ(180deg);
+	}
+	100% {
+		transform: rotateY(360deg) rotateZ(360deg);
 	}
 }

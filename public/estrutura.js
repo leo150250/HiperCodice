@@ -2,12 +2,13 @@ var deque = null;
 var jogadores = [];
 
 class Deque {
-	constructor(_id,_nome) {
+	constructor(_id,_nome,_descricao="") {
 		this.id = _id;
 		this.nome = _nome;
 		this.atributos = [];
 		this.cartas = [];
 		this.cartaEspecial = -1;
+		this.descricao = _descricao;
 	}
 	info() {
 		console.log(`Deque: ${this.nome} (ID ${this.id})`);
@@ -31,6 +32,49 @@ class Deque {
 			}
 			return a.classe - b.classe;
 		});
+	}
+	desenhar() {
+		//<div class="Deque">
+		let divDeque = document.createElement("div");
+		divDeque.classList.add("Deque");
+		//let cor = cores[Math.floor(Math.random() * cores.length)];
+		let cor = cores[parseInt(this.id) % cores.length];
+		divDeque.style.borderTopColor = cor[0];
+		divDeque.style.borderRightColor = cor[1];
+		divDeque.style.borderLeftColor = cor[1];
+		divDeque.style.borderBottomColor = cor[2];
+		//<img class="fundo" src="img/decks/1/default.jpg">
+		let imgFundo = document.createElement("img");
+		imgFundo.classList.add("fundo");
+		imgFundo.src = `img/decks/${this.id}/default.jpg`;
+		divDeque.appendChild(imgFundo);
+		//<img class="logo" src="img/logo.svg">
+		let imgLogo = document.createElement("img");
+		imgLogo.classList.add("logo");
+		imgLogo.src="img/logo.svg";
+		imgLogo.style.backgroundColor = cor[0];
+		divDeque.appendChild(imgLogo);
+		//<p class="identificadorDeque">#1</p>
+		let pId = document.createElement("p");
+		pId.classList.add("identificadorDeque");
+		pId.textContent=`#${this.id}`;
+		divDeque.appendChild(pId);
+		//<div class="titulo">
+		let divTitulo = document.createElement("div");
+		divTitulo.classList.add("titulo");
+		//<h1>Nome</h1>
+		let h1Nome = document.createElement("h1");
+		h1Nome.textContent = this.nome;
+		h1Nome.style.backgroundColor = cor[0];
+		divTitulo.appendChild(h1Nome);
+		//<p>Descrição</p>
+		let pDescricao = document.createElement("p");
+		pDescricao.textContent = this.descricao;
+		divTitulo.appendChild(pDescricao);
+		//</div>
+		divDeque.appendChild(divTitulo);
+		//</div>
+		return divDeque;
 	}
 }
 

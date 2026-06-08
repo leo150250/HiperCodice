@@ -223,7 +223,7 @@ class Jogador {
 	}
 }
 
-function construirDeque($_id,$_numAtributos=6) {
+function construirDeque($_id,$_numAtributos=6,$_atributos=[]) {
 	global $Deque;
 	global $path;
 	require_once($path.".interno/conexaoBD.php");
@@ -233,7 +233,11 @@ function construirDeque($_id,$_numAtributos=6) {
 	}
 	$regDeque = BD_fetch($resDeque);
 	$Deque = new Deque($regDeque['id'], $regDeque['nome']);
-	$resAtributos = BD_query("SELECT * FROM Atributos WHERE idDeque = ".$_id." ORDER BY id ASC");
+	$queryAtributos = "";
+	if (count($_atributos)>0) {
+		$queryAtributos = "AND id IN (".implode(", ",$_atributos).") ";
+	}
+	$resAtributos = BD_query("SELECT * FROM Atributos WHERE idDeque = ".$_id." ".$queryAtributos."ORDER BY id ASC");
 	$atributos = [];
 	while ($regAtributo = BD_fetch($resAtributos)) {
 		$atributo = new Atributo($Deque, $regAtributo['id']);

@@ -5,6 +5,11 @@ const labelConfigSom = document.getElementById("labelConfigSom");
 const labelConfigMusica = document.getElementById("labelConfigMusica");
 const inputConfigSom = document.getElementById("inputConfigSom");
 const inputConfigMusica = document.getElementById("inputConfigMusica");
+const inputDequesPesquisa = document.getElementById("inputDequesPesquisa");
+const divListagemDequesPesquisa = document.getElementById("listagemDequesPesquisa");
+const divListagemAtributosDeque = document.getElementById("listagemAtributosDeque");
+const inputNumCPUsSPPers = document.getElementById("inputNumCPUsSPPers");
+const buttonIniciarSPPersonalizado = document.getElementById("buttonIniciarSPPersonalizado");
 const divJogo = document.getElementById("jogo");
 
 var cores = [
@@ -14,6 +19,10 @@ var cores = [
 	["#2196F3","#002c8bf8","#00204ff8"]
 ];
 var menuAberto = null;
+var timerDequePesquisa = null;
+var divDequeSelecionado = null;
+var dequeSelecionadoSPPers = 0;
+var atributosSelecionados = [];
 
 var sons = [];
 var indSons = {};
@@ -191,13 +200,17 @@ function carregarScript(_script,_callback=()=>{}) {
     };
     document.body.appendChild(novoScript);
 }
-function carregarJogoSP() {
+function carregarJogoSP(_personalizado = false) {
 	fecharMenu();
 	exibirDialogo("carregando");
 	carregarScript("jogo",()=>{
 		carregarScript("jogoSP",()=>{
 			divJogo.style.display=null;
-			iniciarJogoSP();
+			if (_personalizado) {
+				iniciarJogoSP(inputNumCPUsSPPers.value,dequeSelecionadoSPPers,atributosSelecionados);
+			} else {
+				iniciarJogoSP();
+			}
 		});
 	});
 }
@@ -230,6 +243,86 @@ function executarMusicaAleatoria() {
 	//console.log(musicas);
 	let idMusicaAleatoria = Math.floor(Math.random()*musicasParaExecutar.length);
 	musicasParaExecutar[idMusicaAleatoria].executar();
+}
+function gerarLoader(_elemento = null) {
+	let novoLoader = document.createElement("div");
+	novoLoader.classList.add("loader");
+	novoLoader.textContent="HC";
+	if (_elemento != null) {
+		_elemento.appendChild(novoLoader);
+	}
+	return novoLoader;
+}
+function listarDequesPesquisa(_espera = true) {
+	let loader = null;
+	if (timerDequePesquisa != null) {
+		clearTimeout(timerDequePesquisa);
+		loader = divListagemDequesPesquisa.getElementsByClassName("loader")[0];
+	} else {
+		divListagemDequesPesquisa.innerHTML = "";
+		loader = gerarLoader(divListagemDequesPesquisa);
+		divListagemAtributosDeque.innerHTML = "Selecione um deque";
+		divDequeSelecionado = null;
+		dequeSelecionadoSPPers = 0;
+	}
+	timerDequePesquisa = setTimeout(()=>{
+		fetch('getListaDeques.php', {
+			method: "POST",
+			headers: { "Content-Type": "application/x-www-form-urlencoded" },
+			body: new URLSearchParams({
+				pesquisaDeque: inputDequesPesquisa.value,
+			})
+		}).then(response => response.json())
+			.then(data => {
+				if (loader != null) {
+					loader.remove();
+				}
+				if (data.length == 0) {
+					divListagemDequesPesquisa.textContent = "Nenhum deque encontrado. Por favor, refine a busca acima.";
+				}
+				for (let i = 0; i < data.length; i++) {
+					const dequePesquisa = data[i];
+					let novoDeque = new Deque(dequePesquisa["id"],dequePesquisa["nome"],dequePesquisa["descricao"]);
+					elementoDeque = novoDeque.desenhar();
+					elementoDeque.onclick = ()=>{
+						if (divDequeSelecionado != elementoDeque) {
+							if (divDequeSelecionado != null) {
+								divDequeSelecionado.classList.remove("selecionado");
+							}
+							divDequeSelecionado = elementoDeque;
+							dequeSelecionadoSPPers = dequePesquisa["id"];
+							divDequeSelecionado.classList.add("selecionado");
+							listarAtributosDeque(dequePesquisa["atributos"]);
+						}
+					}
+					divListagemDequesPesquisa.appendChild(elementoDeque);
+				}
+				timerDequePesquisa = null;
+			})
+			.catch(error => console.error('Erro ao carregar os deques:', error));
+	},_espera?1000:0);
+}
+function listarAtributosDeque(_atributos) {
+	divListagemAtributosDeque.innerHTML = "";
+	atributosSelecionados = [];
+	for (let i = 0; i < _atributos.length; i++) {
+		let atributo = _atributos[i];
+		let divNovoAtributo = document.createElement("div");
+		divNovoAtributo.classList.add("atributo");
+		let inputNovoAtributo = document.createElement("input");
+		inputNovoAtributo.type = "checkbox";
+		inputNovoAtributo.name = inputNovoAtributo.id = `atributoPers${atributo["id"]}`;
+		inputNovoAtributo.onchange = ()=>{
+			inputNovoAtributo.checked?atributosSelecionados.push(atributo["id"]):atributosSelecionados.splice(atributosSelecionados.indexOf(atributo["id"]),1);
+			atributosSelecionados.length>=6?buttonIniciarSPPersonalizado.removeAttribute("disabled"):buttonIniciarSPPersonalizado.setAttribute("disabled",true);
+		};
+		divNovoAtributo.appendChild(inputNovoAtributo);
+		let labelNovoAtributo = document.createElement("label");
+		labelNovoAtributo.textContent = `${atributo["nome"]} (${atributo["medida"]})`;
+		labelNovoAtributo.setAttribute("for",`atributoPers${atributo["id"]}`);
+		divNovoAtributo.appendChild(labelNovoAtributo);
+		divListagemAtributosDeque.appendChild(divNovoAtributo);
+	}
 }
 
 //Execução
