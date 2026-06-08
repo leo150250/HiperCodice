@@ -107,10 +107,10 @@
 		</p>
 		<p>
 			<label>Número de CPUs:</label>
-			<input type="number" min="1" max="7" value="3">
+			<input id="inputNumCPUsSPPers" type="number" min="1" max="7" value="3">
 		</p>
 		<div class="botoes">
-			<button disabled id="buttonIniciarSPPersonalizado">Iniciar jogo</button>
+			<button disabled id="buttonIniciarSPPersonalizado" onclick="esconderDialogo('dialogPersonalizarSP'); carregarJogoSP(true)">Iniciar jogo</button>
 			<button onclick="esconderDialogo('dialogPersonalizarSP')">Voltar</button>
 		</div>
 	</dialog>

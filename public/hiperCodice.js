@@ -8,6 +8,7 @@ const inputConfigMusica = document.getElementById("inputConfigMusica");
 const inputDequesPesquisa = document.getElementById("inputDequesPesquisa");
 const divListagemDequesPesquisa = document.getElementById("listagemDequesPesquisa");
 const divListagemAtributosDeque = document.getElementById("listagemAtributosDeque");
+const inputNumCPUsSPPers = document.getElementById("inputNumCPUsSPPers");
 const buttonIniciarSPPersonalizado = document.getElementById("buttonIniciarSPPersonalizado");
 const divJogo = document.getElementById("jogo");
 
@@ -19,6 +20,8 @@ var cores = [
 ];
 var menuAberto = null;
 var timerDequePesquisa = null;
+var divDequeSelecionado = null;
+var dequeSelecionadoSPPers = 0;
 var atributosSelecionados = [];
 
 var sons = [];
@@ -197,13 +200,17 @@ function carregarScript(_script,_callback=()=>{}) {
     };
     document.body.appendChild(novoScript);
 }
-function carregarJogoSP() {
+function carregarJogoSP(_personalizado = false) {
 	fecharMenu();
 	exibirDialogo("carregando");
 	carregarScript("jogo",()=>{
 		carregarScript("jogoSP",()=>{
 			divJogo.style.display=null;
-			iniciarJogoSP();
+			if (_personalizado) {
+				iniciarJogoSP(inputNumCPUsSPPers.value,dequeSelecionadoSPPers,atributosSelecionados);
+			} else {
+				iniciarJogoSP();
+			}
 		});
 	});
 }
@@ -256,6 +263,7 @@ function listarDequesPesquisa(_espera = true) {
 		loader = gerarLoader(divListagemDequesPesquisa);
 		divListagemAtributosDeque.innerHTML = "Selecione um deque";
 		divDequeSelecionado = null;
+		dequeSelecionadoSPPers = 0;
 	}
 	timerDequePesquisa = setTimeout(()=>{
 		fetch('getListaDeques.php')
@@ -269,12 +277,15 @@ function listarDequesPesquisa(_espera = true) {
 					let novoDeque = new Deque(dequePesquisa["id"],dequePesquisa["nome"],dequePesquisa["descricao"]);
 					elementoDeque = novoDeque.desenhar();
 					elementoDeque.onclick = ()=>{
-						if (divDequeSelecionado != null) {
-							divDequeSelecionado.classList.remove("selecionado");
+						if (divDequeSelecionado != elementoDeque) {
+							if (divDequeSelecionado != null) {
+								divDequeSelecionado.classList.remove("selecionado");
+							}
+							divDequeSelecionado = elementoDeque;
+							dequeSelecionadoSPPers = dequePesquisa["id"];
+							divDequeSelecionado.classList.add("selecionado");
+							listarAtributosDeque(dequePesquisa["atributos"]);
 						}
-						divDequeSelecionado = elementoDeque;
-						divDequeSelecionado.classList.add("selecionado");
-						listarAtributosDeque(dequePesquisa["atributos"]);
 					}
 					divListagemDequesPesquisa.appendChild(elementoDeque);
 				}
@@ -320,5 +331,3 @@ new Som("Inspired.mp3",true);
 new Som("Rising Tide.mp3",true);
 
 divJogo.style.display="none";
-
-exibirDialogo('dialogPersonalizarSP');

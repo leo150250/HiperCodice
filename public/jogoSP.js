@@ -9,21 +9,26 @@ function defineFundo(_deck) {
 	divAmbiente.style.backgroundImage = `radial-gradient(${cores[corSelecionada][1]}, ${cores[corSelecionada][2]}), url("img/decks/${_deck}/default.jpg")`;
 }
 
-function iniciarJogoSP() {
+function iniciarJogoSP(_numCPUs=3, _deque=0, _atributos=[]) {
 	divMenu.style.display="none";
 	criarNovoJogador("Jogador",false);
-	criarNovoJogador("CPU 1");
-	criarNovoJogador("CPU 2");
-	criarNovoJogador("CPU 3");
-	//criarNovoJogador("CPU 4");
+	for (let i = 1; i <= _numCPUs; i++) {
+		criarNovoJogador(`CPU ${i}`);
+	}
 	numRodadas = 0;
 	dataHoraInicio = new Date();
 	setInterval(()=>{
 		divTimer.textContent = `⏱️${obterTempoDaPartida()}`;
 	},1000);
 	zerarElementosRodada();
-	fetch('getDeque.php')
-		.then(response => response.json())
+	fetch('getDeque.php',{
+		method: "POST",
+		headers: { "Content-Type": "application/x-www-form-urlencoded" },
+		body: new URLSearchParams({
+			deque: _deque,
+			atributos: _atributos.toString()
+		})
+	}).then(response => response.json())
 		.then(data => {
 			gerarDequeJSON(data);
 			defineFundo(deque.id);

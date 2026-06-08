@@ -7,14 +7,9 @@ body {
 	width: 100vw;
 	height: 100vh;
 }
-#menu ins.adsbygoogle {
+ins.adsbygoogle {
 	position: fixed;
-	top: 0px;
-	right: 0px;
-}
-#jogo ins.adsbygoogle {
-	position: fixed;
-	top: 0px;
+	bottom: 0px;
 	left: 0px;
 }
 
@@ -105,6 +100,18 @@ dialog .botoes {
 	box-shadow: 0px 0px 10px inset #000F;
 	user-select: none;
 	box-sizing: border-box;
+	transform: scale(0.9);
+	transition: transform 0.25s ease-in-out;
+}
+.Deque:hover {
+	transform: scale(1);
+	cursor: pointer;
+}
+.Deque.selecionado {
+	animation: bordaSelecionado 1s infinite;
+	outline-width: 5px;
+	outline-color: #FF0;
+	outline-style: solid;
 }
 .Deque * {
 	padding: 0.25em;
@@ -145,23 +152,31 @@ dialog .botoes {
 }
 #listagemDequesPesquisa {
 	height: 320px;
-	width: 100%;
+	padding: 1em;
 	min-width: 80vw;
 	overflow-x: scroll;
 }
 #listagemAtributosDeque {
-	display: flex;
-	flex-wrap: wrap;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
-#listagemAtributosDeque .atributo {
-	background-color: #FFF8;
-	border: 1px solid #0004;
+#listagemAtributosDeque .atributo label {
+	border: 1px solid #8884;
 	border-radius: 5px;
 	padding: 0.25em 0.5em;
 	margin: 0.25em;
 	font-size: 0.75em;
+	display: inline-block;
+	cursor: pointer;
+	width: stretch;
+	text-align: center;
 }
-
+input[type="checkbox"]:has(+ label) {
+	display: none;
+}
+input[type="checkbox"]:checked + label {
+	background-color: #26b32b;
+}
 #wrapper {
 	position: relative;
 	width: 100%;
