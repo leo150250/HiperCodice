@@ -28,7 +28,7 @@ if ($pesquisaDeque == "") { //Nenhum deque em específico. Exibir deques recomen
 }
 
 for ($i = 0; $i < count($deques); $i++) {
-	$resAtributos = BD_query("SELECT Atributos.id, Atributos.nome, Atributos.medida FROM Atributos WHERE Atributos.idDeque = ".$regDeques["id"]);
+	$resAtributos = BD_query("SELECT Atributos.id, Atributos.nome, Atributos.medida FROM Atributos WHERE Atributos.idDeque = ".$deques[$i]["id"]);
 	$atributos = [];
 	for ($j = 0; $j < $resAtributos->num_rows; $j++) {
 		$regAtributos = BD_fetch($resAtributos);

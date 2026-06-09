@@ -11,3 +11,6 @@ public/img
 server/img
 public/.interno/
 server/.interno/
+
+# Ignorar pasta de debug, para correção em tempo real com dados já publicados (Um QA "perigoso", praticamente)
+debug
