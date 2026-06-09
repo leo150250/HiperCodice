@@ -45,10 +45,13 @@ function BD_desconectar() {
 		$conexaoDB = null;
 	}
 }
-function BD_query($_sql) {
+function BD_query($_sql,$_debug=false) {
 	global $conexaoDB;
 	if (!$conexaoDB) {
 		BD_conectar();
+	}
+	if ($_debug) {
+		die("SQL DEBUG: ".$_sql);
 	}
 	$resultado = $conexaoDB->query($_sql);
 	if ($resultado === false) {
