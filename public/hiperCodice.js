@@ -281,7 +281,7 @@ function listarDequesPesquisa(_espera = true) {
 					divListagemDequesPesquisa.textContent = "Nenhum deque encontrado. Por favor, refine a busca acima.";
 				}
 				for (let i = 0; i < data.length; i++) {
-					const dequePesquisa = data[i];
+					let dequePesquisa = data[i];
 					let novoDeque = new Deque(dequePesquisa["id"],dequePesquisa["nome"],dequePesquisa["descricao"]);
 					let elementoDeque = novoDeque.desenhar();
 					elementoDeque.onclick = ()=>{
