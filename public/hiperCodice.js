@@ -283,6 +283,12 @@ function listarDequesPesquisa(_espera = true) {
 				for (let i = 0; i < data.length; i++) {
 					let dequePesquisa = data[i];
 					let novoDeque = new Deque(dequePesquisa["id"],dequePesquisa["nome"],dequePesquisa["descricao"]);
+					dequePesquisa["atributos"].forEach(_atributo=>{
+						let novoAtributo = new Atributo(novoDeque,_atributo["id"]);
+						novoAtributo.nome = _atributo["nome"];
+						novoAtributo.medida = _atributo["medida"];
+						novoDeque.atributos.push(novoAtributo);
+					});
 					let elementoDeque = novoDeque.desenhar();
 					elementoDeque.onclick = ()=>{
 						if (divDequeSelecionado != elementoDeque) {
@@ -292,7 +298,7 @@ function listarDequesPesquisa(_espera = true) {
 							divDequeSelecionado = elementoDeque;
 							dequeSelecionadoSPPers = dequePesquisa["id"];
 							divDequeSelecionado.classList.add("selecionado");
-							listarAtributosDeque(dequePesquisa["atributos"]);
+							listarAtributosDeque(novoDeque);
 						}
 					}
 					divListagemDequesPesquisa.appendChild(elementoDeque);
@@ -302,11 +308,12 @@ function listarDequesPesquisa(_espera = true) {
 			.catch(error => console.error('Erro ao carregar os deques:', error));
 	},_espera?1000:0);
 }
-function listarAtributosDeque(_atributos) {
+function listarAtributosDeque(_deque) {
 	divListagemAtributosDeque.innerHTML = "";
 	atributosSelecionados = [];
-	for (let i = 0; i < _atributos.length; i++) {
-		let atributo = _atributos[i];
+	let atributos = _deque.atributos;
+	for (let i = 0; i < atributos.length; i++) {
+		let atributo = atributos[i];
 		let divNovoAtributo = document.createElement("div");
 		divNovoAtributo.classList.add("atributo");
 		let inputNovoAtributo = document.createElement("input");
