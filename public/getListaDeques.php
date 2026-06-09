@@ -20,7 +20,7 @@ if ($pesquisaDeque == "") { //Nenhum deque em específico. Exibir deques recomen
 } else {
 	$idPesquisaDeque = intval($pesquisaDeque);
 	$pesquisaDeque = addslashes($pesquisaDeque);
-	$resDeques = BD_query("SELECT Deques.* FROM Deques WHERE Deques.id = ".$idPesquisaDeque." OR Deques.nome LIKE '%".$pesquisaDeque."%' OR Deques.descricao LIKE '%".$pesquisaDeque."%' LIMIT 10");
+	$resDeques = BD_query("SELECT Deques.* FROM Deques WHERE (Deques.id = ".$idPesquisaDeque." OR Deques.nome LIKE '%".$pesquisaDeque."%' OR Deques.descricao LIKE '%".$pesquisaDeque."%') AND (Deques.situacao = 'b' OR Deques.situacao = 'c') LIMIT 10");
 	for ($i = 0; $i < $resDeques->num_rows; $i++) {
 		$regDeques = BD_fetch($resDeques);
 		array_push($deques,$regDeques);
