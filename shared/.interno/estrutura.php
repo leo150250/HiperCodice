@@ -234,6 +234,9 @@ function construirDeque($_id,$_numAtributos=6,$_atributos=[]) {
 	$regDeque = BD_fetch($resDeque);
 	$Deque = new Deque($regDeque['id'], $regDeque['nome']);
 	$queryAtributos = "";
+	if (implode("",$_atributos)=="") {
+		$_atributos = [];
+	}
 	if (count($_atributos)>0) {
 		$queryAtributos = "AND id IN (".implode(", ",$_atributos).") ";
 	}

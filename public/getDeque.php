@@ -30,6 +30,9 @@ if ($idDeque == 0) {
 	$deque = BD_fetch($resDeques);
 	$idDeque = (int)$deque["id"];
 }
+if (implode("",$atributos)=="") {
+	$atributos = [];
+}
 $numAtributos = count($atributos);
 if ($numAtributos == 0) {
 	$numAtributos = 6;
