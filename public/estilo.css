@@ -107,6 +107,7 @@ dialog .botoes {
 	box-sizing: border-box;
 	transform: scale(0.9);
 	transition: transform 0.25s ease-in-out;
+	display: inline-block;
 }
 .Deque:hover {
 	transform: scale(1);
@@ -143,6 +144,7 @@ dialog .botoes {
 	border-top-left-radius: 2em;
 	max-width: 90%;
 	font-size: 0.75em;
+	text-wrap: auto;
 }
 .Deque .titulo * {
 	position: relative;
@@ -160,6 +162,7 @@ dialog .botoes {
 	padding: 1em;
 	min-width: 80vw;
 	overflow-x: scroll;
+	white-space: nowrap;
 }
 #listagemAtributosDeque {
 	display: grid;

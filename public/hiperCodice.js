@@ -283,7 +283,7 @@ function listarDequesPesquisa(_espera = true) {
 				for (let i = 0; i < data.length; i++) {
 					const dequePesquisa = data[i];
 					let novoDeque = new Deque(dequePesquisa["id"],dequePesquisa["nome"],dequePesquisa["descricao"]);
-					elementoDeque = novoDeque.desenhar();
+					let elementoDeque = novoDeque.desenhar();
 					elementoDeque.onclick = ()=>{
 						if (divDequeSelecionado != elementoDeque) {
 							if (divDequeSelecionado != null) {
