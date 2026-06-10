@@ -206,6 +206,7 @@ function carregarJogoSP(_personalizado = false) {
 	carregarScript("jogo",()=>{
 		carregarScript("jogoSP",()=>{
 			divJogo.style.display=null;
+			clearInterval(atualizacaoImagemMenu);
 			if (_personalizado) {
 				iniciarJogoSP(inputNumCPUsSPPers.value,dequeSelecionadoSPPers,atributosSelecionados);
 			} else {
@@ -214,12 +215,23 @@ function carregarJogoSP(_personalizado = false) {
 		});
 	});
 }
+function carregarJogoMP() {
+	fecharMenu();
+	exibirDialogo("carregando");
+	carregarScript("jogo",()=>{
+		carregarScript("jogoMP",()=>{
+			divJogo.style.display=null;
+			clearInterval(atualizacaoImagemMenu);
+			iniciarJogoMP("localhost",1500);
+		});
+	});
+}
 function paginaCarregada() {
 	executarMusicaAleatoria();
 	setTimeout(()=>{
 		abrirMenu("Inicio");
 	},2000);
-	//carregarJogoSP();
+	carregarJogoMP();
 }
 function reiniciarJogo() {
 	document.location.reload();

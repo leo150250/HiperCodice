@@ -301,7 +301,7 @@ function checarRodada() {
 				$comm->enviarMensagemTodos("Iniciativa cancelada. Aguardando todos os jogadores ficarem prontos...");
 				$timerProntidao = -1;
 			}
-			return;
+			return true;
 		}
 		return true;
 	} else {

@@ -22,6 +22,9 @@ foreach ($argv as $chave => $valor) {
 		$porta = $argv[$chave+1];
 	}
 }
+if ($porta == 0) {
+	die("Precisa especificar a porta");
+}
 $timer = 0;
 construirDeque(1,6);
 //$Deque->info();
