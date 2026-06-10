@@ -162,7 +162,7 @@ class Carta {
 
 		let elImg = document.createElement("img");
 		elImg.classList.add("imagem");
-		elImg.src = `img/decks/${this.deque.id}/${this.id}.jpg`;
+		elImg.src = `img/img.php?d=${this.deque.id}&c=${this.id}`;
 		elImg.alt = this.nome;
 		el.appendChild(elImg);
 

@@ -166,7 +166,7 @@ function carregarImagensMenu() {
 				let divImagem = document.createElement("div");
 				divImagem.classList.add("imagemFundo");
 				let imagemFundo = document.createElement("img");
-				imagemFundo.src = "img/decks/"+data[i].idDeque+"/"+data[i].idCarta+".jpg";
+				imagemFundo.src = "img/img.php?d="+data[i].idDeque+"&c="+data[i].idCarta+"&f";
 				let imagemTexto = document.createElement("p");
 				imagemTexto.innerHTML = data[i].nomeCarta+"<br>Deque \""+data[i].nomeDeque+"\"";
 				divImagem.appendChild(imagemFundo);
