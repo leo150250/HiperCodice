@@ -61,6 +61,8 @@ dialog {
 	padding: 1em;
 	border: none;
 	max-width: 90vw;
+	outline: none;
+	box-shadow: 2px 3px 7px #000;
 }
 dialog::backdrop {
 	backdrop-filter: blur(10px);

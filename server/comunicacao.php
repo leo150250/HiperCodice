@@ -7,8 +7,62 @@ require_once $path.".interno/estrutura.php";
 
 $server = null;
 $clientes = array($server);
-$comm = null;
+$comm = new Comm();
 $porta = 0;
+
+$timers = [];
+class Timer {
+	private $funcao;
+	private $horaInicio;
+	private $horaExec;
+	private $_reexecutar = false;
+	public $ms = 1000;
+	public $execucoes = 0;
+	public function __construct($_funcao, $_ms = 1000) {
+		global $timers;
+		$this->funcao = $_funcao;
+		$this->ms = $_ms;
+		$this->redefinir();
+		array_push($timers,$this);
+	}
+	public function executar() {
+		if (new DateTime() >= $this->horaExec) {
+			$this->_reexecutar = false;
+			$this->execucoes++;
+			call_user_func($this->funcao,$this);
+			if (!$this->_reexecutar) {
+				$this->__destruct();
+			}
+		}
+	}
+	public function __destruct()
+	{
+		global $timers;
+		$indice = array_search($this, $timers, true);
+		if ($indice !== false) {
+			unset ($timers[$indice]);
+			$timers = array_values($timers);
+		}
+	}
+	public function reexecutar() {
+		$this->_reexecutar = true;
+		$this->redefinir();
+	}
+	public function redefinir($_novoMs = null) {
+		if ($_novoMs !== null) {
+			$this->ms = $_novoMs;
+		}
+		$this->horaInicio = new DateTime();
+		$this->horaExec = clone $this->horaInicio;
+		$this->horaExec->add(DateInterval::createFromDateString("{$this->ms}ms"));
+	}
+}
+function executaTimers() {
+	global $timers;
+	foreach ($timers as $timer) {
+		$timer->executar();
+	}
+}
 
 class Comm {
 	protected $clients;
@@ -52,6 +106,16 @@ class Comm {
 					$novoJogador = new Jogador("Jogador {$from->resourceId}");
 					$novoJogador->conexao = $from;
 					$from->jogador = $novoJogador;
+					$renome = implode(" ",$args);
+					if ($renome != "") {
+						$novoJogador->renomear($renome);
+					}
+					global $Jogadores;
+					$numJogadores = count($Jogadores);
+					$numProntos = count(array_filter($Jogadores, function($jogador) {
+						return $jogador->pronto;
+					}));
+					verbose("Jogadores prontos: {$numProntos} / {$numJogadores}\n");
 					break;
 				case "ready":
 					verbose("Jogador {$from->resourceId} está pronto para iniciar a partida.\n");
@@ -64,6 +128,12 @@ class Comm {
 							]
 						]));
 					}
+					global $Jogadores;
+					$numJogadores = count($Jogadores);
+					$numProntos = count(array_filter($Jogadores, function($jogador) {
+						return $jogador->pronto;
+					}));
+					verbose("Jogadores prontos: {$numProntos} / {$numJogadores}\n");
 					break;
 				case "notready":
 					verbose("Jogador {$from->resourceId} não está mais pronto.\n");
@@ -76,6 +146,12 @@ class Comm {
 							]
 						]));
 					}
+					global $Jogadores;
+					$numJogadores = count($Jogadores);
+					$numProntos = count(array_filter($Jogadores, function($jogador) {
+						return $jogador->pronto;
+					}));
+					verbose("Jogadores prontos: {$numProntos} / {$numJogadores}\n");
 					break;
 				case "escolha":
 					verbose("Jogador {$from->resourceId} escolheu atributo {$args[0]}\n");
@@ -124,6 +200,15 @@ class Comm {
 			$jogadorSaiu->quitar();
 		}
         unset($this->clients[(int)$conn->resourceId]);
+		global $emExecucao;
+		if (!$emExecucao) {
+			global $Jogadores;
+			$numJogadores = count($Jogadores);
+			$numProntos = count(array_filter($Jogadores, function($jogador) {
+				return $jogador->pronto;
+			}));
+			verbose("Jogadores prontos: {$numProntos} / {$numJogadores}\n");
+		}
         verbose("Conexão ({$conn->resourceId}) fechada\n");
     }
 
@@ -132,14 +217,14 @@ class Comm {
         $conn->close();
     }
 
-	public function enviarComm($conn,$tipo,$conteudo = new Object()) {
+	public function enviarComm($conn,$tipo,$conteudo = new stdClass()) {
 		$conn->send(json_encode([
 			"tipo"=>$tipo,
 			"conteudo"=>$conteudo
 		]));
 	}
 
-	public function enviarCommTodos($tipo,$conteudo = new Object()) {
+	public function enviarCommTodos($tipo,$conteudo = new stdClass()) {
 		foreach ($this->clients as $client) {
 			$client->send(json_encode([
 				"tipo"=>$tipo,
@@ -214,7 +299,7 @@ function iniciarSala($_porta) {
 	if (!$server) {
 		die("Falha ao iniciar a sala: $errstr ($errno)");
 	}
-	verbose("Sala iniciada na porta $_porta.\n");
+	verbose("Sala iniciada na porta $_porta. Aguardando jogadores...\n");
 	$clientes = array($server);
 	$comm = new Comm();
 	$porta = $_porta;
@@ -271,20 +356,29 @@ function heartBeat($_conn) {
 }
 function checarRodada() {
 	global $emExecucao, $Jogadores, $timerProntidao, $comm, $Deque, $encerrada, $jogadorDaVez, $atributoEscolhido;
-	if (!$emExecucao) { //Estamos no Lobby ainda, aguardando 2 ou mais ficarem prontos
+	if (!$emExecucao) { //Estamos no Lobby ainda, aguardando todos os 2 ou mais jogadores ficarem prontos
+		if ($encerrada) { return false; } //Se for encerrada no lobby por algum motivo, faz a sala parar
 		$numJogadores = count($Jogadores);
 		$numProntos = count(array_filter($Jogadores, function($jogador) {
 			return $jogador->pronto;
 		}));
-		verbose("Jogadores {$numProntos} / {$numJogadores}\n");
 		if ($numJogadores > 1 && $numProntos == $numJogadores) {
 			if ($timerProntidao == -1) {
 				verbose("Todos os jogadores estão prontos.\n");
 				$timerProntidao = 3;
-			} elseif ($timerProntidao > 0) {
 				verbose("Iniciando em $timerProntidao...\n");
 				$comm->enviarMensagemTodos("Iniciando em $timerProntidao...");
-				$timerProntidao--;
+				new Timer(function($_this){
+					global $timerProntidao, $comm;
+					$timerProntidao--;
+					if ($timerProntidao > 0) {
+						$_this->reexecutar();
+						verbose("Iniciando em $timerProntidao...\n");
+						$comm->enviarMensagemTodos("Iniciando em $timerProntidao...");
+					}
+				},1000);
+			} elseif ($timerProntidao > 0) {
+				//Faz nada. Espera os timers!
 			} else {
 				$comm->enviarMensagemTodos("Iniciando partida...");
 				$emExecucao = true;
@@ -301,7 +395,6 @@ function checarRodada() {
 				$comm->enviarMensagemTodos("Iniciativa cancelada. Aguardando todos os jogadores ficarem prontos...");
 				$timerProntidao = -1;
 			}
-			return true;
 		}
 		return true;
 	} else {

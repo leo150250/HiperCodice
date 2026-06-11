@@ -30,12 +30,22 @@ construirDeque(1,6);
 //$Deque->info();
 iniciarSala($porta);
 $jogoRodando = true;
+new Timer(function(Timer $_this){
+	verbose("Nenhum jogador presente, a sala será encerrada em ".(6-$_this->execucoes)."...\n");
+	if ($_this->execucoes < 5) {
+		$_this->reexecutar();
+		$_this->redefinir(1000);
+	} else {
+		global $encerrada;
+		$encerrada = true;
+	}
+},10000);
 while ($jogoRodando) {
+	executaTimers();
 	checarConexoes();
 	$jogoRodando = checarRodada();
 	$timer=($timer+1)%60;
 	//verbose("Timer: $timer\n");
-	sleep(1);
 }
 
 fclose($server);

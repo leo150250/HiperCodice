@@ -1,15 +1,21 @@
-var socket = null;
+var comm = null;
 var pronto = false;
 var meuId = 0;
 
-class Socket {
+class Comm {
 	constructor(_servidor,_porta) {
 		this.servidor = _servidor;
 		this.porta = _porta;
-		this.socket = new WebSocket(`wss://${this.servidor}:${this.porta}`);
+		this.filaMensagem = [];
+		this.processandoFila = false;
+		this.filaEspera = 200;
+		console.log(this.filaMensagem);
+
+		console.log(`Conectando em ${this.servidor}:${this.porta}...`);
+		this.socket = new WebSocket(`ws://${this.servidor}:${this.porta}`);
 		this.socket.onopen = () => {
-			console.log("Conectado ao servidor");
-			socket = this;
+			console.log("Conectado!");
+			comm = this;
 		};
 		this.socket.onmessage = (_evento) => {
 			this.respostaServidor(_evento);
@@ -22,11 +28,47 @@ class Socket {
 		};
 	}
 	respostaServidor(_evento) {
-		console.log("SERVIDOR:",_evento);
+		let resposta = JSON.parse(_evento.data);
+		console.log("<== RECEBIDO:",resposta);
+		switch (resposta.tipo) {
+			case "welcome": {
+				meuId = resposta.conteudo.resourceId;
+				this.enviarMensagem(`\\thnx ${configNome}`);
+				this.enviarMensagem(`\\ready`);
+			}
+		}
+	}
+	enviarMensagem(_mensagem) {
+		this.filaMensagem.push(_mensagem);
+		setTimeout(()=>{
+			this.processarFilaMensagem();
+		},10);
+	}
+	processarFilaMensagem() {
+		if (this.processandoFila) {
+			return;
+		}
+		if (this.filaMensagem.length > 0) {
+			this.processandoFila = true;
+			this._enviarProximaMensagem();
+			if (this.filaMensagem.length == 0) {
+				this.processandoFila = false;
+			} else {
+				setTimeout(()=>{
+					this._enviarProximaMensagem();
+				},this.filaEspera);
+			}
+		}
+	}
+	_enviarProximaMensagem() {
+		if (this.socket.readyState === WebSocket.OPEN) {
+			console.log("ENVIANDO ==>", this.filaMensagem[0]);
+			this.socket.send(this.filaMensagem.shift());
+		}
 	}
 }
 
 function iniciarJogoMP(_servidor,_porta) {
 	divMenu.style.display="none";
-	new Socket(_servidor,_porta);
+	new Comm(_servidor,_porta);
 }

@@ -30,6 +30,7 @@ var musicas = [];
 var musicaEmExecucao = null;
 var configSom = true;
 var configMusica = true;
+var configNome = "Jogador "+Math.floor(Math.random()*Number.MAX_SAFE_INTEGER);
 
 var cookies = decodeURIComponent(document.cookie).split(";");
 cookies.forEach(_cookie=>{
@@ -51,6 +52,9 @@ cookies.forEach(_cookie=>{
 				configMusica = false;
 			}
 		} break;
+		case "configNome": {
+			configNome = cookieAtual[1];
+		}
 	}
 });
 
@@ -58,6 +62,9 @@ inputConfigSom.checked = configSom;
 inputConfigMusica.checked = configMusica;
 labelConfigSom.textContent = "Sons: "+(inputConfigSom.checked?"SIM":"NÃO");
 labelConfigMusica.textContent = "Música: "+(inputConfigMusica.checked?"SIM":"NÃO");
+document.cookie = `configSom=${configSom?1:0}`;
+document.cookie = `configMusica=${configMusica?1:0}`;
+document.cookie = `configNome=${encodeURIComponent(configNome)}`;
 
 class Som {
 	constructor(_arquivo,_musica=false) {
@@ -222,7 +229,7 @@ function carregarJogoMP() {
 		carregarScript("jogoMP",()=>{
 			divJogo.style.display=null;
 			clearInterval(atualizacaoImagemMenu);
-			iniciarJogoMP("localhost",1500);
+			iniciarJogoMP("127.0.0.1",15000);
 		});
 	});
 }

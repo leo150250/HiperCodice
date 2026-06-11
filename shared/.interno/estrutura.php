@@ -221,6 +221,10 @@ class Jogador {
 		}
 		return $listagemCartas;
 	}
+	public function renomear(string $_novoNome) {
+		verbose("Jogador ".$this->nome." renomeado para ".$_novoNome."\n");
+		$this->nome = $_novoNome;
+	}
 }
 
 function construirDeque($_id,$_numAtributos=6,$_atributos=[]) {
