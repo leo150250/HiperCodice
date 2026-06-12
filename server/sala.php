@@ -30,7 +30,12 @@ construirDeque(1,6);
 //$Deque->info();
 iniciarSala($porta);
 $jogoRodando = true;
-new Timer(function(Timer $_this){
+$timerInatividade = new Timer(function(Timer $_this){
+	global $Jogadores;
+	if (count($Jogadores)>0) {
+		$_this->resetar(10000);
+		return;
+	}
 	verbose("Nenhum jogador presente, a sala será encerrada em ".(6-$_this->execucoes)."...\n");
 	if ($_this->execucoes < 5) {
 		$_this->reexecutar();

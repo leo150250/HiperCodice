@@ -247,16 +247,16 @@ class Carta {
 }
 
 class Jogador {
-	constructor(_nome,_cpu = true) {
+	constructor(_nome,_cpu = true,_conexao = null) {
 		this.nome = _nome;
 		this.cartas = [];
 		this.ativo = true;
 		this.pronto = false;
-		this.conexao = null;
+		this.conexao = _conexao;
 		this.cpu = _cpu;
 		this.id = jogadores.length;
 		jogadores.push(this);
-		console.log(`Jogador ${this.nome} entrou!`);
+		console.log(`Jogador ${this.nome} entrou ${this.conexao==null?"!":`, com conexão ID ${this.conexao}`}`);
 		
 		this.elemento = document.createElement("div");
 		this.elemento.classList.add("cardJogador");

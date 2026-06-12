@@ -11,12 +11,18 @@ const divListagemAtributosDeque = document.getElementById("listagemAtributosDequ
 const inputNumCPUsSPPers = document.getElementById("inputNumCPUsSPPers");
 const buttonIniciarSPPersonalizado = document.getElementById("buttonIniciarSPPersonalizado");
 const divJogo = document.getElementById("jogo");
+const pMensagemDialogMsg = document.getElementById("mensagemDialogMsg");
 
 var cores = [
 	["#F44336","#8b0000f8","#4f0000f8"],
 	["#FF9800","#4f2d00f8","#211300f8"],
 	["#4CAF50","#004700f8","#002500f8"],
 	["#2196F3","#002c8bf8","#00204ff8"]
+];
+var nomesAleatorios = [
+	"Gato","Cão","Rã","Tatu","Lobo","Urso","Leão","Tigre","Puma","Boi",
+	"Vaca","Porco","Veado","Raposa","Foca","Baleia","Cobra","Corvo","Pato","Galo",
+	"Ema","Puma","Mico","Zebu","Anta","Onça","Guaxinim","Coala","Cabra","Ovelha"
 ];
 var menuAberto = null;
 var timerDequePesquisa = null;
@@ -30,7 +36,7 @@ var musicas = [];
 var musicaEmExecucao = null;
 var configSom = true;
 var configMusica = true;
-var configNome = "Jogador "+Math.floor(Math.random()*Number.MAX_SAFE_INTEGER);
+var configNome = "";
 
 var cookies = decodeURIComponent(document.cookie).split(";");
 cookies.forEach(_cookie=>{
@@ -64,7 +70,11 @@ labelConfigSom.textContent = "Sons: "+(inputConfigSom.checked?"SIM":"NÃO");
 labelConfigMusica.textContent = "Música: "+(inputConfigMusica.checked?"SIM":"NÃO");
 document.cookie = `configSom=${configSom?1:0}`;
 document.cookie = `configMusica=${configMusica?1:0}`;
-document.cookie = `configNome=${encodeURIComponent(configNome)}`;
+if (configNome=="") {
+	configNome = nomesAleatorios[Math.floor(Math.random()*(nomesAleatorios.length-1))] + "#" + Math.floor(Math.random()*999);
+	console.log(`Olá, ${configNome}!`);
+}
+//document.cookie = `configNome=${encodeURIComponent(configNome)}`;
 
 class Som {
 	constructor(_arquivo,_musica=false) {
@@ -162,6 +172,19 @@ function exibirDialogo(_id) {
 function esconderDialogo(_id) {
 	let dialogo = document.getElementById(_id);
 	dialogo.close();
+}
+function esconderTodosDialogos() {
+	let dialogos = document.getElementsByTagName("dialog");
+	for (let i = 0; i < dialogos.length; i++) {
+		if (dialogos[i].open) {
+			dialogos[i].close();
+		}
+	}
+}
+function exibirMensagem(_mensagem) {
+	esconderTodosDialogos();
+	pMensagemDialogMsg.textContent = _mensagem;
+	exibirDialogo("dialogMsg");
 }
 function carregarImagensMenu() {
 	fetch('getFundo.php')

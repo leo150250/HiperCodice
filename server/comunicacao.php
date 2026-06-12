@@ -31,9 +31,13 @@ class Timer {
 			$this->execucoes++;
 			call_user_func($this->funcao,$this);
 			if (!$this->_reexecutar) {
-				$this->__destruct();
+				$this->desativar();
 			}
 		}
+	}
+	public function desativar() {
+		verbose("Timer desativado\n");
+		$this->__destruct();
 	}
 	public function __destruct()
 	{
@@ -44,9 +48,9 @@ class Timer {
 			$timers = array_values($timers);
 		}
 	}
-	public function reexecutar() {
+	public function reexecutar($_novoMs = null) {
 		$this->_reexecutar = true;
-		$this->redefinir();
+		$this->redefinir($_novoMs);
 	}
 	public function redefinir($_novoMs = null) {
 		if ($_novoMs !== null) {
@@ -55,6 +59,10 @@ class Timer {
 		$this->horaInicio = new DateTime();
 		$this->horaExec = clone $this->horaInicio;
 		$this->horaExec->add(DateInterval::createFromDateString("{$this->ms}ms"));
+	}
+	public function resetar($_novoMs = null) {
+		$this->execucoes = 0;
+		$this->reexecutar($_novoMs);
 	}
 }
 function executaTimers() {
@@ -110,7 +118,8 @@ class Comm {
 					if ($renome != "") {
 						$novoJogador->renomear($renome);
 					}
-					global $Jogadores;
+					global $Jogadores, $timerInatividade;
+					$timerInatividade->resetar(10000);
 					$numJogadores = count($Jogadores);
 					$numProntos = count(array_filter($Jogadores, function($jogador) {
 						return $jogador->pronto;
@@ -128,7 +137,8 @@ class Comm {
 							]
 						]));
 					}
-					global $Jogadores;
+					global $Jogadores, $timerInatividade;
+					$timerInatividade->resetar(10000);
 					$numJogadores = count($Jogadores);
 					$numProntos = count(array_filter($Jogadores, function($jogador) {
 						return $jogador->pronto;
@@ -146,7 +156,8 @@ class Comm {
 							]
 						]));
 					}
-					global $Jogadores;
+					global $Jogadores, $timerInatividade;
+					$timerInatividade->resetar(10000);
 					$numJogadores = count($Jogadores);
 					$numProntos = count(array_filter($Jogadores, function($jogador) {
 						return $jogador->pronto;
@@ -155,22 +166,10 @@ class Comm {
 					break;
 				case "escolha":
 					verbose("Jogador {$from->resourceId} escolheu atributo {$args[0]}\n");
-					global $Jogadores;
-					global $timerProntidao;
-					global $atributoEscolhido;
-					global $jogadorDaVez;
+					global $Jogadores, $timerProntidao, $atributoEscolhido, $jogadorDaVez;
 					if ($this->jogadorConn($from) === $Jogadores[$jogadorDaVez]) {
 						$timerProntidao = 0;
 						$atributoEscolhido = $args[0];
-					}
-					foreach ($this->clients as $client) {
-						$client->send(json_encode([
-							"tipo"=>"escolha",
-							"conteudo"=>[
-								"resourceId"=>$from->resourceId,
-								"atributo"=>$atributoEscolhido
-							]
-						]));
 					}
 					break;
                 default:
@@ -200,7 +199,8 @@ class Comm {
 			$jogadorSaiu->quitar();
 		}
         unset($this->clients[(int)$conn->resourceId]);
-		global $emExecucao;
+		global $emExecucao, $timerInatividade;
+		$timerInatividade->resetar(10000);
 		if (!$emExecucao) {
 			global $Jogadores;
 			$numJogadores = count($Jogadores);
@@ -355,9 +355,9 @@ function heartBeat($_conn) {
 	}
 }
 function checarRodada() {
-	global $emExecucao, $Jogadores, $timerProntidao, $comm, $Deque, $encerrada, $jogadorDaVez, $atributoEscolhido;
+	global $emExecucao, $Jogadores, $timerProntidao, $comm, $Deque, $encerrada, $jogadorDaVez, $atributoEscolhido, $timerInatividade;
 	if (!$emExecucao) { //Estamos no Lobby ainda, aguardando todos os 2 ou mais jogadores ficarem prontos
-		if ($encerrada) { return false; } //Se for encerrada no lobby por algum motivo, faz a sala parar
+		if ($encerrada) { return false; } //Se for encerrada no lobby por algum motivo (inatividade, por exemplo), faz a sala parar
 		$numJogadores = count($Jogadores);
 		$numProntos = count(array_filter($Jogadores, function($jogador) {
 			return $jogador->pronto;
@@ -365,6 +365,7 @@ function checarRodada() {
 		if ($numJogadores > 1 && $numProntos == $numJogadores) {
 			if ($timerProntidao == -1) {
 				verbose("Todos os jogadores estão prontos.\n");
+				$timerInatividade->resetar(10000);
 				$timerProntidao = 3;
 				verbose("Iniciando em $timerProntidao...\n");
 				$comm->enviarMensagemTodos("Iniciando em $timerProntidao...");
@@ -381,10 +382,20 @@ function checarRodada() {
 				//Faz nada. Espera os timers!
 			} else {
 				$comm->enviarMensagemTodos("Iniciando partida...");
+				$timerInatividade->resetar(10000);
 				$emExecucao = true;
 				$timerProntidao = -1;
+				$infoJogadores = [];
+				foreach ($Jogadores as $jogador) {
+					$novaInfo = [
+						"resourceId"=>$jogador->conexao->resourceId,
+						"nome"=>$jogador->nome
+					];
+					array_push($infoJogadores,$novaInfo);
+				}
 				foreach ($Jogadores as $jogador) {
 					$comm->enviarComm($jogador->conexao,"deque",$Deque->json());
+					$comm->enviarComm($jogador->conexao,"jogadores",$infoJogadores);
 				}
 				embaralharEDistribuirCartas();
 				exibirCartasJogadores();
@@ -394,6 +405,7 @@ function checarRodada() {
 				verbose("Iniciativa cancelada. Aguardando todos os jogadores ficarem prontos...\n");
 				$comm->enviarMensagemTodos("Iniciativa cancelada. Aguardando todos os jogadores ficarem prontos...");
 				$timerProntidao = -1;
+				$timerInatividade->resetar(10000);
 			}
 		}
 		return true;
@@ -419,20 +431,36 @@ function checarRodada() {
 					"resourceId"=>$Jogadores[$jogadorDaVez]->conexao->resourceId,
 				]);
 				$timerProntidao = 30;
+				new Timer(function($_this){
+					global $timerProntidao;
+					if ($timerProntidao > 0) {
+						$timerProntidao--;
+						if ($timerProntidao <= 5 && $timerProntidao > 0) {
+							verbose("Vai ser escolhido um atributo em {$timerProntidao}...\n");
+						}
+						$_this->reexecutar();
+					}
+				},1000);
 			} else {
-				if ($timerProntidao <= 5 && $timerProntidao > 0) {
-					verbose("Vai ser escolhido um atributo em {$timerProntidao}...\n");
-				}
-				if ($timerProntidao > 0) {
-					$timerProntidao--;
-				}
-				if ($timerProntidao == 0) {
+				if ($timerProntidao <= 0) {
 					if ($atributoEscolhido == -1) {
 						$atributoEscolhido = rand(0, count($Deque->atributos) - 1);
 					}
+					$cartasJogadores = [];
+					foreach ($Jogadores as $jogador) {
+						$novaCartaJogadores = [];
+						$novaCartaJogadores["jogador"] = $jogador->conexao->resourceId;
+						foreach ($Deque->cartas as $indice => $carta) {
+							if ($carta === $jogador->cartaAtual()) {
+								$novaCartaJogadores["carta"] = $indice;
+							}
+						}
+						array_push($cartasJogadores,$novaCartaJogadores);
+					}
 					$comm->enviarCommTodos("escolha",[
 						"resourceId"=>$Jogadores[$jogadorDaVez]->conexao->resourceId,
-						"atributo"=>$atributoEscolhido
+						"atributo"=>$atributoEscolhido,
+						"cartasJogadores"=>$cartasJogadores
 					]);
 					$encerrada = !girarRodada($atributoEscolhido);
 					$timerProntidao = -1;

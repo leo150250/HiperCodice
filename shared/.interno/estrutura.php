@@ -206,11 +206,10 @@ class Jogador {
 	}
 	public function quitar() {
 		global $Jogadores;
-		foreach ($Jogadores as $index => $jogador) {
-			if ($jogador === $this) {
-				array_splice($Jogadores, $index, 1);
-				break;
-			}
+		$indice = array_search($this, $Jogadores, true);
+		if ($indice !== false) {
+			unset ($Jogadores[$indice]);
+			$Jogadores = array_values($Jogadores);
 		}
 		verbose("Jogador {$this->nome} quitou da partida.\n");
 	}
@@ -449,7 +448,7 @@ function girarRodada($_atributoEscolhido) {
 		$jogadoresVencedores[0]->cartaAtual()->info();
 	}
 	verbose("\n");
-	sleep(1);
+	sleep(6);
 	//O vencedor da rodada recebe as cartas dos outros jogadores (primeiro as cartas dos outros jogadores, depois a sua própria carta) e as coloca no final do seu deque. Os outros jogadores perdem a carta da vez.
 	foreach ($Jogadores as $jogador) {
 		if (!$jogador->ativo) {
