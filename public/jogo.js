@@ -314,5 +314,5 @@ function executarRodada() {
 	},tempoExibirCartaVencedor);
 	setTimeout(zerarElementosRodada,tempoExecucao);
 	
-	verificarVencedor(jogadoresVencedores[0]);
+	verificarVencedor(jogadoresVencedores[0],tempoExecucao);
 }

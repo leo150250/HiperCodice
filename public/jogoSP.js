@@ -130,7 +130,7 @@ function executarJogador(_jogadorCPU) {
 	setTimeout(executarRodada,4000);
 }
 
-function verificarVencedor(_jogadorVencedor) {
+function verificarVencedor(_jogadorVencedor, _tempoExecucao) {
 	//Enviar as cartas dos perdedores para o vencedor
 	let numJogadoresAtivos = 0;
 	let cartasGanhas = [];
@@ -142,7 +142,7 @@ function verificarVencedor(_jogadorVencedor) {
 		numJogadoresAtivos++;
 		if (_jogador !== _jogadorVencedor) {
 			cartasGanhas.push(_jogador.cartaAtual());
-			jogadoresVencedores[0].adicionarCarta(_jogador.removerCartaAtual());
+			_jogadorVencedor.adicionarCarta(_jogador.removerCartaAtual());
 			if (_jogador.cartas.length == 0) {
 				_jogador.perder();
 				console.log(`Jogador ${_jogador.nome} eliminado!`);
@@ -212,6 +212,6 @@ function verificarVencedor(_jogadorVencedor) {
 				spanResultadoTempo.textContent = obterTempoDaPartida();
 				exibirDialogo('dialogPartidaEncerrada');
 			}
-		},tempoExecucao);
+		},_tempoExecucao);
 	}
 }

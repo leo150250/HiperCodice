@@ -252,7 +252,7 @@ function carregarJogoMP() {
 		carregarScript("jogoMP",()=>{
 			divJogo.style.display=null;
 			clearInterval(atualizacaoImagemMenu);
-			iniciarJogoMP("127.0.0.1",15000);
+			iniciarJogoMP(prompt("Digite o endereço IP do servidor:","localhost"),15000);
 		});
 	});
 }

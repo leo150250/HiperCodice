@@ -385,11 +385,14 @@ function checarRodada() {
 				$timerInatividade->resetar(10000);
 				$emExecucao = true;
 				$timerProntidao = -1;
+				embaralharEDistribuirCartas();
+				exibirCartasJogadores();
 				$infoJogadores = [];
 				foreach ($Jogadores as $jogador) {
 					$novaInfo = [
 						"resourceId"=>$jogador->conexao->resourceId,
-						"nome"=>$jogador->nome
+						"nome"=>$jogador->nome,
+						"qtdCartas"=>count($jogador->cartas)
 					];
 					array_push($infoJogadores,$novaInfo);
 				}
@@ -397,8 +400,6 @@ function checarRodada() {
 					$comm->enviarComm($jogador->conexao,"deque",$Deque->json());
 					$comm->enviarComm($jogador->conexao,"jogadores",$infoJogadores);
 				}
-				embaralharEDistribuirCartas();
-				exibirCartasJogadores();
 			}
 		} else {
 			if ($timerProntidao != -1) {
@@ -443,8 +444,10 @@ function checarRodada() {
 				},1000);
 			} else {
 				if ($timerProntidao <= 0) {
+					$autoEscolha = false;
 					if ($atributoEscolhido == -1) {
 						$atributoEscolhido = rand(0, count($Deque->atributos) - 1);
+						$autoEscolha = true;
 					}
 					$cartasJogadores = [];
 					foreach ($Jogadores as $jogador) {
@@ -460,7 +463,8 @@ function checarRodada() {
 					$comm->enviarCommTodos("escolha",[
 						"resourceId"=>$Jogadores[$jogadorDaVez]->conexao->resourceId,
 						"atributo"=>$atributoEscolhido,
-						"cartasJogadores"=>$cartasJogadores
+						"cartasJogadores"=>$cartasJogadores,
+						"autoEscolha"=>$autoEscolha
 					]);
 					$encerrada = !girarRodada($atributoEscolhido);
 					$timerProntidao = -1;

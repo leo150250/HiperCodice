@@ -48,14 +48,21 @@ class Comm {
 				this.socket.close();
 			} break;
 			case "deque": {
+				numRodadas = 0;
+				dataHoraInicio = new Date();
+				setInterval(()=>{
+					divTimer.textContent = `⏱️${obterTempoDaPartida()}`;
+				},1000);
+				zerarElementosRodada();
 				gerarDequeJSON(resposta.conteudo);
 				defineFundo(deque.id);
-				esconderTodosDialogos();
 				executarMusicaAleatoria();
+				esconderTodosDialogos();
 			} break;
 			case "jogadores": {				
 				for (let i = 0; i < resposta.conteudo.length; i++) {
-					criarNovoJogador(resposta.conteudo[i].nome,resposta.conteudo[i].resourceId);
+					let novoJogador = criarNovoJogador(resposta.conteudo[i].nome,resposta.conteudo[i].resourceId);
+					novoJogador.qtdCartas = resposta.conteudo[i].qtdCartas;
 				}
 			} break;
 			case "carta": {
@@ -112,7 +119,7 @@ class Comm {
 					destacarAtributo(atributoEscolhido);
 					executarSom("attrib.wav");
 				}
-				executarRodada();
+				setTimeout(executarRodada,3000);
 			} break;
 		}
 	}
@@ -172,4 +179,89 @@ function executarJogador(_jogador) {
 
 function executarEscolha(_id) {
 	comm.enviarMensagem(`\\escolha ${_id}`);
+}
+
+function verificarVencedor(_jogadorVencedor,_tempoExecucao) {
+	//Enviar as cartas dos perdedores para o vencedor
+	let numJogadoresAtivos = 0;
+	let cartasGanhas = [];
+	jogadores.forEach(_jogador=>{
+		if (!_jogador.ativo) {
+			return;
+		}
+		let numDiferencaCartas = -_jogador.qtdCartas;
+		numJogadoresAtivos++;
+		if (_jogador !== _jogadorVencedor) {
+			cartasGanhas.push(_jogador.cartaAtual());
+			_jogadorVencedor.qtdCartas++;
+			_jogador.qtdCartas--;
+			if (_jogador.qtdCartas == 0) {
+				_jogador.perder();
+				console.log(`Jogador ${_jogador.nome} eliminado!`);
+				numJogadoresAtivos--;
+			}
+		}
+		numDiferencaCartas += _jogador.qtdCartas;
+		setTimeout(()=>{
+			if (_jogador == jogadores[idJogador]) {
+				if (jogadores[idJogador] == _jogadorVencedor) {
+					numDiferencaCartas = numJogadoresAtivos-1;
+					for (let i = 0; i < cartasGanhas.length; i++) {
+						let divCartaGanha = divCartaJogador.appendChild(cartasGanhas[i].desenhar());
+						divCartaGanha.classList.add("adquirida");
+						divCartaGanha.style.animationDelay = (i/4) + "s";
+						setTimeout(()=>{
+							executarSom("cardAdd.wav");
+						},500 + ((i/4) * 1000));
+						let posicaoCarta = (-(cartasGanhas.length - 1) / 2) + i;
+						posicaoCarta *= 100;
+						console.log(`Posição: ${posicaoCarta}`);
+						divCartaGanha.style.transform = `rotate(${-5+(Math.random()*10)}deg) scale(0.8) translate(${posicaoCarta}%,0%)`;
+					};
+				}
+				if (numDiferencaCartas>0) {
+					divFxDifCartasJogador.textContent = "+";
+					divFxDifCartasJogador.style.backgroundColor = "#26b32b";
+				} else {
+					divFxDifCartasJogador.textContent = "-";
+					divFxDifCartasJogador.style.backgroundColor = "#b32626";
+				}
+				divFxDifCartasJogador.style.display = "block";
+				setTimeout(()=>{
+					divFxDifCartasJogador.style.display = null;
+				},2500);
+				divFxDifCartasJogador.textContent += Math.abs(numDiferencaCartas);
+				divNumCartasJogador.textContent = `🃏${_jogador.qtdCartas}`;
+			}
+		},100);
+	});
+	_jogadorVencedor.adicionarCarta(_jogadorVencedor.removerCartaAtual());
+
+	if (numJogadoresAtivos == 1) {
+		console.log(`Jogador ${_jogadorVencedor.nome} venceu a partida!`);
+		if (_jogadorVencedor == jogadores[idJogador]) {
+			divMensagemJogador.textContent = `Você venceu!`;
+			spanResultadoPartida.textContent = "venceu";
+			spanResultadoDeque.textContent = `${deque.nome} (#${deque.id})`;
+			spanResultadoRodadas.textContent = numRodadas;
+			spanResultadoTempo.textContent = obterTempoDaPartida();
+			exibirDialogo('dialogPartidaEncerrada');
+		}
+	} else {
+		setTimeout(()=>{
+			divNumJogadores.textContent = `👥${numJogadoresAtivos}`;
+			if (jogadores[idJogador].ativo) {
+				cartaJogadorDesenhada = exibirCarta(jogadores[idJogador].cartaAtual().id);
+			} else {
+				jogadores[idJogador].perder();
+				divMensagemJogador.textContent = `Você perdeu!`;
+				console.log("GAME OVER!! Você perdeu!");
+				spanResultadoPartida.textContent = "perdeu";
+				spanResultadoDeque.textContent = `${deque.nome} (#${deque.id})`;
+				spanResultadoRodadas.textContent = numRodadas;
+				spanResultadoTempo.textContent = obterTempoDaPartida();
+				exibirDialogo('dialogPartidaEncerrada');
+			}
+		},_tempoExecucao);
+	}
 }
