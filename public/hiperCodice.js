@@ -245,14 +245,14 @@ function carregarJogoSP(_personalizado = false) {
 		});
 	});
 }
-function carregarJogoMP() {
+function carregarJogoMP(_JSONdeque) {
 	fecharMenu();
 	exibirDialogo("carregando");
 	carregarScript("jogo",()=>{
 		carregarScript("jogoMP",()=>{
 			divJogo.style.display=null;
 			clearInterval(atualizacaoImagemMenu);
-			iniciarJogoMP(prompt("Digite o endereço IP do servidor:","localhost"),15000);
+			iniciarJogoMP(_JSONdeque);
 		});
 	});
 }

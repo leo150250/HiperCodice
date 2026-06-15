@@ -340,6 +340,103 @@ class Jogador {
 	}
 }
 
+class Comm {
+	constructor(_servidor,_porta) {
+		this.servidor = _servidor;
+		this.porta = _porta;
+		this.filaMensagem = [];
+		this.processandoFila = false;
+		this.filaEspera = 200;
+		this.pronto = false;
+		console.log(this.filaMensagem);
+
+		console.log(`Conectando em ${this.servidor}:${this.porta}...`);
+		this.socket = new WebSocket(`ws://${this.servidor}:${this.porta}`);
+		this.socket.onopen = () => {
+			console.log("Conectado!");
+			this.pronto = true;
+			comm = this;
+		};
+		this.socket.onmessage = (_evento) => {
+			this.respostaServidor(_evento);
+		}
+		this.socket.onerror = (_erro) => {
+			console.error("Erro na conexão:", _erro);
+			exibirMensagem(`O servidor não retornou resposta.`);
+		};
+		this.socket.onclose = (_ev) => {
+			console.log("Desconectado do servidor", _ev);
+			if (this.pronto) {
+				exibirMensagem(`Você foi desconectado do servidor.`);
+			}
+		};
+	}
+	respostaServidor(_evento) {
+		let resposta = JSON.parse(_evento.data);
+		console.log("<== RECEBIDO:",resposta);
+		switch (resposta.tipo) {
+			case "welcome": {
+				meuId = resposta.conteudo.resourceId;
+				this.enviarMensagem(`\\thnx ${configNome}`);
+				this.enviarMensagem(`\\ready`);
+			} break;
+			case "goaway": {
+				this.pronto = false;
+				exibirMensagem(`Não foi possível conectar: ${resposta.conteudo.msg}`);
+				this.socket.close();
+			} break;
+			case "deque": {
+				carregarJogoMP(resposta.conteudo);
+			} break;
+			case "jogadores": {	
+				gerarJogadores(resposta.conteudo);
+			} break;
+			case "carta": {
+				carregarCartas(resposta.conteudo);
+			} break;
+			case "jogar": {
+				rodada(resposta.conteudo.resourceId);
+			} break;
+			case "escolha": {
+				processarEscolha(resposta.conteudo);
+			} break;
+		}
+	}
+	enviarMensagem(_mensagem) {
+		console.log("Enviando mensagem...");
+		this.filaMensagem.push(_mensagem);
+		setTimeout(()=>{
+			this.processarFilaMensagem();
+		},10);
+	}
+	processarFilaMensagem() {
+		if (this.filaMensagem.length == 0) {
+			this.processandoFila = false;
+		}
+		if (this.processandoFila) {
+			console.log("Tô processando...",this.filaMensagem);
+			return;
+		}
+		if (this.filaMensagem.length > 0) {
+			this.processandoFila = true;
+			this._enviarProximaMensagem();
+		}
+	}
+	_enviarProximaMensagem() {
+		if (this.socket.readyState === WebSocket.OPEN) {
+			console.log("ENVIANDO ==>", this.filaMensagem[0]);
+			this.socket.send(this.filaMensagem.shift());
+			if (this.filaMensagem.length == 0) {
+				this.processandoFila = false;
+			} else {
+				setTimeout(()=>{
+					this._enviarProximaMensagem();
+				},this.filaEspera);
+			}
+		}
+	}
+}
+
 function gerarDequeJSON(_json) {
 	//console.log(_json);
 
@@ -369,6 +466,6 @@ function gerarDequeJSON(_json) {
 		}
 	});
 
-	console.log(deque);
+	//console.log(deque);
 	//deque.info();
 }
