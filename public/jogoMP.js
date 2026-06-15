@@ -59,7 +59,7 @@ class Comm {
 				executarMusicaAleatoria();
 				esconderTodosDialogos();
 			} break;
-			case "jogadores": {				
+			case "jogadores": {	
 				for (let i = 0; i < resposta.conteudo.length; i++) {
 					let novoJogador = criarNovoJogador(resposta.conteudo[i].nome,resposta.conteudo[i].resourceId);
 					novoJogador.qtdCartas = resposta.conteudo[i].qtdCartas;
@@ -251,7 +251,7 @@ function verificarVencedor(_jogadorVencedor,_tempoExecucao) {
 		setTimeout(()=>{
 			divNumJogadores.textContent = `👥${numJogadoresAtivos}`;
 			if (jogadores[idJogador].ativo) {
-				cartaJogadorDesenhada = exibirCarta(jogadores[idJogador].cartaAtual().id);
+				divMensagemJogador.textContent = "Aguardando o servidor...";
 			} else {
 				jogadores[idJogador].perder();
 				divMensagemJogador.textContent = `Você perdeu!`;

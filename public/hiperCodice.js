@@ -261,7 +261,8 @@ function paginaCarregada() {
 	setTimeout(()=>{
 		abrirMenu("Inicio");
 	},2000);
-	carregarJogoMP();
+	conectarLobby("localhost",15000);
+	//carregarJogoMP();
 }
 function reiniciarJogo() {
 	document.location.reload();
