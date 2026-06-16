@@ -101,8 +101,36 @@
 			<button onclick="reiniciarJogo()">OK</button>
 		</div>
 	</dialog>
+	<dialog id="dialogSalasMP">
+		<h1>Partidas multiplayer</h1>
+	</dialog>
+	<dialog id="dialogLobby">
+		<h1>Lobby</h1>
+		<div id="wrapperLobby">
+			<div id="lobbyJogadores">
+				<div class="local">Jogador</div>
+				<div>Jogador</div>
+				<div class="pronto">Jogador</div>
+			</div>
+			<div id="lobbyConfig">
+				<p><label for="inputLobbyJogador">Seu nome:</label>
+				<input id="inputLobbyJogador" type="text"></p>
+				<p><label for="inputLobbyNome">Nome da sala:</label>
+				<input id="inputLobbyNome" type="text"></p>
+			</div>
+			<div id="lobbyDeque"></div>
+			<div id="lobbyChat">
+				<div id="lobbyMsgs"></div>
+				<p><input type="text" placeholder="Digite sua mensagem. ENTER para enviar"><button>Enviar</button></p>
+			</div>
+		</div>
+		<div class="botoes">
+			<button id="btnLobbyPronto" onclick="">Pronto</button>
+			<button onclick="reiniciarJogo()">Sair</button>
+		</div>
+	</dialog>
 	<dialog id="carregando">
-		<h1>Carregando</h1>
+		<h1 id="h1Carregando">Carregando</h1>
 		<div class="loader">HC</div>
 	</dialog>
 	<dialog id="dialogMsg">

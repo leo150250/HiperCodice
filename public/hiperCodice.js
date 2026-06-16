@@ -12,6 +12,11 @@ const inputNumCPUsSPPers = document.getElementById("inputNumCPUsSPPers");
 const buttonIniciarSPPersonalizado = document.getElementById("buttonIniciarSPPersonalizado");
 const divJogo = document.getElementById("jogo");
 const pMensagemDialogMsg = document.getElementById("mensagemDialogMsg");
+const h1Carregando = document.getElementById("h1Carregando");
+const inputLobbyJogador = document.getElementById("inputLobbyJogador");
+const inputLobbyNome = document.getElementById("inputLobbyNome");
+const divLobbyJogadores = document.getElementById("lobbyJogadores");
+const divLobbyDeque = document.getElementById("lobbyDeque");
 
 var cores = [
 	["#F44336","#8b0000f8","#4f0000f8"],
@@ -37,6 +42,12 @@ var musicaEmExecucao = null;
 var configSom = true;
 var configMusica = true;
 var configNome = "";
+
+var comm = null;
+var pronto = false;
+var meuId = 0;
+var nomeLobby = "";
+var dequeLobby = null;
 
 var cookies = decodeURIComponent(document.cookie).split(";");
 cookies.forEach(_cookie=>{
@@ -186,6 +197,17 @@ function exibirMensagem(_mensagem) {
 	pMensagemDialogMsg.textContent = _mensagem;
 	exibirDialogo("dialogMsg");
 }
+function exibirCarregamento(_mensagem="Carregando") {
+	h1Carregando.textContent = _mensagem;
+	exibirDialogo("carregando");
+}
+function exibirLobby() {
+	if (!comm.pronto) {
+		exibirMensagem("Lobby desconectado");
+		return;
+	}
+	exibirDialogo("dialogLobby");
+}
 function carregarImagensMenu() {
 	fetch('getFundo.php')
 		.then(response => response.json())
@@ -232,7 +254,7 @@ function carregarScript(_script,_callback=()=>{}) {
 }
 function carregarJogoSP(_personalizado = false) {
 	fecharMenu();
-	exibirDialogo("carregando");
+	exibirCarregamento();
 	carregarScript("jogo",()=>{
 		carregarScript("jogoSP",()=>{
 			divJogo.style.display=null;
@@ -247,7 +269,7 @@ function carregarJogoSP(_personalizado = false) {
 }
 function carregarJogoMP(_JSONdeque) {
 	fecharMenu();
-	exibirDialogo("carregando");
+	exibirCarregamento();
 	carregarScript("jogo",()=>{
 		carregarScript("jogoMP",()=>{
 			divJogo.style.display=null;
@@ -263,6 +285,12 @@ function paginaCarregada() {
 	},2000);
 	conectarLobby("localhost",15000);
 	//carregarJogoMP();
+}
+function conectarLobby(_servidor,_porta) {
+	exibirCarregamento("Conectando");
+	new Comm(_servidor,_porta,()=>{
+		exibirLobby();
+	});
 }
 function reiniciarJogo() {
 	document.location.reload();

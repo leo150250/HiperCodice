@@ -1,7 +1,3 @@
-var comm = null;
-var pronto = false;
-var meuId = 0;
-
 function iniciarJogoMP(_JSONdeque) {
 	numRodadas = 0;
 	dataHoraInicio = new Date();
@@ -123,6 +119,7 @@ function conectarServidor(_servidor,_porta) {
 	new Comm(_servidor,_porta);
 }
 function gerarJogadores(_jogadoresServidor) {
+	jogadores = [];
 	for (let i = 0; i < _jogadoresServidor.length; i++) {
 		let novoJogador = criarNovoJogador(_jogadoresServidor[i].nome,_jogadoresServidor[i].resourceId);
 		novoJogador.qtdCartas = _jogadoresServidor[i].qtdCartas;

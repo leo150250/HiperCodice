@@ -341,13 +341,15 @@ class Jogador {
 }
 
 class Comm {
-	constructor(_servidor,_porta) {
+	constructor(_servidor,_porta,_callback=null) {
 		this.servidor = _servidor;
 		this.porta = _porta;
+		this.callback = _callback;
 		this.filaMensagem = [];
 		this.processandoFila = false;
 		this.filaEspera = 200;
 		this.pronto = false;
+		this.callbacks = [];
 		console.log(this.filaMensagem);
 
 		console.log(`Conectando em ${this.servidor}:${this.porta}...`);
@@ -356,6 +358,9 @@ class Comm {
 			console.log("Conectado!");
 			this.pronto = true;
 			comm = this;
+			if (this.callback != null) {
+				this.callback();
+			}
 		};
 		this.socket.onmessage = (_evento) => {
 			this.respostaServidor(_evento);
@@ -378,33 +383,81 @@ class Comm {
 			case "welcome": {
 				meuId = resposta.conteudo.resourceId;
 				this.enviarMensagem(`\\thnx ${configNome}`);
-				this.enviarMensagem(`\\ready`);
+				exibirDialogo("dialogLobby");
+				//this.enviarMensagem(`\\ready`);
+			} break;
+			case "lobby": {
+				nomeLobby = resposta.conteudo.nome;
+				inputLobbyNome.value = nomeLobby;
+				inputLobbyJogador.value = configNome;
+				divLobbyDeque.innerHTML = "";
+				dequeLobby = new Deque(resposta.conteudo.deque);
+				let divLobbyDequeBotao = dequeLobby.desenhar();
+				divLobbyDeque.appendChild(divLobbyDequeBotao);
+				let atributosLobby = resposta.conteudo.atributos.split(",");
+				atributosLobby.forEach(_atributoLobby => {
+					let novoAtributo = new Atributo(dequeLobby,parseInt(_atributoLobby));
+					dequeLobby.atributos.push(novoAtributo);
+				});
+				jogadores = [];
+				divLobbyJogadores.innerHTML = "";
+				for (let i = 0; i < resposta.conteudo.jogadores.length; i++) {
+					let novoJogador = new Jogador(resposta.conteudo.jogadores[i].nome,false,resposta.conteudo.jogadores[i].resourceId);
+					novoJogador.pronto = resposta.conteudo.jogadores[i].pronto;
+					let divNovoJogador = document.createElement("div");
+					if (novoJogador.conexao == meuId) {
+						divNovoJogador.classList.add("local");
+					}
+					if (novoJogador.pronto) {
+						divNovoJogador.classList.add("pronto");
+					}
+					divNovoJogador.textContent = novoJogador.nome;
+					divLobbyJogadores.appendChild(divNovoJogador);
+				}
 			} break;
 			case "goaway": {
 				this.pronto = false;
 				exibirMensagem(`Não foi possível conectar: ${resposta.conteudo.msg}`);
 				this.socket.close();
 			} break;
-			case "deque": {
+			case "deque": { //SalaMP
 				carregarJogoMP(resposta.conteudo);
 			} break;
-			case "jogadores": {	
+			case "jogadores": {	//SalaMP
 				gerarJogadores(resposta.conteudo);
 			} break;
-			case "carta": {
+			case "carta": { //SalaMP
 				carregarCartas(resposta.conteudo);
 			} break;
-			case "jogar": {
+			case "jogar": { //SalaMP
 				rodada(resposta.conteudo.resourceId);
 			} break;
-			case "escolha": {
+			case "escolha": { //SalaMP
 				processarEscolha(resposta.conteudo);
+			} break;
+			case "callback": {
+				for (let indice in this.callbacks) {
+					if (!Object.prototype.hasOwnProperty.call(this.callbacks, indice)) {
+						continue;
+					}
+					if (indice === resposta.callback) {
+						const callback = this.callbacks[indice];
+						if (typeof callback === "function") {
+							callback(resposta.conteudo);
+						}
+						delete this.callbacks[indice];
+						break;
+					}
+				}
 			} break;
 		}
 	}
-	enviarMensagem(_mensagem) {
+	enviarMensagem(_mensagem,_callback = null) {
 		console.log("Enviando mensagem...");
 		this.filaMensagem.push(_mensagem);
+		if (_callback != null) {
+			this.callbacks[_mensagem] = _callback;
+		}
 		setTimeout(()=>{
 			this.processarFilaMensagem();
 		},10);

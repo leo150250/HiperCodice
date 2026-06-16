@@ -125,6 +125,7 @@ class Comm {
 						return $jogador->pronto;
 					}));
 					verbose("Jogadores prontos: {$numProntos} / {$numJogadores}\n");
+					enviarInfoLobby();
 					break;
 				case "ready":
 					verbose("Jogador {$from->resourceId} está pronto para iniciar a partida.\n");
@@ -144,6 +145,7 @@ class Comm {
 						return $jogador->pronto;
 					}));
 					verbose("Jogadores prontos: {$numProntos} / {$numJogadores}\n");
+					enviarInfoLobby();
 					break;
 				case "notready":
 					verbose("Jogador {$from->resourceId} não está mais pronto.\n");
@@ -163,6 +165,7 @@ class Comm {
 						return $jogador->pronto;
 					}));
 					verbose("Jogadores prontos: {$numProntos} / {$numJogadores}\n");
+					enviarInfoLobby();
 					break;
 				case "escolha":
 					verbose("Jogador {$from->resourceId} escolheu atributo {$args[0]}\n");
@@ -208,6 +211,7 @@ class Comm {
 				return $jogador->pronto;
 			}));
 			verbose("Jogadores prontos: {$numProntos} / {$numJogadores}\n");
+			enviarInfoLobby();
 		}
         verbose("Conexão ({$conn->resourceId}) fechada\n");
     }
@@ -495,6 +499,26 @@ function checarRodada() {
 }
 function checarDesconexoes() {
 
+}
+function enviarInfoLobby() {
+	global $Jogadores, $comm;
+	$infoJogadores = [];
+	foreach ($Jogadores as $jogador) {
+		$novaInfo = [
+			"resourceId"=>$jogador->conexao->resourceId,
+			"nome"=>$jogador->nome,
+			"pronto"=>$jogador->pronto
+		];
+		array_push($infoJogadores,$novaInfo);
+	}
+	foreach ($Jogadores as $jogador) {
+		$comm->enviarComm($jogador->conexao,"lobby",[
+			"nome"=>"Lobby",
+			"deque"=>1,
+			"atributos"=>"1,2,3,4,5,6",
+			"jogadores"=>$infoJogadores
+		]);
+	}
 }
 
 function perform_handshaking($received_header, $client_conn, $host, $port) {

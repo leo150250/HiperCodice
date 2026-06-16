@@ -930,6 +930,61 @@ input[type="checkbox"]:checked + label {
 	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
+#wrapperLobby {
+	display: flex;
+	width: fit-content;
+	flex-wrap: wrap;
+}
+
+#wrapperLobby #lobbyJogadores {
+	flex-basis: 200px;
+	flex-shrink: 0;
+	height: stretch;
+	flex-grow: 1;
+	border: 1px solid #8884;
+	margin: 1em 1em 1em 0px;
+}
+#wrapperLobby #lobbyJogadores > div {
+	border-bottom: 1px solid #8884;
+	padding: 0.25em 0.5em;
+	width: stretch;
+}
+#wrapperLobby #lobbyJogadores > div.local {
+	color: #FF0;
+	font-weight: bold;
+}
+#wrapperLobby #lobbyJogadores > div.local::after {
+	content: " (você)";
+	font-size: 0.75em;
+	color: #FF0;
+	vertical-align: middle;
+}
+#wrapperLobby #lobbyJogadores > div.pronto {
+	background-color: #004700;
+}
+#wrapperLobby #lobbyConfig input[type="text"] {
+	width: stretch;
+}
+
+#wrapperLobby #lobbyChat {
+	flex-basis: 100%;
+}
+
+#lobbyChat #lobbyMsgs {
+	height: 200px;
+	overflow-y: scroll;
+	border: 1px solid #8884;
+	padding: 10px;
+}
+#lobbyChat #lobbyMsgs+p {
+	display: flex;
+	margin-top: 0px;
+}
+#lobbyChat #lobbyMsgs+p input[type="text"] {
+	flex-grow: 1;
+	margin-right: 10px;
+}
+
 @media only screen and (max-width: 800px) {
 	#menu {
 		left: 0px;
