@@ -383,18 +383,16 @@ class Comm {
 			case "welcome": {
 				meuId = resposta.conteudo.resourceId;
 				this.enviarMensagem(`\\thnx ${configNome}`);
-				exibirDialogo("dialogLobby");
-				//this.enviarMensagem(`\\ready`);
 			} break;
 			case "lobby": {
 				nomeLobby = resposta.conteudo.nome;
 				inputLobbyNome.value = nomeLobby;
 				inputLobbyJogador.value = configNome;
 				divLobbyDeque.innerHTML = "";
-				dequeLobby = new Deque(resposta.conteudo.deque);
+				dequeLobby = new Deque(resposta.conteudo.deque.id, resposta.conteudo.deque.nome, resposta.conteudo.deque.descricao);
 				let divLobbyDequeBotao = dequeLobby.desenhar();
 				divLobbyDeque.appendChild(divLobbyDequeBotao);
-				let atributosLobby = resposta.conteudo.atributos.split(",");
+				let atributosLobby = resposta.conteudo.deque.atributos.split(",");
 				atributosLobby.forEach(_atributoLobby => {
 					let novoAtributo = new Atributo(dequeLobby,parseInt(_atributoLobby));
 					dequeLobby.atributos.push(novoAtributo);
@@ -419,6 +417,27 @@ class Comm {
 				this.pronto = false;
 				exibirMensagem(`Não foi possível conectar: ${resposta.conteudo.msg}`);
 				this.socket.close();
+			} break;
+			case "msg": {
+				let novoChat = document.createElement("div");
+				let nomeRemetente = "";
+				if (resposta.conteudo.remetente == meuId) {
+					novoChat.classList.add("local");
+					nomeRemetente = "Você diz:";
+				} else if (resposta.conteudo.remetente == -1) {
+					//Se for -1, é mensagem do servidor. Não tem remetente.
+					novoChat.classList.add("servidor");
+				} else {
+					jogadores.forEach(_jogador => {
+						if (_jogador.conexao == resposta.conteudo.remetente) {
+							nomeRemetente = `${_jogador.nome} diz:`;
+							return;
+						}
+					});
+				}
+				novoChat.textContent = `${nomeRemetente} ${resposta.conteudo.msg}`;
+				divLobbyMsgs.appendChild(novoChat);
+				novoChat.scrollIntoView();
 			} break;
 			case "deque": { //SalaMP
 				carregarJogoMP(resposta.conteudo);

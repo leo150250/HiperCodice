@@ -17,9 +17,11 @@ class Deque {
 	public $cartas = [];
 	public $id = 0;
 	public $nome = "Deque";
-	public function __construct($_id,$_nome) {
+	public $descricao = "";
+	public function __construct($_id,$_nome,$_descricao = "") {
 		$this->id = $_id;
 		$this->nome = $_nome;
+		$this->descricao = $_descricao;
 	}
 	public function info() {
 		verbose("Deque: ".$this->nome." (ID: ".$this->id.")\n");
@@ -235,7 +237,7 @@ function construirDeque($_id,$_numAtributos=6,$_atributos=[]) {
 		die("Deque não encontrado.");
 	}
 	$regDeque = BD_fetch($resDeque);
-	$Deque = new Deque($regDeque['id'], $regDeque['nome']);
+	$Deque = new Deque($regDeque['id'], $regDeque['nome'], $regDeque['descricao']);
 	$queryAtributos = "";
 	if (implode("",$_atributos)=="") {
 		$_atributos = [];

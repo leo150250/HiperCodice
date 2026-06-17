@@ -117,15 +117,21 @@
 				<input id="inputLobbyJogador" type="text"></p>
 				<p><label for="inputLobbyNome">Nome da sala:</label>
 				<input id="inputLobbyNome" type="text"></p>
+				<p><label for="inputLobbyLinkSala">Link da sala:</label>
+				<input id="inputLobbyLinkSala" type="url" readonly value="..." title="Clique para copiar o link"></p>
 			</div>
 			<div id="lobbyDeque"></div>
 			<div id="lobbyChat">
-				<div id="lobbyMsgs"></div>
-				<p><input type="text" placeholder="Digite sua mensagem. ENTER para enviar"><button>Enviar</button></p>
+				<div id="lobbyMsgs">
+					<div>Fulano diz: E aí, tem alguém aqui?</div>
+					<div class="local">Você diz: Opa, sim estou!</div>
+					<div>Fulano diz: Ah, ótimo! Não estou sozinho aqui!</div>
+				</div>
+				<p><input type="text" id="inputLobbyChat" placeholder="Digite sua mensagem, ENTER para enviar"><button onclick="enviarChat()">Enviar</button></p>
 			</div>
 		</div>
 		<div class="botoes">
-			<button id="btnLobbyPronto" onclick="">Pronto</button>
+			<button id="buttonLobbyPronto" onclick="alternarProntidao()">Pronto</button>
 			<button onclick="reiniciarJogo()">Sair</button>
 		</div>
 	</dialog>

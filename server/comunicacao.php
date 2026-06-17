@@ -9,6 +9,7 @@ $server = null;
 $clientes = array($server);
 $comm = new Comm();
 $porta = 0;
+$pendingHandshakes = array();
 
 $timers = [];
 class Timer {
@@ -118,14 +119,8 @@ class Comm {
 					if ($renome != "") {
 						$novoJogador->renomear($renome);
 					}
-					global $Jogadores, $timerInatividade;
-					$timerInatividade->resetar(10000);
-					$numJogadores = count($Jogadores);
-					$numProntos = count(array_filter($Jogadores, function($jogador) {
-						return $jogador->pronto;
-					}));
-					verbose("Jogadores prontos: {$numProntos} / {$numJogadores}\n");
-					enviarInfoLobby();
+					$this->enviarMensagemTodos("{$novoJogador->nome} entrou na sala.");
+					registrarJogadoresProntos();
 					break;
 				case "ready":
 					verbose("Jogador {$from->resourceId} está pronto para iniciar a partida.\n");
@@ -138,14 +133,7 @@ class Comm {
 							]
 						]));
 					}
-					global $Jogadores, $timerInatividade;
-					$timerInatividade->resetar(10000);
-					$numJogadores = count($Jogadores);
-					$numProntos = count(array_filter($Jogadores, function($jogador) {
-						return $jogador->pronto;
-					}));
-					verbose("Jogadores prontos: {$numProntos} / {$numJogadores}\n");
-					enviarInfoLobby();
+					registrarJogadoresProntos();
 					break;
 				case "notready":
 					verbose("Jogador {$from->resourceId} não está mais pronto.\n");
@@ -158,14 +146,7 @@ class Comm {
 							]
 						]));
 					}
-					global $Jogadores, $timerInatividade;
-					$timerInatividade->resetar(10000);
-					$numJogadores = count($Jogadores);
-					$numProntos = count(array_filter($Jogadores, function($jogador) {
-						return $jogador->pronto;
-					}));
-					verbose("Jogadores prontos: {$numProntos} / {$numJogadores}\n");
-					enviarInfoLobby();
+					registrarJogadoresProntos();
 					break;
 				case "escolha":
 					verbose("Jogador {$from->resourceId} escolheu atributo {$args[0]}\n");
@@ -175,45 +156,44 @@ class Comm {
 						$atributoEscolhido = $args[0];
 					}
 					break;
+				case "msg":
+					verbose("Mensagem de {$from->resourceId}: ".implode(" ",$args)."\n");
+						foreach ($this->clients as $client) {
+							if ($from !== $client) {
+								$client->send(json_encode([
+									"tipo"=>"msg",
+									"conteudo"=>[
+										"remetente"=>$from->resourceId,
+										"msg"=>implode(" ",$args)
+									]
+								]));
+							}
+						}
+					break;
                 default:
                     verbose("Comando desconhecido: $command\n");
                     break;
             }
         } else {
-            // Senão, interpretar como mensagem de chat
-            $numRecv = count($this->clients) - 1;
-            verbose(sprintf('Conexão %d enviou mensagem "%s" para %d outras conexões',
-                $from->resourceId, $msg, $numRecv));
-            foreach ($this->clients as $client) {
-                if ($from !== $client) {
-                    $client->send(json_encode([
-                        "tipo"=>"msg",
-                        "conteudo"=>[
-                            "remetente"=>$from->resourceId,
-                            "msg"=>$msg]]));
-                }
-            }
+            // Senão, interpretar como gibberish, apenas logar
+            verbose(sprintf('Conexão %d enviou gibberish: "%s"',
+                $from->resourceId, $msg));
         }
     }
 
     public function onClose($conn) {
 		$jogadorSaiu = $this->jogadorConn($conn);
 		if ($jogadorSaiu !== null) {
+			global $emExecucao, $timerInatividade;
+			$timerInatividade->resetar(10000);
+			if (!$emExecucao) {
+				registrarJogadoresProntos();
+			}
+			verbose("Conexão ({$conn->resourceId}) fechada\n");
+			$this->enviarMensagemTodos("{$jogadorSaiu->nome} saiu da sala.");
 			$jogadorSaiu->quitar();
 		}
         unset($this->clients[(int)$conn->resourceId]);
-		global $emExecucao, $timerInatividade;
-		$timerInatividade->resetar(10000);
-		if (!$emExecucao) {
-			global $Jogadores;
-			$numJogadores = count($Jogadores);
-			$numProntos = count(array_filter($Jogadores, function($jogador) {
-				return $jogador->pronto;
-			}));
-			verbose("Jogadores prontos: {$numProntos} / {$numJogadores}\n");
-			enviarInfoLobby();
-		}
-        verbose("Conexão ({$conn->resourceId}) fechada\n");
     }
 
     public function onError($conn, $e) {
@@ -241,7 +221,7 @@ class Comm {
 		$conn->send(json_encode([
 			"tipo"=>"msg",
 			"conteudo"=>[
-				"resourceId"=>-1,
+				"remetente"=>-1,
 				"msg"=>$msg
 			]
 		]));
@@ -252,7 +232,7 @@ class Comm {
 			$client->send(json_encode([
 				"tipo"=>"msg",
 				"conteudo"=>[
-					"resourceId"=>-1,
+					"remetente"=>-1,
 					"msg"=>$msg
 				]
 			]));
@@ -309,34 +289,83 @@ function iniciarSala($_porta) {
 	$porta = $_porta;
 }
 function checarConexoes() {
-	global $clientes;
-	$read = $clientes;
-    $write = null;
-    $except = null;
+	global $clientes, $server, $pendingHandshakes, $comm, $porta;
 
-    if (stream_select($read, $write, $except, 0, 10) > 0) {
-        verificarNovasConexoes($read);
-		verbose("Heartbeats: ".implode(', ', $read)."\n");
-        foreach ($read as $conn) {
-            heartBeat($conn);
-        }
-    }
+	$read = array_merge($clientes, $pendingHandshakes);
+	$write = null;
+	$except = null;
+
+	//verbose("checarConexoes: contador clientes=" . count($clientes) . " pendentes=" . count($pendingHandshakes) . "\n");
+	$ready = @stream_select($read, $write, $except, 0, 100000);
+	verbose("stream_select retornou: " . var_export($ready, true) . "; count(read)=" . count($read) . "\n");
+
+	if ($ready > 0) {
+		verificarNovasConexoes($read);
+
+		// Tenta concluir handshakes pendentes que ficaram prontos
+		foreach ($pendingHandshakes as $idx => $sock) {
+			if (!in_array($sock, $read, true)) continue;
+			$headers = fread($sock, 1024);
+			if ($headers === false || $headers === '') {
+				// ainda não há dados; aguarda próximas iterações
+				continue;
+			}
+			if (perform_handshaking($headers, $sock, 'localhost', $porta)) {
+				$connection = new Conexao($sock);
+				$clientes[] = $sock;
+				$comm->onOpen($connection);
+				unset($pendingHandshakes[$idx]);
+				$pendingHandshakes = array_values($pendingHandshakes);
+			} else {
+				verbose("Conexão rejeitada: handshake WebSocket inválido. Fechando socket.\n");
+				fclose($sock);
+				unset($pendingHandshakes[$idx]);
+				$pendingHandshakes = array_values($pendingHandshakes);
+			}
+		}
+
+		$read = array_filter($read, function($conn) use ($server) {
+			return $conn !== $server;
+		});
+		verbose("Read set após filtro do servidor: " . implode(', ', $read) . "\n");
+		verbose("Clientes ativos: " . implode(', ', $clientes) . "\n");
+		if (count($read) > 0) {
+			verbose("Heartbeats: " . implode(', ', $read) . "\n");
+			foreach ($read as $conn) {
+				heartBeat($conn);
+			}
+		}
+	}
 }
 function verificarNovasConexoes($_read) {
-	global $server, $clientes, $comm, $porta;
-	if (in_array($server, $_read)) {
+	global $server, $clientes, $comm, $porta, $pendingHandshakes;
+	if (in_array($server, $_read, true)) {
 		$conn = stream_socket_accept($server);
 		if ($conn) {
-			$connection = new Conexao($conn);
-			$clientes[] = $conn;
-
-			// Perform WebSocket handshake
+			stream_set_blocking($conn, false);
 			$headers = fread($conn, 1024);
-			perform_handshaking($headers, $conn, 'localhost', $porta);
-
-			$comm->onOpen($connection);
+			if ($headers === false) {
+				$headers = '';
+			}
+			if ($headers === '') {
+				// Nenhum dado imediato: armazena para tentativa posterior
+				$pendingHandshakes[] = $conn;
+				verbose("Conexão pendente: aguardando dados para handshake.\n");
+			} else {
+				if (perform_handshaking($headers, $conn, 'localhost', $porta)) {
+					$connection = new Conexao($conn);
+					$clientes[] = $conn;
+					$comm->onOpen($connection);
+				} else {
+					verbose("Conexão rejeitada: handshake WebSocket inválido. Fechando socket.\n");
+					fclose($conn);
+				}
+			}
 		}
-		unset($_read[array_search($server, $_read)]);
+		$serverIndex = array_search($server, $_read, true);
+		if ($serverIndex !== false) {
+			unset($_read[$serverIndex]);
+		}
 	}
 }
 function heartBeat($_conn) {
@@ -375,8 +404,8 @@ function checarRodada() {
 				$comm->enviarMensagemTodos("Iniciando em $timerProntidao...");
 				new Timer(function($_this){
 					global $timerProntidao, $comm;
-					$timerProntidao--;
 					if ($timerProntidao > 0) {
+						$timerProntidao--;
 						$_this->reexecutar();
 						verbose("Iniciando em $timerProntidao...\n");
 						$comm->enviarMensagemTodos("Iniciando em $timerProntidao...");
@@ -501,7 +530,7 @@ function checarDesconexoes() {
 
 }
 function enviarInfoLobby() {
-	global $Jogadores, $comm;
+	global $Jogadores, $comm, $Deque;
 	$infoJogadores = [];
 	foreach ($Jogadores as $jogador) {
 		$novaInfo = [
@@ -511,14 +540,32 @@ function enviarInfoLobby() {
 		];
 		array_push($infoJogadores,$novaInfo);
 	}
+	$infoDeque = [];
+	$infoDeque["id"] = $Deque->id;
+	$infoDeque["nome"] = $Deque->nome;
+	$infoDeque["descricao"] = $Deque->descricao;
+	$infoDeque["atributos"] = [];
+	foreach ($Deque->atributos as $atributo) {
+		$infoDeque["atributos"][] = $atributo->id;
+	}
+	$infoDeque["atributos"] = implode(",", $infoDeque["atributos"]);
 	foreach ($Jogadores as $jogador) {
 		$comm->enviarComm($jogador->conexao,"lobby",[
 			"nome"=>"Lobby",
-			"deque"=>1,
-			"atributos"=>"1,2,3,4,5,6",
+			"deque"=>$infoDeque,
 			"jogadores"=>$infoJogadores
 		]);
 	}
+}
+function registrarJogadoresProntos() {
+	global $Jogadores, $timerInatividade;
+	$timerInatividade->resetar(10000);
+	$numJogadores = count($Jogadores);
+	$numProntos = count(array_filter($Jogadores, function($jogador) {
+		return $jogador->pronto;
+	}));
+	verbose("Jogadores prontos: {$numProntos} / {$numJogadores}\n");
+	enviarInfoLobby();
 }
 
 function perform_handshaking($received_header, $client_conn, $host, $port) {
@@ -532,7 +579,8 @@ function perform_handshaking($received_header, $client_conn, $host, $port) {
     }
 
     if (!isset($headers['Sec-WebSocket-Key'])) {
-        return;
+        fwrite($client_conn, "HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n");
+        return false;
     }
     $secKey = $headers['Sec-WebSocket-Key'];
     $secAccept = base64_encode(sha1($secKey . '258EAFA5-E914-47DA-95CA-C5AB0DC85B11', true));
@@ -546,6 +594,7 @@ function perform_handshaking($received_header, $client_conn, $host, $port) {
                "Connection: Upgrade\r\n" .
                "Sec-WebSocket-Accept: $secAccept\r\n\r\n";
     fwrite($client_conn, $upgrade);
+    return true;
 }
 function unmask($payload) {
     $length = ord($payload[1]) & 127;

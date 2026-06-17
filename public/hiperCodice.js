@@ -15,8 +15,12 @@ const pMensagemDialogMsg = document.getElementById("mensagemDialogMsg");
 const h1Carregando = document.getElementById("h1Carregando");
 const inputLobbyJogador = document.getElementById("inputLobbyJogador");
 const inputLobbyNome = document.getElementById("inputLobbyNome");
+const inputLobbyLinkSala = document.getElementById("inputLobbyLinkSala");
 const divLobbyJogadores = document.getElementById("lobbyJogadores");
 const divLobbyDeque = document.getElementById("lobbyDeque");
+const divLobbyMsgs = document.getElementById("lobbyMsgs");
+const inputLobbyChat = document.getElementById("inputLobbyChat");
+const buttonLobbyPronto = document.getElementById("buttonLobbyPronto");
 
 var cores = [
 	["#F44336","#8b0000f8","#4f0000f8"],
@@ -201,10 +205,14 @@ function exibirCarregamento(_mensagem="Carregando") {
 	h1Carregando.textContent = _mensagem;
 	exibirDialogo("carregando");
 }
-function exibirLobby() {
+function exibirLobby(_servidor=null,_porta=null) {
 	if (!comm.pronto) {
 		exibirMensagem("Lobby desconectado");
 		return;
+	}
+	divLobbyMsgs.innerHTML="";
+	if (_servidor!=null) {		
+		inputLobbyLinkSala.value = `${document.URL}?sala=${_servidor}${(_porta!=null)?":"+_porta:""}`;
 	}
 	exibirDialogo("dialogLobby");
 }
@@ -281,16 +289,43 @@ function carregarJogoMP(_JSONdeque) {
 function paginaCarregada() {
 	executarMusicaAleatoria();
 	setTimeout(()=>{
-		abrirMenu("Inicio");
+		const params = new URLSearchParams(window.location.search);
+		const salaParam = params.get("sala");
+		if (salaParam) {
+			const [host, porta] = salaParam.split(":");
+			if (host && porta) {
+				conectarLobby(host, porta);
+				return;
+			}
+		} else {
+			abrirMenu("Inicio");
+		}
 	},2000);
-	conectarLobby("localhost",15000);
 	//carregarJogoMP();
 }
 function conectarLobby(_servidor,_porta) {
 	exibirCarregamento("Conectando");
 	new Comm(_servidor,_porta,()=>{
-		exibirLobby();
+		exibirLobby(_servidor,_porta);
 	});
+}
+function enviarChat() {
+	let mensagem = JSON.stringify(inputLobbyChat.value).slice(1, -1);
+	if (mensagem != "") {
+		comm.enviarMensagem(`\\msg ${mensagem}`);
+		inputLobbyChat.value = "";
+	}
+}
+function alternarProntidao() {
+	if (!pronto) {
+		pronto = true;
+		buttonLobbyPronto.classList.add("pronto");
+		comm.enviarMensagem(`\\ready`);
+	} else {
+		pronto = false;
+		buttonLobbyPronto.classList.remove("pronto");
+		comm.enviarMensagem(`\\notready`);
+	}
 }
 function reiniciarJogo() {
 	document.location.reload();
@@ -417,3 +452,14 @@ new Som("Inspired.mp3",true);
 new Som("Rising Tide.mp3",true);
 
 divJogo.style.display="none";
+inputLobbyChat.addEventListener("keypress",(_ev)=>{
+	if (_ev.key === "Enter") {
+		_ev.preventDefault();
+		enviarChat();
+	}
+});
+inputLobbyLinkSala.onclick = (_ev)=>{
+	navigator.clipboard.writeText(inputLobbyLinkSala.value)
+    .then(()=>{ alert('Link copiado para a área de transferência.'); })
+    .catch(()=>{ alert('Falha ao copiar o link.'); });
+}

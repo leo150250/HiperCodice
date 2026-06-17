@@ -27,7 +27,7 @@ form > * {
 	margin: 10px 0;
 }
 
-input[type="text"], input[type="number"], input[type="search"], select {
+input[type="text"], input[type="number"], input[type="search"], input[type="url"], select {
 	background-color: inherit;
 	border: 1px solid #8884;
 	vertical-align: baseline;
@@ -962,12 +962,14 @@ input[type="checkbox"]:checked + label {
 #wrapperLobby #lobbyJogadores > div.pronto {
 	background-color: #004700;
 }
-#wrapperLobby #lobbyConfig input[type="text"] {
+#wrapperLobby #lobbyConfig input {
 	width: stretch;
 }
 
 #wrapperLobby #lobbyChat {
 	flex-basis: 100%;
+	max-width: calc(100vw - 2em);
+    width: 20em;
 }
 
 #lobbyChat #lobbyMsgs {
@@ -975,12 +977,50 @@ input[type="checkbox"]:checked + label {
 	overflow-y: scroll;
 	border: 1px solid #8884;
 	padding: 10px;
+	display: flex;
+	flex-direction: column;
 }
-#lobbyChat #lobbyMsgs+p {
+#lobbyChat #lobbyMsgs div {
+	border-bottom: 1px solid #8884;
+	padding: 0.25em 0;
+	animation: 0.5s novaMsg linear forwards;
+}
+@keyframes novaMsg {
+	0% {
+		background-color: #26b32b8f;
+	}
+	20% {
+		background-color: transparent;
+	}
+	40% {
+		background-color: #26b32b8f;
+	}
+	60% {
+		background-color: transparent;
+	}
+	80% {
+		background-color: #26b32b8f;
+	}
+	100% {
+		background-color: transparent;
+	}
+}
+#lobbyChat #lobbyMsgs div:last-child {
+	border-bottom: none;
+}
+#lobbyChat #lobbyMsgs div.local {
+	color: #FF0;
+	font-weight: bold;
+}
+#lobbyChat #lobbyMsgs div.servidor {
+	color: #888;
+	font-weight: bold;
+}
+#lobbyChat #lobbyMsgs + p {
 	display: flex;
 	margin-top: 0px;
 }
-#lobbyChat #lobbyMsgs+p input[type="text"] {
+#lobbyChat #lobbyMsgs + p input[type="text"] {
 	flex-grow: 1;
 	margin-right: 10px;
 }
