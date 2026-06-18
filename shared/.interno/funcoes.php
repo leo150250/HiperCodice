@@ -83,4 +83,46 @@ function executaTimers() {
 		$timer->executar();
 	}
 }
+
+$ssl = false;
+$sslCertFile = '/etc/letsencrypt/live/seu-dominio/fullchain.pem';
+$sslKeyFile = '/etc/letsencrypt/live/seu-dominio/privkey.pem';
+$sslPassphrase = '';
+function carregarConfigSSL() {
+	global $path, $ssl, $sslCertFile, $sslKeyFile, $sslPassphrase;
+	if (file_exists($path.".interno/ssl.json")) {
+		$configSSL = file_get_contents($path.".interno/ssl.json");
+		$configSSL = json_decode($configSSL);
+		if ($configSSL->useSSL) {
+			$ssl = true;
+			$sslCertFile = $configSSL->certFile;
+			$sslKeyFile = $configSSL->keyFile;
+			$sslPassphrase = $configSSL->passphrase;
+		}
+	} else {
+		verbose("Arquivo de configuração SSL não encontrado, usando configurações padrão (sem SSL).\n");
+		$configSSL = json_encode([
+			"useSSL" => false,
+			"certFile" => "",
+			"keyFile" => "",
+			"passphrase" => ""
+		]);
+		$configSSL = json_decode($configSSL);
+		$ssl = true;
+		$sslCertFile = $configSSL->certFile;
+		$sslKeyFile = $configSSL->keyFile;
+		$sslPassphrase = $configSSL->passphrase;
+		salvarConfigSSL();
+	}
+}
+function salvarConfigSSL() {
+	global $path, $ssl, $sslCertFile, $sslKeyFile, $sslPassphrase;
+	$configSSL = json_encode([
+		"useSSL" => $ssl,
+		"certFile" => $sslCertFile,
+		"keyFile" => $sslKeyFile,
+		"passphrase" => $sslPassphrase
+	], JSON_PRETTY_PRINT);
+	file_put_contents($path.".interno/ssl.json",$configSSL);
+}
 ?>

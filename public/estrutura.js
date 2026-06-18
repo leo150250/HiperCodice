@@ -353,7 +353,7 @@ class Comm {
 		console.log(this.filaMensagem);
 
 		console.log(`Conectando em ${this.servidor}:${this.porta}...`);
-		this.socket = new WebSocket(`ws://${this.servidor}:${this.porta}`);
+		this.socket = new WebSocket(`wss://${this.servidor}:${this.porta}`);
 		this.socket.onopen = () => {
 			console.log("Conectado!");
 			this.pronto = true;

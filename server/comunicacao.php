@@ -11,6 +11,7 @@ $comm = new Comm();
 $porta = 0;
 $pendingHandshakes = array();
 $jogadoresMPEmEspera = [];
+carregarConfigSSL();
 
 class Comm {
 	protected $clients;
@@ -303,16 +304,42 @@ function encodeMessage($msg) {
 }
 
 function iniciarSala($_porta) {
-	global $server, $clientes, $comm, $porta;
+	global $server, $clientes, $comm, $porta, $ssl, $sslCertFile, $sslKeyFile, $sslPassphrase;
 	if ($_porta == 0) {
 		$_porta = intval(readline("Digite o número da porta: "));
 	}
 	verbose("Iniciando sala na porta $_porta...\n");
-	$context = stream_context_create();
-	$server = stream_socket_server("tcp://0.0.0.0:$_porta", $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
-	if (!$server) {
-		die("Falha ao iniciar a sala: $errstr ($errno)");
+	$context = null;
+	if ($ssl) {
+		if (!extension_loaded('openssl')) {
+			die("Falha ao iniciar a sala SSL: extensão OpenSSL do PHP não está habilitada.\n");
+		}
+		if (!file_exists($sslCertFile)) {
+			die("Falha ao iniciar a sala: certificado SSL não encontrado em $sslCertFile\n");
+		}
+		if (!file_exists($sslKeyFile)) {
+			die("Falha ao iniciar a sala: chave privada SSL não encontrada em $sslKeyFile\n");
+		}
+		$context = stream_context_create(["ssl" => [
+			"local_cert" => $sslCertFile,
+			"local_pk" => $sslKeyFile,
+			"passphrase" => $sslPassphrase,
+			"allow_self_signed" => false,
+			"verify_peer" => false,
+			"verify_peer_name" => false,
+		]]);
+		$server = stream_socket_server("ssl://0.0.0.0:$_porta", $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
+		if (!$server) {
+			die("Falha ao iniciar a sala SSL: $errstr ($errno)");
+		}
+	} else {
+		$context = stream_context_create();
+		$server = stream_socket_server("tcp://0.0.0.0:$_porta", $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
+		if (!$server) {
+			die("Falha ao iniciar a sala: $errstr ($errno)");
+		}
 	}
+	stream_set_blocking($server, false);
 	verbose("Sala iniciada na porta $_porta. Aguardando jogadores...\n");
 	$clientes = array($server);
 	$comm = new Comm();
@@ -356,7 +383,7 @@ function checarConexoes() {
 		}
 
 		$read = array_filter($read, function($conn) use ($server) {
-			return $conn !== $server;
+			return $conn !== $server && is_resource($conn);
 		});
 		//verbose("Read set após filtro do servidor: " . implode(', ', $read) . "\n");
 		//verbose("Clientes ativos: " . implode(', ', $clientes) . "\n");
@@ -402,6 +429,10 @@ function verificarNovasConexoes($_read) {
 function heartBeat($_conn,$_tentativa = 0) {
 	global $comm, $clientes, $server;
 	//verbose("Heartbeat ".$_conn."\n");
+	if (!is_resource($_conn)) {
+		verbose("Heartbeat ignorado: recurso de socket inválido ou fechado.\n");
+		return;
+	}
 	if ($_conn === $server) {
 		//verbose("Socket do servidor.\n");
 		return;
