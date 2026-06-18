@@ -224,8 +224,34 @@ class Jogador {
 		return $listagemCartas;
 	}
 	public function renomear(string $_novoNome) {
-		verbose("Jogador ".$this->nome." renomeado para ".$_novoNome."\n");
-		$this->nome = $_novoNome;
+		if ($_novoNome != $this->nome) {
+			$_novoNome = trim($_novoNome);
+			$_novoNome = str_replace(["\n","\r"], "", $_novoNome);
+			$_novoNome = substr($_novoNome, 0, 16);
+			//Filtro de palavras proibidas
+			$palavrasProibidas = [
+				"admin", "moderador", "mod", "staff", "membro", "member", "criador", "dono", "owner",
+				"adm", "moderação", "moderação", "administração", "administração", "suporte", "support",
+				"gerente", "manager", "diretor", "director", "líder", "leader", "fundador",
+				"adm1n", "m0d", "st4ff", "0wner", "0wn3r", "sup0rt", "manag3r", "l3ader", "fund4dor"];
+			//Filtro de palavrões (nomes impróprios, termos ofensivos, etc) tanto em português quanto em inglês
+			$palavrasProibidas = array_merge($palavrasProibidas, [
+				"puta", "filho da puta", "fdp", "caralho",
+				"merda", "bosta", "cuzão", "cuzao", "buceta",
+				"bucetinha", "bucetão", "piroca", "xereca", "rola",
+				"pau", "corno", "corna", "viado", "vadia", "vagabunda",
+				"bicha", "bixa", "bixona", "fodase", "foda-se", "fuder", "fudeu", "fudido",
+				"motherfucker", "nigger", "niggers", "fuck", "fucking"]);
+			foreach ($palavrasProibidas as $palavra) {
+				if (stripos($_novoNome, $palavra) !== false) {
+					verbose("Nome contém palavra proibida: ".$palavra."\n");
+					//Troca a palavra proibida por asteriscos
+					$_novoNome = str_ireplace($palavra, str_repeat("*", strlen($palavra)), $_novoNome);
+				}
+			}
+			verbose("Jogador ".$this->nome." renomeado para ".$_novoNome."\n");
+			$this->nome = $_novoNome;
+		}
 	}
 }
 
