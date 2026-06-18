@@ -26,7 +26,7 @@
 				<button onclick="abrirMenu('Inicio')" onmouseenter="executarSom('hover.wav')">Voltar</button>
 			</div>
 			<div id="menuMP" class="menu">
-				<button disabled onmouseenter="executarSom('hover.wav')">Entrar em sala</button>
+				<button onclick="conectarLobby('s01.leandrogabriel.net', 15000)" onmouseenter="executarSom('hover.wav')">Entrar em sala</button>
 				<button disabled onmouseenter="executarSom('hover.wav')">Iniciar sala</button>
 				<button disabled onmouseenter="executarSom('hover.wav')">Iniciar modo party</button>
 				<button onclick="abrirMenu('Inicio')" onmouseenter="executarSom('hover.wav')">Voltar</button>
@@ -114,7 +114,7 @@
 			</div>
 			<div id="lobbyConfig">
 				<p><label for="inputLobbyJogador">Seu nome:</label>
-				<input id="inputLobbyJogador" type="text"></p>
+				<input id="inputLobbyJogador" type="text" onchange="renomearJogador(this)"></p>
 				<p><label for="inputLobbyNome">Nome da sala:</label>
 				<input id="inputLobbyNome" type="text"></p>
 				<p><label for="inputLobbyLinkSala">Link da sala:</label>

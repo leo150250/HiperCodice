@@ -10,68 +10,7 @@ $clientes = array($server);
 $comm = new Comm();
 $porta = 0;
 $pendingHandshakes = array();
-
-$timers = [];
-class Timer {
-	private $funcao;
-	private $horaInicio;
-	private $horaExec;
-	private $_reexecutar = false;
-	public $ms = 1000;
-	public $execucoes = 0;
-	public function __construct($_funcao, $_ms = 1000) {
-		global $timers;
-		$this->funcao = $_funcao;
-		$this->ms = $_ms;
-		$this->redefinir();
-		array_push($timers,$this);
-	}
-	public function executar() {
-		if (new DateTime() >= $this->horaExec) {
-			$this->_reexecutar = false;
-			$this->execucoes++;
-			call_user_func($this->funcao,$this);
-			if (!$this->_reexecutar) {
-				$this->desativar();
-			}
-		}
-	}
-	public function desativar() {
-		verbose("Timer desativado\n");
-		$this->__destruct();
-	}
-	public function __destruct()
-	{
-		global $timers;
-		$indice = array_search($this, $timers, true);
-		if ($indice !== false) {
-			unset ($timers[$indice]);
-			$timers = array_values($timers);
-		}
-	}
-	public function reexecutar($_novoMs = null) {
-		$this->_reexecutar = true;
-		$this->redefinir($_novoMs);
-	}
-	public function redefinir($_novoMs = null) {
-		if ($_novoMs !== null) {
-			$this->ms = $_novoMs;
-		}
-		$this->horaInicio = new DateTime();
-		$this->horaExec = clone $this->horaInicio;
-		$this->horaExec->add(DateInterval::createFromDateString("{$this->ms}ms"));
-	}
-	public function resetar($_novoMs = null) {
-		$this->execucoes = 0;
-		$this->reexecutar($_novoMs);
-	}
-}
-function executaTimers() {
-	global $timers;
-	foreach ($timers as $timer) {
-		$timer->executar();
-	}
-}
+$jogadoresMPEmEspera = [];
 
 class Comm {
 	protected $clients;
@@ -148,6 +87,28 @@ class Comm {
 					}
 					registrarJogadoresProntos();
 					break;
+				case "ok":
+					verbose("Jogador {$from->resourceId} confirma que seu jogo está carregado e pronto para iniciar.\n");
+					//Remover o ID deste jogadores de jogadoresMPEmEspera
+					global $jogadoresMPEmEspera, $Jogadores;
+					foreach ($jogadoresMPEmEspera as $idx => $id) {
+						if ($id === $from->resourceId) {
+							unset($jogadoresMPEmEspera[$idx]);
+							$jogadoresMPEmEspera = array_values($jogadoresMPEmEspera);
+							break;
+						}
+					}
+					$infoJogadores = [];
+					foreach ($Jogadores as $jogador) {
+						$novaInfo = [
+							"resourceId"=>$jogador->conexao->resourceId,
+							"nome"=>$jogador->nome,
+							"qtdCartas"=>count($jogador->cartas)
+						];
+						array_push($infoJogadores,$novaInfo);
+					}
+					$this->enviarComm($from,"jogadores",$infoJogadores);
+					break;
 				case "escolha":
 					verbose("Jogador {$from->resourceId} escolheu atributo {$args[0]}\n");
 					global $Jogadores, $timerProntidao, $atributoEscolhido, $jogadorDaVez;
@@ -155,6 +116,12 @@ class Comm {
 						$timerProntidao = 0;
 						$atributoEscolhido = $args[0];
 					}
+					break;
+				case "renomear":
+					$novoNome = implode(" ",$args);
+					verbose("Jogador {$from->resourceId} renomeou para {$novoNome}\n");
+					$this->jogadorConn($from)->renomear($novoNome);
+					registrarJogadoresProntos();
 					break;
 				case "msg":
 					verbose("Mensagem de {$from->resourceId}: ".implode(" ",$args)."\n");
@@ -270,6 +237,69 @@ class Conexao {
     public function close() {
         fclose($this->socket);
     }
+}
+function perform_handshaking($received_header, $client_conn, $host, $port) {
+    $headers = array();
+    $lines = preg_split("/\r\n/", $received_header);
+    foreach ($lines as $line) {
+        $line = chop($line);
+        if (preg_match('/\A(\S+): (.*)\z/', $line, $matches)) {
+            $headers[$matches[1]] = $matches[2];
+        }
+    }
+
+    if (!isset($headers['Sec-WebSocket-Key'])) {
+        fwrite($client_conn, "HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n");
+        return false;
+    }
+    $secKey = $headers['Sec-WebSocket-Key'];
+    $secAccept = base64_encode(sha1($secKey . '258EAFA5-E914-47DA-95CA-C5AB0DC85B11', true));
+
+    //$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'wss' : 'ws';
+    $protocol = 'wss';
+    $location = "{$protocol}://$host:$port";
+
+    $upgrade = "HTTP/1.1 101 Switching Protocols\r\n" .
+               "Upgrade: websocket\r\n" .
+               "Connection: Upgrade\r\n" .
+               "Sec-WebSocket-Accept: $secAccept\r\n\r\n";
+    fwrite($client_conn, $upgrade);
+    return true;
+}
+function unmask($payload) {
+    $length = ord($payload[1]) & 127;
+
+    if ($length == 126) {
+        $masks = substr($payload, 4, 4);
+        $data = substr($payload, 8);
+    } elseif ($length == 127) {
+        $masks = substr($payload, 10, 4);
+        $data = substr($payload, 14);
+    } else {
+        $masks = substr($payload, 2, 4);
+        $data = substr($payload, 6);
+    }
+
+    $text = '';
+    for ($i = 0; $i < strlen($data); ++$i) {
+        $text .= $data[$i] ^ $masks[$i % 4];
+    }
+    return $text;
+}
+function encodeMessage($msg) {
+    $b1 = 0x80 | (0x1 & 0x0f); // FIN + opcode (text)
+    $length = strlen($msg);
+
+    if ($length <= 125) {
+        $header = pack('CC', $b1, $length);
+    } elseif ($length <= 65535) {
+        $header = pack('CCn', $b1, 126, $length);
+    } else {
+        // 64 bits: PHP não tem pack 'J' em todo sistema, então use gmp or split em 2x32 bits
+        $header = pack('CCNN', $b1, 127, 0, $length); // Funciona para mensagens < 4GB
+    }
+
+    return $header . $msg;
 }
 
 function iniciarSala($_porta) {
@@ -396,7 +426,7 @@ function heartBeat($_conn,$_tentativa = 0) {
 	}
 }
 function checarRodada() {
-	global $emExecucao, $Jogadores, $timerProntidao, $comm, $Deque, $encerrada, $jogadorDaVez, $atributoEscolhido, $timerInatividade;
+	global $emExecucao, $Jogadores, $timerProntidao, $comm, $Deque, $encerrada, $jogadorDaVez, $atributoEscolhido, $timerInatividade, $jogadoresMPEmEspera;
 	if (!$emExecucao) { //Estamos no Lobby ainda, aguardando todos os 2 ou mais jogadores ficarem prontos
 		if ($encerrada) { return false; } //Se for encerrada no lobby por algum motivo (inatividade, por exemplo), faz a sala parar
 		$numJogadores = count($Jogadores);
@@ -428,18 +458,11 @@ function checarRodada() {
 				$timerProntidao = -1;
 				embaralharEDistribuirCartas();
 				exibirCartasJogadores();
-				$infoJogadores = [];
-				foreach ($Jogadores as $jogador) {
-					$novaInfo = [
-						"resourceId"=>$jogador->conexao->resourceId,
-						"nome"=>$jogador->nome,
-						"qtdCartas"=>count($jogador->cartas)
-					];
-					array_push($infoJogadores,$novaInfo);
-				}
 				foreach ($Jogadores as $jogador) {
 					$comm->enviarComm($jogador->conexao,"deque",$Deque->json());
-					$comm->enviarComm($jogador->conexao,"jogadores",$infoJogadores);
+				}
+				foreach ($Jogadores as $jogador) {
+					$jogadoresMPEmEspera[] = $jogador->conexao->resourceId;
 				}
 			}
 		} else {
@@ -453,6 +476,11 @@ function checarRodada() {
 		return true;
 	} else {
 		if (!$encerrada) { //O jogo tá acontecendo.
+			if (count($jogadoresMPEmEspera) > 0) {
+				verbose("Aguardando confirmação de carregamento dos jogos pelos jogadores: " . implode(", ", $jogadoresMPEmEspera) . "\n");
+				sleep(1);
+				return true;
+			}
 			if ($timerProntidao == -1) {
 				//Envia os índices das cartas da vez para cada jogador
 				foreach ($Jogadores as $jogador) {
@@ -538,7 +566,7 @@ function checarDesconexoes() {
 
 }
 function enviarInfoLobby() {
-	global $Jogadores, $comm, $Deque;
+	global $Jogadores, $comm, $Deque, $nomeLobby;
 	$infoJogadores = [];
 	foreach ($Jogadores as $jogador) {
 		$novaInfo = [
@@ -559,7 +587,7 @@ function enviarInfoLobby() {
 	$infoDeque["atributos"] = implode(",", $infoDeque["atributos"]);
 	foreach ($Jogadores as $jogador) {
 		$comm->enviarComm($jogador->conexao,"lobby",[
-			"nome"=>"Lobby",
+			"nome"=>$nomeLobby,
 			"deque"=>$infoDeque,
 			"jogadores"=>$infoJogadores
 		]);
@@ -574,69 +602,5 @@ function registrarJogadoresProntos() {
 	}));
 	verbose("Jogadores prontos: {$numProntos} / {$numJogadores}\n");
 	enviarInfoLobby();
-}
-
-function perform_handshaking($received_header, $client_conn, $host, $port) {
-    $headers = array();
-    $lines = preg_split("/\r\n/", $received_header);
-    foreach ($lines as $line) {
-        $line = chop($line);
-        if (preg_match('/\A(\S+): (.*)\z/', $line, $matches)) {
-            $headers[$matches[1]] = $matches[2];
-        }
-    }
-
-    if (!isset($headers['Sec-WebSocket-Key'])) {
-        fwrite($client_conn, "HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n");
-        return false;
-    }
-    $secKey = $headers['Sec-WebSocket-Key'];
-    $secAccept = base64_encode(sha1($secKey . '258EAFA5-E914-47DA-95CA-C5AB0DC85B11', true));
-
-    //$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'wss' : 'ws';
-    $protocol = 'wss';
-    $location = "{$protocol}://$host:$port";
-
-    $upgrade = "HTTP/1.1 101 Switching Protocols\r\n" .
-               "Upgrade: websocket\r\n" .
-               "Connection: Upgrade\r\n" .
-               "Sec-WebSocket-Accept: $secAccept\r\n\r\n";
-    fwrite($client_conn, $upgrade);
-    return true;
-}
-function unmask($payload) {
-    $length = ord($payload[1]) & 127;
-
-    if ($length == 126) {
-        $masks = substr($payload, 4, 4);
-        $data = substr($payload, 8);
-    } elseif ($length == 127) {
-        $masks = substr($payload, 10, 4);
-        $data = substr($payload, 14);
-    } else {
-        $masks = substr($payload, 2, 4);
-        $data = substr($payload, 6);
-    }
-
-    $text = '';
-    for ($i = 0; $i < strlen($data); ++$i) {
-        $text .= $data[$i] ^ $masks[$i % 4];
-    }
-    return $text;
-}
-function encodeMessage($msg) {
-    $b1 = 0x80 | (0x1 & 0x0f); // FIN + opcode (text)
-    $length = strlen($msg);
-
-    if ($length <= 125) {
-        $header = pack('CC', $b1, $length);
-    } elseif ($length <= 65535) {
-        $header = pack('CCn', $b1, 126, $length);
-    } else {
-        // 64 bits: PHP não tem pack 'J' em todo sistema, então use gmp or split em 2x32 bits
-        $header = pack('CCNN', $b1, 127, 0, $length); // Funciona para mensagens < 4GB
-    }
-
-    return $header . $msg;
 }
 ?>

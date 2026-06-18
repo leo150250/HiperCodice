@@ -11,6 +11,7 @@ $emExecucao = false;
 $encerrada = false;
 $timerProntidao = -1;
 $atributoEscolhido = -1;
+$nomeLobby = "Lobby#".getmypid();
 
 class Deque {
 	public $atributos = [];

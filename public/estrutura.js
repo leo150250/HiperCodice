@@ -386,8 +386,6 @@ class Comm {
 			} break;
 			case "lobby": {
 				nomeLobby = resposta.conteudo.nome;
-				inputLobbyNome.value = nomeLobby;
-				inputLobbyJogador.value = configNome;
 				divLobbyDeque.innerHTML = "";
 				dequeLobby = new Deque(resposta.conteudo.deque.id, resposta.conteudo.deque.nome, resposta.conteudo.deque.descricao);
 				let divLobbyDequeBotao = dequeLobby.desenhar();
@@ -405,6 +403,7 @@ class Comm {
 					let divNovoJogador = document.createElement("div");
 					if (novoJogador.conexao == meuId) {
 						divNovoJogador.classList.add("local");
+						configNome = novoJogador.nome;
 					}
 					if (novoJogador.pronto) {
 						divNovoJogador.classList.add("pronto");
@@ -412,6 +411,8 @@ class Comm {
 					divNovoJogador.textContent = novoJogador.nome;
 					divLobbyJogadores.appendChild(divNovoJogador);
 				}
+				inputLobbyNome.value = nomeLobby;
+				inputLobbyJogador.value = configNome;
 			} break;
 			case "goaway": {
 				this.pronto = false;
@@ -439,7 +440,7 @@ class Comm {
 				divLobbyMsgs.appendChild(novoChat);
 				novoChat.scrollIntoView();
 			} break;
-			case "deque": { //SalaMP
+			case "deque": {
 				carregarJogoMP(resposta.conteudo);
 			} break;
 			case "jogadores": {	//SalaMP

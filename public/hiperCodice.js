@@ -283,6 +283,7 @@ function carregarJogoMP(_JSONdeque) {
 			divJogo.style.display=null;
 			clearInterval(atualizacaoImagemMenu);
 			iniciarJogoMP(_JSONdeque);
+			comm.enviarMensagem("\\ok");
 		});
 	});
 }
@@ -308,6 +309,15 @@ function conectarLobby(_servidor,_porta) {
 	new Comm(_servidor,_porta,()=>{
 		exibirLobby(_servidor,_porta);
 	});
+}
+function renomearJogador(_novoNome) {
+	if (_novoNome.value != undefined) {
+		_novoNome = _novoNome.value;
+	}
+	let novoNome = JSON.stringify(_novoNome).slice(1, -1);
+	if (configNome != novoNome) {
+		comm.enviarMensagem(`\\renomear ${novoNome}`);
+	}
 }
 function enviarChat() {
 	let mensagem = JSON.stringify(inputLobbyChat.value).slice(1, -1);
