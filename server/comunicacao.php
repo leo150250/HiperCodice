@@ -297,9 +297,10 @@ function checarConexoes() {
 
 	//verbose("checarConexoes: contador clientes=" . count($clientes) . " pendentes=" . count($pendingHandshakes) . "\n");
 	$ready = @stream_select($read, $write, $except, 0, 100000);
-	verbose("stream_select retornou: " . var_export($ready, true) . "; count(read)=" . count($read) . "\n");
+	//verbose("stream_select retornou: " . var_export($ready, true) . "; count(read)=" . count($read) . "\n");
 
 	if ($ready > 0) {
+		//verbose("Nova conexão!\n");
 		verificarNovasConexoes($read);
 
 		// Tenta concluir handshakes pendentes que ficaram prontos
@@ -317,7 +318,7 @@ function checarConexoes() {
 				unset($pendingHandshakes[$idx]);
 				$pendingHandshakes = array_values($pendingHandshakes);
 			} else {
-				verbose("Conexão rejeitada: handshake WebSocket inválido. Fechando socket.\n");
+				verbose("Conexão rejeitada: headers não enviados ou handshake WebSocket inválido. Fechando socket.\n");
 				fclose($sock);
 				unset($pendingHandshakes[$idx]);
 				$pendingHandshakes = array_values($pendingHandshakes);
@@ -327,10 +328,10 @@ function checarConexoes() {
 		$read = array_filter($read, function($conn) use ($server) {
 			return $conn !== $server;
 		});
-		verbose("Read set após filtro do servidor: " . implode(', ', $read) . "\n");
-		verbose("Clientes ativos: " . implode(', ', $clientes) . "\n");
+		//verbose("Read set após filtro do servidor: " . implode(', ', $read) . "\n");
+		//verbose("Clientes ativos: " . implode(', ', $clientes) . "\n");
 		if (count($read) > 0) {
-			verbose("Heartbeats: " . implode(', ', $read) . "\n");
+			//verbose("Heartbeats: " . implode(', ', $read) . "\n");
 			foreach ($read as $conn) {
 				heartBeat($conn);
 			}
@@ -368,7 +369,7 @@ function verificarNovasConexoes($_read) {
 		}
 	}
 }
-function heartBeat($_conn) {
+function heartBeat($_conn,$_tentativa = 0) {
 	global $comm, $clientes, $server;
 	//verbose("Heartbeat ".$_conn."\n");
 	if ($_conn === $server) {
@@ -377,6 +378,13 @@ function heartBeat($_conn) {
 	}
 	$msg = fread($_conn, 1024);
 	if ($msg === false || $msg === '') {
+		if ($_tentativa < 3) {
+			verbose("(Heartbeat {$_tentativa})\n");
+			usleep(100000); // Espera 100ms antes de tentar ler novamente
+			heartBeat($_conn, $_tentativa + 1);
+			return;
+		}
+		verbose("Conexão ({$_conn}) fechada por inatividade ou erro.\n");
 		$connection = new Conexao($_conn);
 		$comm->onClose($connection);
 		fclose($_conn);
