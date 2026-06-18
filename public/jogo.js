@@ -19,6 +19,11 @@ var atributoEscolhido = -1;
 var idJogador = 0;
 var numRodadas = 0;
 var cartaJogadorDesenhada = null;
+var jogadorDaVez = -1;
+var emExecucao = false;
+var encerrada = false;
+var timerProntidao = -1;
+var dataHoraInicio = null;
 
 var elementosRodada = [];
 class ElementoRodada {
@@ -50,6 +55,37 @@ class ElementoRodada {
 			this.elemento.classList.add("hiperCodice");
 		}
 	}
+}
+
+function defineFundo(_deck) {
+	let corSelecionada = Math.floor(Math.random()*cores.length);
+	divAmbiente.style.backgroundImage = `radial-gradient(${cores[corSelecionada][1]}, ${cores[corSelecionada][2]}), url("img/decks/${_deck}/default.jpg")`;
+}
+
+function posicionarJogadores() {
+	let angulo = 270;
+	let diferencaAngulo = 360 / jogadores.length;
+	jogadores.forEach(_jogador=>{
+		let posX = 50;
+		let posY = 50;
+		posX -= Math.cos(angulo * (Math.PI / 180)) * 25;
+		posY -= Math.sin(angulo * (Math.PI / 180)) * 35;
+		_jogador.definirPosicaoElementoPadrao(posX,posY);
+		_jogador.posicionarElementoPadrao();
+		angulo+=diferencaAngulo;
+	});
+}
+
+function destacarJogador(_idProximoJogador) {
+	if (jogadorDaVez >= 0) {
+		console.log("Desativando jogador #"+jogadorDaVez);
+		jogadores[jogadorDaVez].restaurar();
+	}
+	jogadorDaVez = _idProximoJogador;
+	console.log("Ativando jogador #"+jogadorDaVez);
+	jogadores[jogadorDaVez].destacar();
+	console.log(jogadores[jogadorDaVez]);
+	return jogadores[jogadorDaVez];
 }
 
 function exibirCarta(_id) {
@@ -134,4 +170,149 @@ function obterTempoDaPartida() {
 	let minutos = Math.floor((difMs % msHor) / msMin);
 	let segundos = Math.floor((difMs % msMin) / msSeg);
 	return `${horas.toString()}:${minutos.toString().padStart(2,"0")}:${segundos.toString().padStart(2,"0")}`;
+}
+
+function executarRodada() {
+	let jogadorEspecial = null;
+	let nomesVencedores = "";
+	let jogadoresVencedores = [];
+	let tempoExecucao = 5000;
+	let tempoExibirCartaVencedor = 1;
+	console.log("Valores dos jogadores:");
+	jogadores.forEach(_jogador=>{
+		if (!_jogador.ativo) {
+			return;
+		}
+		console.log(` - ${_jogador.nome}: ${_jogador.cartaAtual().valores[atributoEscolhido]} (${_jogador.cartaAtual().obterCodCarta()}) ${_jogador.cartaAtual().especial?" [Especial]":""}`);
+		if (_jogador.cartaAtual().especial) {
+			jogadorEspecial = _jogador;
+		}
+	})
+	if (jogadorEspecial != null) { //Tem alguém com carta especial?
+		console.log(`Jogador ${jogadorEspecial.nome} tem a carta especial...`);
+		elementosRodada.forEach(_elementoRodada=>{
+			if (_elementoRodada.jogador == jogadorEspecial) {
+				_elementoRodada.destacar();
+			}
+		})
+		for (let i = 0; i < jogadores.length; i++) {
+			if (jogadores[i] == jogadorEspecial) {
+				destacarJogador(i);
+				break;
+			}
+		}
+		let jogadoresClasse1 = []
+		jogadores.forEach(_jogador=>{
+			if (!_jogador.ativo) {
+				return;
+			}
+			if ((_jogador !== jogadorEspecial)
+			&& (_jogador.cartaAtual().classe == 1)) {
+				jogadoresClasse1.push(_jogador);
+			}
+		});
+		if (jogadoresClasse1.length > 0) {
+			nomesVencedores = "";
+			jogadoresClasse1.forEach(_jogador=>{
+				nomesVencedores += " " + _jogador.nome;
+				jogadoresVencedores.push(_jogador);
+			})
+			tempoExecucao += 2000;
+			let cartaAmbiente = jogadorEspecial.cartaAtual().desenhar();
+			setTimeout(()=>{
+				cartaAmbiente.remove();
+			},7000);
+			divAmbiente.appendChild(cartaAmbiente);
+			divElementosRodada.style.bottom = "20px";
+			divElementosRodada.style.marginBottom = "0em";
+			divMensagemJogador.textContent = `${jogadorEspecial.nome} tem o HÍPER-CODICE!`;
+			console.log("...mas os jogadores com carta de classe A vencem:" + nomesVencedores);
+			tempoExibirCartaVencedor += 2000;
+		} else {
+			divMensagemJogador.textContent = `${jogadorEspecial.nome} tem o HÍPER-CODICE!`;
+			jogadoresVencedores.push(jogadorEspecial);
+			console.log("...e vence a rodada!");
+		}
+	} else { //Jogada convencional, melhor valor vence
+		let melhorValor = null;
+		jogadores.forEach(_jogador=>{
+			if (!_jogador.ativo) {
+				return;
+			}
+			let valor = _jogador.cartaAtual().valores[atributoEscolhido];
+			if ((melhorValor == null)
+			|| (deque.atributos[atributoEscolhido].forma == 1 && valor > melhorValor)
+			|| (deque.atributos[atributoEscolhido].forma == 0 && valor < melhorValor)) {
+				melhorValor = valor;
+				jogadoresVencedores = [_jogador];
+			} else if (valor == melhorValor) {
+				jogadoresVencedores.push(_jogador);
+			}
+		});
+	}
+	let porEmpate = false;
+	if (jogadoresVencedores.length > 1) { //Se houver mais de um vencedor, é um empate
+		porEmpate = true;
+		nomesVencedores = "";
+		jogadoresVencedores.forEach(_jogador=>{
+			nomesVencedores += " " + _jogador.nome;
+		})
+		console.log(`Empate entre:${nomesVencedores}`);
+		let vencedor = null;
+		jogadoresVencedores.forEach(_jogador=>{
+			console.log(` - ${_jogador.nome}: ${_jogador.cartaAtual().obterCodCarta()}`);
+			if ((vencedor == null)
+				|| (_jogador.cartaAtual().classe < vencedor.cartaAtual().classe)
+				|| (
+					(_jogador.cartaAtual().classe == vencedor.cartaAtual().classe)
+					&& (_jogador.cartaAtual().numero < vencedor.cartaAtual().numero)
+				)
+			) {
+				vencedor = _jogador;
+			}
+		});
+		jogadoresVencedores = [vencedor];
+	}
+	console.log(`Vencedor: ${jogadoresVencedores[0].nome}, com a seguinte carta:`);
+	jogadoresVencedores[0].cartaAtual().info();
+	let cartaVencedora = jogadoresVencedores[0].cartaAtual();
+	setTimeout(()=>{
+		if (jogadorEspecial !== null) {
+			if (jogadorEspecial !== jogadoresVencedores[0]) {
+				divMensagemJogador.textContent = `...mas ${jogadoresVencedores[0].nome} tem uma carta classe A, e vence${porEmpate?" por empate!":"!"}`;
+			} else {
+				divMensagemJogador.textContent = `${jogadoresVencedores[0].nome} tem o HÍPER-CODICE!`;
+			}
+		} else {
+			divMensagemJogador.textContent = `${jogadoresVencedores[0].nome} venceu${porEmpate?" por empate!":"!"}`;
+		}
+		elementosRodada.forEach(_elementoRodada=>{
+			if (_elementoRodada.jogador == jogadoresVencedores[0]) {
+				_elementoRodada.destacar();
+			}
+		});
+		let cartaAmbienteVencedora = cartaVencedora.desenhar();
+		setTimeout(()=>{
+			cartaAmbienteVencedora.remove();
+		},7000);
+		divAmbiente.appendChild(cartaAmbienteVencedora);
+		divElementosRodada.style.bottom = "20px";
+		divElementosRodada.style.marginBottom = "0em";
+		for (let i = 0; i < jogadores.length; i++) {
+			if (jogadores[i] == jogadoresVencedores[0]) {
+				destacarJogador(i);
+				break;
+			}
+		}
+		divNumCartasJogador.textContent = `🃏${jogadores[idJogador].cartas.length}`;
+		if (jogadoresVencedores[0] == jogadores[idJogador]) {
+			cartaJogadorDesenhada.classList.add("venceu");
+		} else {
+			executarSom("cardRem.wav");
+			cartaJogadorDesenhada.classList.add("perdeu");
+		}
+	},tempoExibirCartaVencedor);
+	setTimeout(zerarElementosRodada,tempoExecucao);
+	
+	verificarVencedor(jogadoresVencedores[0],tempoExecucao);
 }

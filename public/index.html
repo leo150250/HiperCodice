@@ -26,7 +26,7 @@
 				<button onclick="abrirMenu('Inicio')" onmouseenter="executarSom('hover.wav')">Voltar</button>
 			</div>
 			<div id="menuMP" class="menu">
-				<button disabled onmouseenter="executarSom('hover.wav')">Entrar em sala</button>
+				<button onclick="conectarLobby('s01.leandrogabriel.net', 15000)" onmouseenter="executarSom('hover.wav')">Entrar em sala</button>
 				<button disabled onmouseenter="executarSom('hover.wav')">Iniciar sala</button>
 				<button disabled onmouseenter="executarSom('hover.wav')">Iniciar modo party</button>
 				<button onclick="abrirMenu('Inicio')" onmouseenter="executarSom('hover.wav')">Voltar</button>
@@ -101,9 +101,50 @@
 			<button onclick="reiniciarJogo()">OK</button>
 		</div>
 	</dialog>
+	<dialog id="dialogSalasMP">
+		<h1>Partidas multiplayer</h1>
+	</dialog>
+	<dialog id="dialogLobby">
+		<h1>Lobby</h1>
+		<div id="wrapperLobby">
+			<div id="lobbyJogadores">
+				<div class="local">Jogador</div>
+				<div>Jogador</div>
+				<div class="pronto">Jogador</div>
+			</div>
+			<div id="lobbyConfig">
+				<p><label for="inputLobbyJogador">Seu nome:</label>
+				<input id="inputLobbyJogador" type="text" onchange="renomearJogador(this)"></p>
+				<p><label for="inputLobbyNome">Nome da sala:</label>
+				<input id="inputLobbyNome" type="text"></p>
+				<p><label for="inputLobbyLinkSala">Link da sala:</label>
+				<input id="inputLobbyLinkSala" type="url" readonly value="..." title="Clique para copiar o link"></p>
+			</div>
+			<div id="lobbyDeque"></div>
+			<div id="lobbyChat">
+				<div id="lobbyMsgs">
+					<div>Fulano diz: E aí, tem alguém aqui?</div>
+					<div class="local">Você diz: Opa, sim estou!</div>
+					<div>Fulano diz: Ah, ótimo! Não estou sozinho aqui!</div>
+				</div>
+				<p><input type="text" id="inputLobbyChat" placeholder="Digite sua mensagem, ENTER para enviar"><button onclick="enviarChat()">Enviar</button></p>
+			</div>
+		</div>
+		<div class="botoes">
+			<button id="buttonLobbyPronto" onclick="alternarProntidao()">Pronto</button>
+			<button onclick="reiniciarJogo()">Sair</button>
+		</div>
+	</dialog>
 	<dialog id="carregando">
-		<h1>Carregando o Hiper-Códice</h1>
-		<p>Aguarde...</p>
+		<h1 id="h1Carregando">Carregando</h1>
+		<div class="loader">HC</div>
+	</dialog>
+	<dialog id="dialogMsg">
+		<h1>Hiper-Códice</h1>
+		<p id="mensagemDialogMsg"></p>
+		<div class="botoes">
+			<button onclick="reiniciarJogo()">OK</button>
+		</div>
 	</dialog>
 	<div class="holderAds">
 		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1945490586449138"

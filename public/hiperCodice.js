@@ -11,12 +11,27 @@ const divListagemAtributosDeque = document.getElementById("listagemAtributosDequ
 const inputNumCPUsSPPers = document.getElementById("inputNumCPUsSPPers");
 const buttonIniciarSPPersonalizado = document.getElementById("buttonIniciarSPPersonalizado");
 const divJogo = document.getElementById("jogo");
+const pMensagemDialogMsg = document.getElementById("mensagemDialogMsg");
+const h1Carregando = document.getElementById("h1Carregando");
+const inputLobbyJogador = document.getElementById("inputLobbyJogador");
+const inputLobbyNome = document.getElementById("inputLobbyNome");
+const inputLobbyLinkSala = document.getElementById("inputLobbyLinkSala");
+const divLobbyJogadores = document.getElementById("lobbyJogadores");
+const divLobbyDeque = document.getElementById("lobbyDeque");
+const divLobbyMsgs = document.getElementById("lobbyMsgs");
+const inputLobbyChat = document.getElementById("inputLobbyChat");
+const buttonLobbyPronto = document.getElementById("buttonLobbyPronto");
 
 var cores = [
 	["#F44336","#8b0000f8","#4f0000f8"],
 	["#FF9800","#4f2d00f8","#211300f8"],
 	["#4CAF50","#004700f8","#002500f8"],
 	["#2196F3","#002c8bf8","#00204ff8"]
+];
+var nomesAleatorios = [
+	"Gato","Cão","Rã","Tatu","Lobo","Urso","Leão","Tigre","Puma","Boi",
+	"Vaca","Porco","Veado","Raposa","Foca","Baleia","Cobra","Corvo","Pato","Galo",
+	"Ema","Puma","Mico","Zebu","Anta","Onça","Guaxinim","Coala","Cabra","Ovelha"
 ];
 var menuAberto = null;
 var timerDequePesquisa = null;
@@ -30,6 +45,13 @@ var musicas = [];
 var musicaEmExecucao = null;
 var configSom = true;
 var configMusica = true;
+var configNome = "";
+
+var comm = null;
+var pronto = false;
+var meuId = 0;
+var nomeLobby = "";
+var dequeLobby = null;
 
 var cookies = decodeURIComponent(document.cookie).split(";");
 cookies.forEach(_cookie=>{
@@ -51,6 +73,9 @@ cookies.forEach(_cookie=>{
 				configMusica = false;
 			}
 		} break;
+		case "configNome": {
+			configNome = cookieAtual[1];
+		}
 	}
 });
 
@@ -58,6 +83,13 @@ inputConfigSom.checked = configSom;
 inputConfigMusica.checked = configMusica;
 labelConfigSom.textContent = "Sons: "+(inputConfigSom.checked?"SIM":"NÃO");
 labelConfigMusica.textContent = "Música: "+(inputConfigMusica.checked?"SIM":"NÃO");
+document.cookie = `configSom=${configSom?1:0}`;
+document.cookie = `configMusica=${configMusica?1:0}`;
+if (configNome=="") {
+	configNome = nomesAleatorios[Math.floor(Math.random()*(nomesAleatorios.length-1))] + "#" + Math.floor(Math.random()*999);
+	console.log(`Olá, ${configNome}!`);
+}
+//document.cookie = `configNome=${encodeURIComponent(configNome)}`;
 
 class Som {
 	constructor(_arquivo,_musica=false) {
@@ -156,6 +188,34 @@ function esconderDialogo(_id) {
 	let dialogo = document.getElementById(_id);
 	dialogo.close();
 }
+function esconderTodosDialogos() {
+	let dialogos = document.getElementsByTagName("dialog");
+	for (let i = 0; i < dialogos.length; i++) {
+		if (dialogos[i].open) {
+			dialogos[i].close();
+		}
+	}
+}
+function exibirMensagem(_mensagem) {
+	esconderTodosDialogos();
+	pMensagemDialogMsg.textContent = _mensagem;
+	exibirDialogo("dialogMsg");
+}
+function exibirCarregamento(_mensagem="Carregando") {
+	h1Carregando.textContent = _mensagem;
+	exibirDialogo("carregando");
+}
+function exibirLobby(_servidor=null,_porta=null) {
+	if (!comm.pronto) {
+		exibirMensagem("Lobby desconectado");
+		return;
+	}
+	divLobbyMsgs.innerHTML="";
+	if (_servidor!=null) {		
+		inputLobbyLinkSala.value = `${document.URL}?sala=${_servidor}${(_porta!=null)?":"+_porta:""}`;
+	}
+	exibirDialogo("dialogLobby");
+}
 function carregarImagensMenu() {
 	fetch('getFundo.php')
 		.then(response => response.json())
@@ -202,10 +262,11 @@ function carregarScript(_script,_callback=()=>{}) {
 }
 function carregarJogoSP(_personalizado = false) {
 	fecharMenu();
-	exibirDialogo("carregando");
+	exibirCarregamento();
 	carregarScript("jogo",()=>{
 		carregarScript("jogoSP",()=>{
 			divJogo.style.display=null;
+			clearInterval(atualizacaoImagemMenu);
 			if (_personalizado) {
 				iniciarJogoSP(inputNumCPUsSPPers.value,dequeSelecionadoSPPers,atributosSelecionados);
 			} else {
@@ -214,12 +275,67 @@ function carregarJogoSP(_personalizado = false) {
 		});
 	});
 }
+function carregarJogoMP(_JSONdeque) {
+	fecharMenu();
+	exibirCarregamento();
+	carregarScript("jogo",()=>{
+		carregarScript("jogoMP",()=>{
+			divJogo.style.display=null;
+			clearInterval(atualizacaoImagemMenu);
+			iniciarJogoMP(_JSONdeque);
+			comm.enviarMensagem("\\ok");
+		});
+	});
+}
 function paginaCarregada() {
 	executarMusicaAleatoria();
 	setTimeout(()=>{
-		abrirMenu("Inicio");
+		const params = new URLSearchParams(window.location.search);
+		const salaParam = params.get("sala");
+		if (salaParam) {
+			const [host, porta] = salaParam.split(":");
+			if (host && porta) {
+				conectarLobby(host, porta);
+				return;
+			}
+		} else {
+			abrirMenu("Inicio");
+		}
 	},2000);
-	//carregarJogoSP();
+	//carregarJogoMP();
+}
+function conectarLobby(_servidor,_porta) {
+	exibirCarregamento("Conectando");
+	new Comm(_servidor,_porta,()=>{
+		exibirLobby(_servidor,_porta);
+	});
+}
+function renomearJogador(_novoNome) {
+	if (_novoNome.value != undefined) {
+		_novoNome = _novoNome.value;
+	}
+	let novoNome = JSON.stringify(_novoNome).slice(1, -1);
+	if (configNome != novoNome) {
+		comm.enviarMensagem(`\\renomear ${novoNome}`);
+	}
+}
+function enviarChat() {
+	let mensagem = JSON.stringify(inputLobbyChat.value).slice(1, -1);
+	if (mensagem != "") {
+		comm.enviarMensagem(`\\msg ${mensagem}`);
+		inputLobbyChat.value = "";
+	}
+}
+function alternarProntidao() {
+	if (!pronto) {
+		pronto = true;
+		buttonLobbyPronto.classList.add("pronto");
+		comm.enviarMensagem(`\\ready`);
+	} else {
+		pronto = false;
+		buttonLobbyPronto.classList.remove("pronto");
+		comm.enviarMensagem(`\\notready`);
+	}
 }
 function reiniciarJogo() {
 	document.location.reload();
@@ -346,3 +462,14 @@ new Som("Inspired.mp3",true);
 new Som("Rising Tide.mp3",true);
 
 divJogo.style.display="none";
+inputLobbyChat.addEventListener("keypress",(_ev)=>{
+	if (_ev.key === "Enter") {
+		_ev.preventDefault();
+		enviarChat();
+	}
+});
+inputLobbyLinkSala.onclick = (_ev)=>{
+	navigator.clipboard.writeText(inputLobbyLinkSala.value)
+    .then(()=>{ alert('Link copiado para a área de transferência.'); })
+    .catch(()=>{ alert('Falha ao copiar o link.'); });
+}

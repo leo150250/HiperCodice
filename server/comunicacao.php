@@ -7,8 +7,10 @@ require_once $path.".interno/estrutura.php";
 
 $server = null;
 $clientes = array($server);
-$comm = null;
+$comm = new Comm();
 $porta = 0;
+$pendingHandshakes = array();
+$jogadoresMPEmEspera = [];
 
 class Comm {
 	protected $clients;
@@ -52,6 +54,12 @@ class Comm {
 					$novoJogador = new Jogador("Jogador {$from->resourceId}");
 					$novoJogador->conexao = $from;
 					$from->jogador = $novoJogador;
+					$renome = implode(" ",$args);
+					if ($renome != "") {
+						$novoJogador->renomear($renome);
+					}
+					$this->enviarMensagemTodos("{$novoJogador->nome} entrou na sala.");
+					registrarJogadoresProntos();
 					break;
 				case "ready":
 					verbose("Jogador {$from->resourceId} está pronto para iniciar a partida.\n");
@@ -64,6 +72,7 @@ class Comm {
 							]
 						]));
 					}
+					registrarJogadoresProntos();
 					break;
 				case "notready":
 					verbose("Jogador {$from->resourceId} não está mais pronto.\n");
@@ -76,55 +85,82 @@ class Comm {
 							]
 						]));
 					}
+					registrarJogadoresProntos();
+					break;
+				case "ok":
+					verbose("Jogador {$from->resourceId} confirma que seu jogo está carregado e pronto para iniciar.\n");
+					//Remover o ID deste jogadores de jogadoresMPEmEspera
+					global $jogadoresMPEmEspera, $Jogadores;
+					foreach ($jogadoresMPEmEspera as $idx => $id) {
+						if ($id === $from->resourceId) {
+							unset($jogadoresMPEmEspera[$idx]);
+							$jogadoresMPEmEspera = array_values($jogadoresMPEmEspera);
+							break;
+						}
+					}
+					$infoJogadores = [];
+					foreach ($Jogadores as $jogador) {
+						$novaInfo = [
+							"resourceId"=>$jogador->conexao->resourceId,
+							"nome"=>$jogador->nome,
+							"qtdCartas"=>count($jogador->cartas)
+						];
+						array_push($infoJogadores,$novaInfo);
+					}
+					$this->enviarComm($from,"jogadores",$infoJogadores);
 					break;
 				case "escolha":
 					verbose("Jogador {$from->resourceId} escolheu atributo {$args[0]}\n");
-					global $Jogadores;
-					global $timerProntidao;
-					global $atributoEscolhido;
-					global $jogadorDaVez;
+					global $Jogadores, $timerProntidao, $atributoEscolhido, $jogadorDaVez;
 					if ($this->jogadorConn($from) === $Jogadores[$jogadorDaVez]) {
 						$timerProntidao = 0;
 						$atributoEscolhido = $args[0];
 					}
-					foreach ($this->clients as $client) {
-						$client->send(json_encode([
-							"tipo"=>"escolha",
-							"conteudo"=>[
-								"resourceId"=>$from->resourceId,
-								"atributo"=>$atributoEscolhido
-							]
-						]));
-					}
+					break;
+				case "renomear":
+					$novoNome = implode(" ",$args);
+					verbose("Jogador {$from->resourceId} renomeou para {$novoNome}\n");
+					$this->jogadorConn($from)->renomear($novoNome);
+					registrarJogadoresProntos();
+					break;
+				case "msg":
+					verbose("Mensagem de {$from->resourceId}: ".implode(" ",$args)."\n");
+						foreach ($this->clients as $client) {
+							if ($from !== $client) {
+								$client->send(json_encode([
+									"tipo"=>"msg",
+									"conteudo"=>[
+										"remetente"=>$from->resourceId,
+										"msg"=>implode(" ",$args)
+									]
+								]));
+							}
+						}
 					break;
                 default:
                     verbose("Comando desconhecido: $command\n");
                     break;
             }
         } else {
-            // Senão, interpretar como mensagem de chat
-            $numRecv = count($this->clients) - 1;
-            verbose(sprintf('Conexão %d enviou mensagem "%s" para %d outras conexões',
-                $from->resourceId, $msg, $numRecv));
-            foreach ($this->clients as $client) {
-                if ($from !== $client) {
-                    $client->send(json_encode([
-                        "tipo"=>"msg",
-                        "conteudo"=>[
-                            "remetente"=>$from->resourceId,
-                            "msg"=>$msg]]));
-                }
-            }
+            // Senão, interpretar como gibberish, apenas logar
+            verbose(sprintf('Conexão %d enviou gibberish: "%s"',
+                $from->resourceId, $msg));
         }
     }
 
     public function onClose($conn) {
 		$jogadorSaiu = $this->jogadorConn($conn);
 		if ($jogadorSaiu !== null) {
+			global $emExecucao, $timerInatividade;
+			$timerInatividade->resetar(10000);
+			if (!$emExecucao) {
+				registrarJogadoresProntos();
+			}
+			verbose("Conexão ({$conn->resourceId}) fechada\n");
+			$this->enviarMensagemTodos("{$jogadorSaiu->nome} saiu da sala.");
 			$jogadorSaiu->quitar();
 		}
         unset($this->clients[(int)$conn->resourceId]);
-        verbose("Conexão ({$conn->resourceId}) fechada\n");
     }
 
     public function onError($conn, $e) {
@@ -132,14 +168,14 @@ class Comm {
         $conn->close();
     }
 
-	public function enviarComm($conn,$tipo,$conteudo = new Object()) {
+	public function enviarComm($conn,$tipo,$conteudo = new stdClass()) {
 		$conn->send(json_encode([
 			"tipo"=>$tipo,
 			"conteudo"=>$conteudo
 		]));
 	}
 
-	public function enviarCommTodos($tipo,$conteudo = new Object()) {
+	public function enviarCommTodos($tipo,$conteudo = new stdClass()) {
 		foreach ($this->clients as $client) {
 			$client->send(json_encode([
 				"tipo"=>$tipo,
@@ -152,7 +188,7 @@ class Comm {
 		$conn->send(json_encode([
 			"tipo"=>"msg",
 			"conteudo"=>[
-				"resourceId"=>-1,
+				"remetente"=>-1,
 				"msg"=>$msg
 			]
 		]));
@@ -163,7 +199,7 @@ class Comm {
 			$client->send(json_encode([
 				"tipo"=>"msg",
 				"conteudo"=>[
-					"resourceId"=>-1,
+					"remetente"=>-1,
 					"msg"=>$msg
 				]
 			]));
@@ -202,176 +238,6 @@ class Conexao {
         fclose($this->socket);
     }
 }
-
-function iniciarSala($_porta) {
-	global $server, $clientes, $comm, $porta;
-	if ($_porta == 0) {
-		$_porta = intval(readline("Digite o número da porta: "));
-	}
-	verbose("Iniciando sala na porta $_porta...\n");
-	$context = stream_context_create();
-	$server = stream_socket_server("tcp://0.0.0.0:$_porta", $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
-	if (!$server) {
-		die("Falha ao iniciar a sala: $errstr ($errno)");
-	}
-	verbose("Sala iniciada na porta $_porta.\n");
-	$clientes = array($server);
-	$comm = new Comm();
-	$porta = $_porta;
-}
-function checarConexoes() {
-	global $clientes;
-	$read = $clientes;
-    $write = null;
-    $except = null;
-
-    if (stream_select($read, $write, $except, 0, 10) > 0) {
-        verificarNovasConexoes($read);
-		verbose("Heartbeats: ".implode(', ', $read)."\n");
-        foreach ($read as $conn) {
-            heartBeat($conn);
-        }
-    }
-}
-function verificarNovasConexoes($_read) {
-	global $server, $clientes, $comm, $porta;
-	if (in_array($server, $_read)) {
-		$conn = stream_socket_accept($server);
-		if ($conn) {
-			$connection = new Conexao($conn);
-			$clientes[] = $conn;
-
-			// Perform WebSocket handshake
-			$headers = fread($conn, 1024);
-			perform_handshaking($headers, $conn, 'localhost', $porta);
-
-			$comm->onOpen($connection);
-		}
-		unset($_read[array_search($server, $_read)]);
-	}
-}
-function heartBeat($_conn) {
-	global $comm, $clientes, $server;
-	//verbose("Heartbeat ".$_conn."\n");
-	if ($_conn === $server) {
-		//verbose("Socket do servidor.\n");
-		return;
-	}
-	$msg = fread($_conn, 1024);
-	if ($msg === false || $msg === '') {
-		$connection = new Conexao($_conn);
-		$comm->onClose($connection);
-		fclose($_conn);
-		unset($clientes[array_search($_conn, $clientes)]);
-	} else {
-		$decoded_msg = unmask($msg);
-		$connection = new Conexao($_conn);
-		$comm->onMessage($connection, $decoded_msg);
-	}
-}
-function checarRodada() {
-	global $emExecucao, $Jogadores, $timerProntidao, $comm, $Deque, $encerrada, $jogadorDaVez, $atributoEscolhido;
-	if (!$emExecucao) { //Estamos no Lobby ainda, aguardando 2 ou mais ficarem prontos
-		$numJogadores = count($Jogadores);
-		$numProntos = count(array_filter($Jogadores, function($jogador) {
-			return $jogador->pronto;
-		}));
-		verbose("Jogadores {$numProntos} / {$numJogadores}\n");
-		if ($numJogadores > 1 && $numProntos == $numJogadores) {
-			if ($timerProntidao == -1) {
-				verbose("Todos os jogadores estão prontos.\n");
-				$timerProntidao = 3;
-			} elseif ($timerProntidao > 0) {
-				verbose("Iniciando em $timerProntidao...\n");
-				$comm->enviarMensagemTodos("Iniciando em $timerProntidao...");
-				$timerProntidao--;
-			} else {
-				$comm->enviarMensagemTodos("Iniciando partida...");
-				$emExecucao = true;
-				$timerProntidao = -1;
-				foreach ($Jogadores as $jogador) {
-					$comm->enviarComm($jogador->conexao,"deque",$Deque->json());
-				}
-				embaralharEDistribuirCartas();
-				exibirCartasJogadores();
-			}
-		} else {
-			if ($timerProntidao != -1) {
-				verbose("Iniciativa cancelada. Aguardando todos os jogadores ficarem prontos...\n");
-				$comm->enviarMensagemTodos("Iniciativa cancelada. Aguardando todos os jogadores ficarem prontos...");
-				$timerProntidao = -1;
-			}
-			return;
-		}
-		return true;
-	} else {
-		if (!$encerrada) { //O jogo tá acontecendo.
-			if ($timerProntidao == -1) {
-				//Envia os índices das cartas da vez para cada jogador
-				foreach ($Jogadores as $jogador) {
-					//Obtém o índice da carta no deque
-					foreach ($Deque->cartas as $indice => $carta) {
-						if ($carta === $jogador->cartaAtual()) {
-							$comm->enviarComm($jogador->conexao,"carta",[
-								"resourceId"=>$jogador->conexao->resourceId,
-								"carta"=>$indice,
-								"qtd"=>count($jogador->cartas)
-							]);
-							break;
-						}
-					}
-				}
-				//Informa o jogador da vez que é a vez dele de jogar
-				$comm->enviarCommTodos("jogar",[
-					"resourceId"=>$Jogadores[$jogadorDaVez]->conexao->resourceId,
-				]);
-				$timerProntidao = 30;
-			} else {
-				if ($timerProntidao <= 5 && $timerProntidao > 0) {
-					verbose("Vai ser escolhido um atributo em {$timerProntidao}...\n");
-				}
-				if ($timerProntidao > 0) {
-					$timerProntidao--;
-				}
-				if ($timerProntidao == 0) {
-					if ($atributoEscolhido == -1) {
-						$atributoEscolhido = rand(0, count($Deque->atributos) - 1);
-					}
-					$comm->enviarCommTodos("escolha",[
-						"resourceId"=>$Jogadores[$jogadorDaVez]->conexao->resourceId,
-						"atributo"=>$atributoEscolhido
-					]);
-					$encerrada = !girarRodada($atributoEscolhido);
-					$timerProntidao = -1;
-				}
-			}
-			return true;
-		} else {
-			return false;
-		}
-		
-		//Teste: Envia uma carta aleatória a todos os jogadores a cada 10 segundos (através do timerProntidao)
-		/*
-		if ($timerProntidao == 0) {
-			foreach ($Jogadores as $jogador) {
-				$numCarta = rand(0, count($Deque->cartas)-1);
-				$carta = $Deque->cartas[$numCarta];
-				$comm->enviarComm($jogador->conexao,"carta",[
-					"resourceId"=>$jogador->conexao->resourceId,
-					"carta"=>$numCarta
-				]);
-			}
-			$timerProntidao = 10;
-		} else {
-			$timerProntidao--;
-		}
-		*/
-	}
-}
-function checarDesconexoes() {
-
-}
-
 function perform_handshaking($received_header, $client_conn, $host, $port) {
     $headers = array();
     $lines = preg_split("/\r\n/", $received_header);
@@ -383,7 +249,8 @@ function perform_handshaking($received_header, $client_conn, $host, $port) {
     }
 
     if (!isset($headers['Sec-WebSocket-Key'])) {
-        return;
+        fwrite($client_conn, "HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n");
+        return false;
     }
     $secKey = $headers['Sec-WebSocket-Key'];
     $secAccept = base64_encode(sha1($secKey . '258EAFA5-E914-47DA-95CA-C5AB0DC85B11', true));
@@ -397,6 +264,7 @@ function perform_handshaking($received_header, $client_conn, $host, $port) {
                "Connection: Upgrade\r\n" .
                "Sec-WebSocket-Accept: $secAccept\r\n\r\n";
     fwrite($client_conn, $upgrade);
+    return true;
 }
 function unmask($payload) {
     $length = ord($payload[1]) & 127;
@@ -432,5 +300,307 @@ function encodeMessage($msg) {
     }
 
     return $header . $msg;
+}
+
+function iniciarSala($_porta) {
+	global $server, $clientes, $comm, $porta;
+	if ($_porta == 0) {
+		$_porta = intval(readline("Digite o número da porta: "));
+	}
+	verbose("Iniciando sala na porta $_porta...\n");
+	$context = stream_context_create();
+	$server = stream_socket_server("tcp://0.0.0.0:$_porta", $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
+	if (!$server) {
+		die("Falha ao iniciar a sala: $errstr ($errno)");
+	}
+	verbose("Sala iniciada na porta $_porta. Aguardando jogadores...\n");
+	$clientes = array($server);
+	$comm = new Comm();
+	$porta = $_porta;
+}
+function checarConexoes() {
+	global $clientes, $server, $pendingHandshakes, $comm, $porta;
+
+	$read = array_merge($clientes, $pendingHandshakes);
+	$write = null;
+	$except = null;
+
+	//verbose("checarConexoes: contador clientes=" . count($clientes) . " pendentes=" . count($pendingHandshakes) . "\n");
+	$ready = @stream_select($read, $write, $except, 0, 100000);
+	//verbose("stream_select retornou: " . var_export($ready, true) . "; count(read)=" . count($read) . "\n");
+
+	if ($ready > 0) {
+		//verbose("Nova conexão!\n");
+		verificarNovasConexoes($read);
+
+		// Tenta concluir handshakes pendentes que ficaram prontos
+		foreach ($pendingHandshakes as $idx => $sock) {
+			if (!in_array($sock, $read, true)) continue;
+			$headers = fread($sock, 1024);
+			if ($headers === false || $headers === '') {
+				// ainda não há dados; aguarda próximas iterações
+				continue;
+			}
+			if (perform_handshaking($headers, $sock, 'localhost', $porta)) {
+				$connection = new Conexao($sock);
+				$clientes[] = $sock;
+				$comm->onOpen($connection);
+				unset($pendingHandshakes[$idx]);
+				$pendingHandshakes = array_values($pendingHandshakes);
+			} else {
+				verbose("Conexão rejeitada: headers não enviados ou handshake WebSocket inválido. Fechando socket.\n");
+				fclose($sock);
+				unset($pendingHandshakes[$idx]);
+				$pendingHandshakes = array_values($pendingHandshakes);
+			}
+		}
+
+		$read = array_filter($read, function($conn) use ($server) {
+			return $conn !== $server;
+		});
+		//verbose("Read set após filtro do servidor: " . implode(', ', $read) . "\n");
+		//verbose("Clientes ativos: " . implode(', ', $clientes) . "\n");
+		if (count($read) > 0) {
+			//verbose("Heartbeats: " . implode(', ', $read) . "\n");
+			foreach ($read as $conn) {
+				heartBeat($conn);
+			}
+		}
+	}
+}
+function verificarNovasConexoes($_read) {
+	global $server, $clientes, $comm, $porta, $pendingHandshakes;
+	if (in_array($server, $_read, true)) {
+		$conn = stream_socket_accept($server);
+		if ($conn) {
+			stream_set_blocking($conn, false);
+			$headers = fread($conn, 1024);
+			if ($headers === false) {
+				$headers = '';
+			}
+			if ($headers === '') {
+				// Nenhum dado imediato: armazena para tentativa posterior
+				$pendingHandshakes[] = $conn;
+				verbose("Conexão pendente: aguardando dados para handshake.\n");
+			} else {
+				if (perform_handshaking($headers, $conn, 'localhost', $porta)) {
+					$connection = new Conexao($conn);
+					$clientes[] = $conn;
+					$comm->onOpen($connection);
+				} else {
+					verbose("Conexão rejeitada: handshake WebSocket inválido. Fechando socket.\n");
+					fclose($conn);
+				}
+			}
+		}
+		$serverIndex = array_search($server, $_read, true);
+		if ($serverIndex !== false) {
+			unset($_read[$serverIndex]);
+		}
+	}
+}
+function heartBeat($_conn,$_tentativa = 0) {
+	global $comm, $clientes, $server;
+	//verbose("Heartbeat ".$_conn."\n");
+	if ($_conn === $server) {
+		//verbose("Socket do servidor.\n");
+		return;
+	}
+	$msg = fread($_conn, 1024);
+	if ($msg === false || $msg === '') {
+		if ($_tentativa < 3) {
+			verbose("(Heartbeat {$_tentativa})\n");
+			usleep(100000); // Espera 100ms antes de tentar ler novamente
+			heartBeat($_conn, $_tentativa + 1);
+			return;
+		}
+		verbose("Conexão ({$_conn}) fechada por inatividade ou erro.\n");
+		$connection = new Conexao($_conn);
+		$comm->onClose($connection);
+		fclose($_conn);
+		unset($clientes[array_search($_conn, $clientes)]);
+	} else {
+		$decoded_msg = unmask($msg);
+		$connection = new Conexao($_conn);
+		$comm->onMessage($connection, $decoded_msg);
+	}
+}
+function checarRodada() {
+	global $emExecucao, $Jogadores, $timerProntidao, $comm, $Deque, $encerrada, $jogadorDaVez, $atributoEscolhido, $timerInatividade, $jogadoresMPEmEspera;
+	if (!$emExecucao) { //Estamos no Lobby ainda, aguardando todos os 2 ou mais jogadores ficarem prontos
+		if ($encerrada) { return false; } //Se for encerrada no lobby por algum motivo (inatividade, por exemplo), faz a sala parar
+		$numJogadores = count($Jogadores);
+		$numProntos = count(array_filter($Jogadores, function($jogador) {
+			return $jogador->pronto;
+		}));
+		if ($numJogadores > 1 && $numProntos == $numJogadores) {
+			if ($timerProntidao == -1) {
+				verbose("Todos os jogadores estão prontos.\n");
+				$timerInatividade->resetar(10000);
+				$timerProntidao = 3;
+				verbose("Iniciando em $timerProntidao...\n");
+				$comm->enviarMensagemTodos("Iniciando em $timerProntidao...");
+				new Timer(function($_this){
+					global $timerProntidao, $comm;
+					if ($timerProntidao > 0) {
+						$timerProntidao--;
+						$_this->reexecutar();
+						verbose("Iniciando em $timerProntidao...\n");
+						$comm->enviarMensagemTodos("Iniciando em $timerProntidao...");
+					}
+				},1000);
+			} elseif ($timerProntidao > 0) {
+				//Faz nada. Espera os timers!
+			} else {
+				$comm->enviarMensagemTodos("Iniciando partida...");
+				$timerInatividade->resetar(10000);
+				$emExecucao = true;
+				$timerProntidao = -1;
+				embaralharEDistribuirCartas();
+				exibirCartasJogadores();
+				foreach ($Jogadores as $jogador) {
+					$comm->enviarComm($jogador->conexao,"deque",$Deque->json());
+				}
+				foreach ($Jogadores as $jogador) {
+					$jogadoresMPEmEspera[] = $jogador->conexao->resourceId;
+				}
+			}
+		} else {
+			if ($timerProntidao != -1) {
+				verbose("Iniciativa cancelada. Aguardando todos os jogadores ficarem prontos...\n");
+				$comm->enviarMensagemTodos("Iniciativa cancelada. Aguardando todos os jogadores ficarem prontos...");
+				$timerProntidao = -1;
+				$timerInatividade->resetar(10000);
+			}
+		}
+		return true;
+	} else {
+		if (!$encerrada) { //O jogo tá acontecendo.
+			if (count($jogadoresMPEmEspera) > 0) {
+				verbose("Aguardando confirmação de carregamento dos jogos pelos jogadores: " . implode(", ", $jogadoresMPEmEspera) . "\n");
+				sleep(1);
+				return true;
+			}
+			if ($timerProntidao == -1) {
+				//Envia os índices das cartas da vez para cada jogador
+				foreach ($Jogadores as $jogador) {
+					//Obtém o índice da carta no deque
+					foreach ($Deque->cartas as $indice => $carta) {
+						if ($carta === $jogador->cartaAtual()) {
+							$comm->enviarComm($jogador->conexao,"carta",[
+								"resourceId"=>$jogador->conexao->resourceId,
+								"carta"=>$indice,
+								"qtd"=>count($jogador->cartas)
+							]);
+							break;
+						}
+					}
+				}
+				//Informa o jogador da vez que é a vez dele de jogar
+				$comm->enviarCommTodos("jogar",[
+					"resourceId"=>$Jogadores[$jogadorDaVez]->conexao->resourceId,
+				]);
+				$timerProntidao = 30;
+				new Timer(function($_this){
+					global $timerProntidao;
+					if ($timerProntidao > 0) {
+						$timerProntidao--;
+						if ($timerProntidao <= 5 && $timerProntidao > 0) {
+							verbose("Vai ser escolhido um atributo em {$timerProntidao}...\n");
+						}
+						$_this->reexecutar();
+					}
+				},1000);
+			} else {
+				if ($timerProntidao <= 0) {
+					$autoEscolha = false;
+					if ($atributoEscolhido == -1) {
+						$atributoEscolhido = rand(0, count($Deque->atributos) - 1);
+						$autoEscolha = true;
+					}
+					$cartasJogadores = [];
+					foreach ($Jogadores as $jogador) {
+						$novaCartaJogadores = [];
+						$novaCartaJogadores["jogador"] = $jogador->conexao->resourceId;
+						foreach ($Deque->cartas as $indice => $carta) {
+							if ($carta === $jogador->cartaAtual()) {
+								$novaCartaJogadores["carta"] = $indice;
+							}
+						}
+						array_push($cartasJogadores,$novaCartaJogadores);
+					}
+					$comm->enviarCommTodos("escolha",[
+						"resourceId"=>$Jogadores[$jogadorDaVez]->conexao->resourceId,
+						"atributo"=>$atributoEscolhido,
+						"cartasJogadores"=>$cartasJogadores,
+						"autoEscolha"=>$autoEscolha
+					]);
+					$encerrada = !girarRodada($atributoEscolhido);
+					$timerProntidao = -1;
+				}
+			}
+			return true;
+		} else {
+			return false;
+		}
+		
+		//Teste: Envia uma carta aleatória a todos os jogadores a cada 10 segundos (através do timerProntidao)
+		/*
+		if ($timerProntidao == 0) {
+			foreach ($Jogadores as $jogador) {
+				$numCarta = rand(0, count($Deque->cartas)-1);
+				$carta = $Deque->cartas[$numCarta];
+				$comm->enviarComm($jogador->conexao,"carta",[
+					"resourceId"=>$jogador->conexao->resourceId,
+					"carta"=>$numCarta
+				]);
+			}
+			$timerProntidao = 10;
+		} else {
+			$timerProntidao--;
+		}
+		*/
+	}
+}
+function checarDesconexoes() {
+
+}
+function enviarInfoLobby() {
+	global $Jogadores, $comm, $Deque, $nomeLobby;
+	$infoJogadores = [];
+	foreach ($Jogadores as $jogador) {
+		$novaInfo = [
+			"resourceId"=>$jogador->conexao->resourceId,
+			"nome"=>$jogador->nome,
+			"pronto"=>$jogador->pronto
+		];
+		array_push($infoJogadores,$novaInfo);
+	}
+	$infoDeque = [];
+	$infoDeque["id"] = $Deque->id;
+	$infoDeque["nome"] = $Deque->nome;
+	$infoDeque["descricao"] = $Deque->descricao;
+	$infoDeque["atributos"] = [];
+	foreach ($Deque->atributos as $atributo) {
+		$infoDeque["atributos"][] = $atributo->id;
+	}
+	$infoDeque["atributos"] = implode(",", $infoDeque["atributos"]);
+	foreach ($Jogadores as $jogador) {
+		$comm->enviarComm($jogador->conexao,"lobby",[
+			"nome"=>$nomeLobby,
+			"deque"=>$infoDeque,
+			"jogadores"=>$infoJogadores
+		]);
+	}
+}
+function registrarJogadoresProntos() {
+	global $Jogadores, $timerInatividade;
+	$timerInatividade->resetar(10000);
+	$numJogadores = count($Jogadores);
+	$numProntos = count(array_filter($Jogadores, function($jogador) {
+		return $jogador->pronto;
+	}));
+	verbose("Jogadores prontos: {$numProntos} / {$numJogadores}\n");
+	enviarInfoLobby();
 }
 ?>

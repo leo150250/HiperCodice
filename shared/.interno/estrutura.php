@@ -11,15 +11,18 @@ $emExecucao = false;
 $encerrada = false;
 $timerProntidao = -1;
 $atributoEscolhido = -1;
+$nomeLobby = "Lobby#".getmypid();
 
 class Deque {
 	public $atributos = [];
 	public $cartas = [];
 	public $id = 0;
 	public $nome = "Deque";
-	public function __construct($_id,$_nome) {
+	public $descricao = "";
+	public function __construct($_id,$_nome,$_descricao = "") {
 		$this->id = $_id;
 		$this->nome = $_nome;
+		$this->descricao = $_descricao;
 	}
 	public function info() {
 		verbose("Deque: ".$this->nome." (ID: ".$this->id.")\n");
@@ -206,11 +209,10 @@ class Jogador {
 	}
 	public function quitar() {
 		global $Jogadores;
-		foreach ($Jogadores as $index => $jogador) {
-			if ($jogador === $this) {
-				array_splice($Jogadores, $index, 1);
-				break;
-			}
+		$indice = array_search($this, $Jogadores, true);
+		if ($indice !== false) {
+			unset ($Jogadores[$indice]);
+			$Jogadores = array_values($Jogadores);
 		}
 		verbose("Jogador {$this->nome} quitou da partida.\n");
 	}
@@ -220,6 +222,10 @@ class Jogador {
 			$listagemCartas.="[".$carta->obterCodCarta()."] ";
 		}
 		return $listagemCartas;
+	}
+	public function renomear(string $_novoNome) {
+		verbose("Jogador ".$this->nome." renomeado para ".$_novoNome."\n");
+		$this->nome = $_novoNome;
 	}
 }
 
@@ -232,7 +238,7 @@ function construirDeque($_id,$_numAtributos=6,$_atributos=[]) {
 		die("Deque não encontrado.");
 	}
 	$regDeque = BD_fetch($resDeque);
-	$Deque = new Deque($regDeque['id'], $regDeque['nome']);
+	$Deque = new Deque($regDeque['id'], $regDeque['nome'], $regDeque['descricao']);
 	$queryAtributos = "";
 	if (implode("",$_atributos)=="") {
 		$_atributos = [];
@@ -445,7 +451,7 @@ function girarRodada($_atributoEscolhido) {
 		$jogadoresVencedores[0]->cartaAtual()->info();
 	}
 	verbose("\n");
-	sleep(1);
+	sleep(6);
 	//O vencedor da rodada recebe as cartas dos outros jogadores (primeiro as cartas dos outros jogadores, depois a sua própria carta) e as coloca no final do seu deque. Os outros jogadores perdem a carta da vez.
 	foreach ($Jogadores as $jogador) {
 		if (!$jogador->ativo) {

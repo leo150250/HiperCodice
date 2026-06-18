@@ -247,16 +247,16 @@ class Carta {
 }
 
 class Jogador {
-	constructor(_nome,_cpu = true) {
+	constructor(_nome,_cpu = true,_conexao = null) {
 		this.nome = _nome;
 		this.cartas = [];
 		this.ativo = true;
 		this.pronto = false;
-		this.conexao = null;
+		this.conexao = _conexao;
 		this.cpu = _cpu;
 		this.id = jogadores.length;
 		jogadores.push(this);
-		console.log(`Jogador ${this.nome} entrou!`);
+		console.log(`Jogador ${this.nome} entrou ${this.conexao==null?"!":`, com conexão ID ${this.conexao}`}`);
 		
 		this.elemento = document.createElement("div");
 		this.elemento.classList.add("cardJogador");
@@ -340,6 +340,176 @@ class Jogador {
 	}
 }
 
+class Comm {
+	constructor(_servidor,_porta,_callback=null) {
+		this.servidor = _servidor;
+		this.porta = _porta;
+		this.callback = _callback;
+		this.filaMensagem = [];
+		this.processandoFila = false;
+		this.filaEspera = 200;
+		this.pronto = false;
+		this.callbacks = [];
+		console.log(this.filaMensagem);
+
+		console.log(`Conectando em ${this.servidor}:${this.porta}...`);
+		this.socket = new WebSocket(`ws://${this.servidor}:${this.porta}`);
+		this.socket.onopen = () => {
+			console.log("Conectado!");
+			this.pronto = true;
+			comm = this;
+			if (this.callback != null) {
+				this.callback();
+			}
+		};
+		this.socket.onmessage = (_evento) => {
+			this.respostaServidor(_evento);
+		}
+		this.socket.onerror = (_erro) => {
+			console.error("Erro na conexão:", _erro);
+			exibirMensagem(`O servidor não retornou resposta.`);
+		};
+		this.socket.onclose = (_ev) => {
+			console.log("Desconectado do servidor", _ev);
+			if (this.pronto) {
+				exibirMensagem(`Você foi desconectado do servidor.`);
+			}
+		};
+	}
+	respostaServidor(_evento) {
+		let resposta = JSON.parse(_evento.data);
+		console.log("<== RECEBIDO:",resposta);
+		switch (resposta.tipo) {
+			case "welcome": {
+				meuId = resposta.conteudo.resourceId;
+				this.enviarMensagem(`\\thnx ${configNome}`);
+			} break;
+			case "lobby": {
+				nomeLobby = resposta.conteudo.nome;
+				divLobbyDeque.innerHTML = "";
+				dequeLobby = new Deque(resposta.conteudo.deque.id, resposta.conteudo.deque.nome, resposta.conteudo.deque.descricao);
+				let divLobbyDequeBotao = dequeLobby.desenhar();
+				divLobbyDeque.appendChild(divLobbyDequeBotao);
+				let atributosLobby = resposta.conteudo.deque.atributos.split(",");
+				atributosLobby.forEach(_atributoLobby => {
+					let novoAtributo = new Atributo(dequeLobby,parseInt(_atributoLobby));
+					dequeLobby.atributos.push(novoAtributo);
+				});
+				jogadores = [];
+				divLobbyJogadores.innerHTML = "";
+				for (let i = 0; i < resposta.conteudo.jogadores.length; i++) {
+					let novoJogador = new Jogador(resposta.conteudo.jogadores[i].nome,false,resposta.conteudo.jogadores[i].resourceId);
+					novoJogador.pronto = resposta.conteudo.jogadores[i].pronto;
+					let divNovoJogador = document.createElement("div");
+					if (novoJogador.conexao == meuId) {
+						divNovoJogador.classList.add("local");
+						configNome = novoJogador.nome;
+					}
+					if (novoJogador.pronto) {
+						divNovoJogador.classList.add("pronto");
+					}
+					divNovoJogador.textContent = novoJogador.nome;
+					divLobbyJogadores.appendChild(divNovoJogador);
+				}
+				inputLobbyNome.value = nomeLobby;
+				inputLobbyJogador.value = configNome;
+			} break;
+			case "goaway": {
+				this.pronto = false;
+				exibirMensagem(`Não foi possível conectar: ${resposta.conteudo.msg}`);
+				this.socket.close();
+			} break;
+			case "msg": {
+				let novoChat = document.createElement("div");
+				let nomeRemetente = "";
+				if (resposta.conteudo.remetente == meuId) {
+					novoChat.classList.add("local");
+					nomeRemetente = "Você diz:";
+				} else if (resposta.conteudo.remetente == -1) {
+					//Se for -1, é mensagem do servidor. Não tem remetente.
+					novoChat.classList.add("servidor");
+				} else {
+					jogadores.forEach(_jogador => {
+						if (_jogador.conexao == resposta.conteudo.remetente) {
+							nomeRemetente = `${_jogador.nome} diz:`;
+							return;
+						}
+					});
+				}
+				novoChat.textContent = `${nomeRemetente} ${resposta.conteudo.msg}`;
+				divLobbyMsgs.appendChild(novoChat);
+				novoChat.scrollIntoView();
+			} break;
+			case "deque": {
+				carregarJogoMP(resposta.conteudo);
+			} break;
+			case "jogadores": {	//SalaMP
+				gerarJogadores(resposta.conteudo);
+			} break;
+			case "carta": { //SalaMP
+				carregarCartas(resposta.conteudo);
+			} break;
+			case "jogar": { //SalaMP
+				rodada(resposta.conteudo.resourceId);
+			} break;
+			case "escolha": { //SalaMP
+				processarEscolha(resposta.conteudo);
+			} break;
+			case "callback": {
+				for (let indice in this.callbacks) {
+					if (!Object.prototype.hasOwnProperty.call(this.callbacks, indice)) {
+						continue;
+					}
+					if (indice === resposta.callback) {
+						const callback = this.callbacks[indice];
+						if (typeof callback === "function") {
+							callback(resposta.conteudo);
+						}
+						delete this.callbacks[indice];
+						break;
+					}
+				}
+			} break;
+		}
+	}
+	enviarMensagem(_mensagem,_callback = null) {
+		console.log("Enviando mensagem...");
+		this.filaMensagem.push(_mensagem);
+		if (_callback != null) {
+			this.callbacks[_mensagem] = _callback;
+		}
+		setTimeout(()=>{
+			this.processarFilaMensagem();
+		},10);
+	}
+	processarFilaMensagem() {
+		if (this.filaMensagem.length == 0) {
+			this.processandoFila = false;
+		}
+		if (this.processandoFila) {
+			console.log("Tô processando...",this.filaMensagem);
+			return;
+		}
+		if (this.filaMensagem.length > 0) {
+			this.processandoFila = true;
+			this._enviarProximaMensagem();
+		}
+	}
+	_enviarProximaMensagem() {
+		if (this.socket.readyState === WebSocket.OPEN) {
+			console.log("ENVIANDO ==>", this.filaMensagem[0]);
+			this.socket.send(this.filaMensagem.shift());
+			if (this.filaMensagem.length == 0) {
+				this.processandoFila = false;
+			} else {
+				setTimeout(()=>{
+					this._enviarProximaMensagem();
+				},this.filaEspera);
+			}
+		}
+	}
+}
+
 function gerarDequeJSON(_json) {
 	//console.log(_json);
 
@@ -369,6 +539,6 @@ function gerarDequeJSON(_json) {
 		}
 	});
 
-	console.log(deque);
+	//console.log(deque);
 	//deque.info();
 }

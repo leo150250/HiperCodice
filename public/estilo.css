@@ -27,7 +27,7 @@ form > * {
 	margin: 10px 0;
 }
 
-input[type="text"], input[type="number"], input[type="search"], select {
+input[type="text"], input[type="number"], input[type="search"], input[type="url"], select {
 	background-color: inherit;
 	border: 1px solid #8884;
 	vertical-align: baseline;
@@ -61,6 +61,8 @@ dialog {
 	padding: 1em;
 	border: none;
 	max-width: 90vw;
+	outline: none;
+	box-shadow: 2px 3px 7px #000;
 }
 dialog::backdrop {
 	backdrop-filter: blur(10px);
@@ -69,7 +71,8 @@ dialog::backdrop {
 dialog h1 {
 	background-color: #F44336;
 	padding: 0.25em 0.5em;
-	margin: 0em -0.5em;
+	margin: -0.5em -0.5em 0em;
+	position: sticky;
 }
 dialog .botoes {
 	background-color: #8884;
@@ -925,6 +928,101 @@ input[type="checkbox"]:checked + label {
 #atributosDeque {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+#wrapperLobby {
+	display: flex;
+	width: fit-content;
+	flex-wrap: wrap;
+}
+
+#wrapperLobby #lobbyJogadores {
+	flex-basis: 200px;
+	flex-shrink: 0;
+	height: stretch;
+	flex-grow: 1;
+	border: 1px solid #8884;
+	margin: 1em 1em 1em 0px;
+}
+#wrapperLobby #lobbyJogadores > div {
+	border-bottom: 1px solid #8884;
+	padding: 0.25em 0.5em;
+	width: stretch;
+}
+#wrapperLobby #lobbyJogadores > div.local {
+	color: #FF0;
+	font-weight: bold;
+}
+#wrapperLobby #lobbyJogadores > div.local::after {
+	content: " (você)";
+	font-size: 0.75em;
+	color: #FF0;
+	vertical-align: middle;
+}
+#wrapperLobby #lobbyJogadores > div.pronto {
+	background-color: #004700;
+}
+#wrapperLobby #lobbyConfig input {
+	width: stretch;
+}
+
+#wrapperLobby #lobbyChat {
+	flex-basis: 100%;
+	max-width: calc(100vw - 2em);
+    width: 20em;
+}
+
+#lobbyChat #lobbyMsgs {
+	height: 200px;
+	overflow-y: scroll;
+	border: 1px solid #8884;
+	padding: 10px;
+	display: flex;
+	flex-direction: column;
+}
+#lobbyChat #lobbyMsgs div {
+	border-bottom: 1px solid #8884;
+	padding: 0.25em 0;
+	animation: 0.5s novaMsg linear forwards;
+}
+@keyframes novaMsg {
+	0% {
+		background-color: #26b32b8f;
+	}
+	20% {
+		background-color: transparent;
+	}
+	40% {
+		background-color: #26b32b8f;
+	}
+	60% {
+		background-color: transparent;
+	}
+	80% {
+		background-color: #26b32b8f;
+	}
+	100% {
+		background-color: transparent;
+	}
+}
+#lobbyChat #lobbyMsgs div:last-child {
+	border-bottom: none;
+}
+#lobbyChat #lobbyMsgs div.local {
+	color: #FF0;
+	font-weight: bold;
+}
+#lobbyChat #lobbyMsgs div.servidor {
+	color: #888;
+	font-weight: bold;
+}
+#lobbyChat #lobbyMsgs + p {
+	display: flex;
+	margin-top: 0px;
+}
+#lobbyChat #lobbyMsgs + p input[type="text"] {
+	flex-grow: 1;
+	margin-right: 10px;
 }
 
 @media only screen and (max-width: 800px) {
