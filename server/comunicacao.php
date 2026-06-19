@@ -125,14 +125,15 @@ class Comm {
 					registrarJogadoresProntos();
 					break;
 				case "msg":
-					verbose("Mensagem de {$from->resourceId}: ".implode(" ",$args)."\n");
+					$texto = filtrarString(implode(" ",$args));
+					verbose("Mensagem de {$from->resourceId}: ".$texto."\n");
 						foreach ($this->clients as $client) {
 							if ($from !== $client) {
 								$client->send(json_encode([
 									"tipo"=>"msg",
 									"conteudo"=>[
 										"remetente"=>$from->resourceId,
-										"msg"=>implode(" ",$args)
+										"msg"=>$texto
 									]
 								]));
 							}
