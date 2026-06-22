@@ -19,7 +19,7 @@ if (file_exists($path.".interno/servidoresMP.json")) {
 		}
 	}
 } else {
-	file_put_contents($path.".interno/servidoresMP.json",json_encode($listaServidores,JSON_PRETTY_PRINT));
+	file_put_contents($path.".interno/servidoresMP.json",json_encode($listaServidores,JSON_PRETTY_PRINT),LOCK_EX);
 }
 header('Content-Type: application/json');
 echo json_encode($listaServidores);

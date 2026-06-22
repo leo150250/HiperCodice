@@ -351,9 +351,12 @@ class Comm {
 		this.pronto = false;
 		this.callbacks = [];
 		console.log(this.filaMensagem);
-
 		console.log(`Conectando em ${this.servidor}:${this.porta}...`);
-		this.socket = new WebSocket(`wss://${this.servidor}:${this.porta}`);
+		if (window.location.protocol === "https:") {
+			this.socket = new WebSocket(`wss://${this.servidor}:${this.porta}`);
+		} else {
+			this.socket = new WebSocket(`ws://${this.servidor}:${this.porta}`);
+		}
 		this.socket.onopen = () => {
 			console.log("Conectado!");
 			this.pronto = true;
