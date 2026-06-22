@@ -104,7 +104,34 @@
 	<dialog id="dialogSalasMP">
 		<h1>Partidas multiplayer</h1>
 		<div id="listaPartidasMP">
-			
+			<table>
+				<tr>
+					<th>👥</th>
+					<th>Sala</th>
+					<th>Deque</th>
+					<th>Jogadores</th>
+				</tr>
+				<tr>
+					<td>🌎</td>
+					<td>Lobby#1</td>
+					<td>Carros (#1)</td>
+					<td>1/4</td>
+				</tr>
+				<tr>
+					<td>🔐</td>
+					<td>Lobby#2</td>
+					<td>Aviões (#4)</td>
+					<td>2/6</td>
+				</tr>
+			</table>
+		</div>
+		<p>Sala: <span id="spanSalasMPNome"></span></p>
+		<p>Jogadores: <span id="spanSalasMPJogadores"></span></p>
+		<p>Deque: <span id="spanSalasMPDeque"></span></p>
+		<div class="botoes">
+			<button disabled id="buttonSalasMPConectar" onclick="conectarLobby()">Conectar</button>
+			<button onclick="criarSalaMP()">Criar nova sala</button>
+			<button onclick="reiniciarJogo()">Voltar</button>
 		</div>
 	</dialog>
 	<dialog id="dialogLobby">

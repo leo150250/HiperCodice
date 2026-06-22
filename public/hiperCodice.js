@@ -53,6 +53,9 @@ var meuId = 0;
 var nomeLobby = "";
 var dequeLobby = null;
 
+var servidorMPSelecionado = null;
+var portaMPSelecionada = null;
+
 var cookies = decodeURIComponent(document.cookie).split(";");
 cookies.forEach(_cookie=>{
 	let cookieAtual = _cookie.split("=");
@@ -211,6 +214,7 @@ function exibirLobby(_servidor=null,_porta=null) {
 		return;
 	}
 	divLobbyMsgs.innerHTML="";
+	buttonLobbyPronto.classList.remove("pronto");
 	if (_servidor!=null) {		
 		inputLobbyLinkSala.value = `${document.URL}?sala=${_servidor}${(_porta!=null)?":"+_porta:""}`;
 	}
@@ -302,10 +306,15 @@ function paginaCarregada() {
 			abrirMenu("Inicio");
 		}
 	},2000);
+	exibirDialogo("dialogSalasMP");
 	//carregarJogoMP();
 }
-function conectarLobby(_servidor,_porta) {
+function conectarLobby(_servidor = null,_porta = null) {
 	exibirCarregamento("Conectando");
+	if (_servidor == null && _porta == null) {
+		_servidor = servidorMPSelecionado;
+		_porta = portaMPSelecionada;
+	}
 	new Comm(_servidor,_porta,()=>{
 		exibirLobby(_servidor,_porta);
 	});
