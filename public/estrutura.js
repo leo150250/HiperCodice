@@ -556,7 +556,11 @@ class Servidor {
 		this.ping();
 		servidores.push(this);
 	}
-	obterComm(_endpoint,_callback,_post = {}) {
+	obterComm(_endpoint,_callback,_post = {},_bypassAtivo = false) {
+		if (!_bypassAtivo && !this.ativo) {
+			console.info(`${this.host} inativo.`)
+			return null;
+		}
 		const url = `${this.url}${_endpoint}.php`;
 		fetch(url, {
 			method: "POST",
@@ -588,7 +592,7 @@ class Servidor {
 			} else {
 				console.warn(`Servidor ${this.host} não respondeu.`);
 			}
-		});
+		},undefined,true);
 	}
 }
 function carregarServidores() {

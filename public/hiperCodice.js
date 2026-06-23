@@ -21,6 +21,7 @@ const divLobbyDeque = document.getElementById("lobbyDeque");
 const divLobbyMsgs = document.getElementById("lobbyMsgs");
 const inputLobbyChat = document.getElementById("inputLobbyChat");
 const buttonLobbyPronto = document.getElementById("buttonLobbyPronto");
+const divListaPartidasMP = document.getElementById("listaPartidasMP");
 
 var cores = [
 	["#F44336","#8b0000f8","#4f0000f8"],
@@ -221,6 +222,60 @@ function exibirLobby(_servidor=null,_porta=null) {
 	}
 	exibirDialogo("dialogLobby");
 }
+function obterSalasMP() {
+	let tabelaPartidasMP = divListaPartidasMP.getElementsByTagName("table")[0];
+	divListaPartidasMP.innerHTML = "";
+	let loaderPartidasMP = gerarLoader(divListaPartidasMP);
+	
+	let numPartidas = 0;
+	let tbodyPartidasMP = tabelaPartidasMP.children[0];
+	for (let i = 1; i < tbodyPartidasMP.children.length; i++) {
+		tbodyPartidasMP.children[i].remove();
+	}
+	let numRespostas = 0;
+	
+	servidores.forEach(_servidor=>{
+		if (!_servidor.ativo) {
+			numRespostas++;
+			return;
+		}
+		_servidor.salas((_salas)=>{
+			numRespostas++;
+			_salas.salas.forEach(_sala=>{
+				if (_sala.emExecucao) return;
+				if (numPartidas == 0) {
+					loaderPartidasMP.remove();
+					divListaPartidasMP.appendChild(tabelaPartidasMP);
+				}
+				let trNovaSala = document.createElement("tr");
+				let tdDisp = document.createElement("td");
+				tdDisp.textContent = (_sala.senha==null)?"🌎":"🔐";
+				trNovaSala.appendChild(tdDisp);
+				let tdSala = document.createElement("td");
+				tdSala.textContent = _sala.nome;
+				trNovaSala.appendChild(tdSala);
+				let tdDeque = document.createElement("td");
+				tdDeque.textContent = _sala.nomeDeque
+				trNovaSala.appendChild(tdDeque);
+				let tdJogadores = document.createElement("td");
+				tdJogadores.textContent = `${_sala.jogadores}/${_sala.maxJogadores}`;
+				trNovaSala.appendChild(tdJogadores);
+				tbodyPartidasMP.appendChild(trNovaSala);
+				numPartidas++;
+			});
+			if (numPartidas == 0 && numRespostas == servidores.length) {
+				loaderPartidasMP.remove();
+				let trNenhumaPartida = document.createElement("tr");
+				let tdNenhumaPartida = document.createElement("td");
+				tdNenhumaPartida.colSpan = 4;
+				tdNenhumaPartida.textContent = "Nenhuma partida online em aberto. Crie uma você mesmo!";
+				trNenhumaPartida.appendChild(tdNenhumaPartida);
+				tbodyPartidasMP.appendChild(trNenhumaPartida);
+				divListaPartidasMP.appendChild(tabelaPartidasMP);
+			}
+		})
+	});
+}
 function carregarImagensMenu() {
 	fetch('getFundo.php')
 		.then(response => response.json())
@@ -308,6 +363,7 @@ function paginaCarregada() {
 		}
 	},2000);
 	exibirDialogo("dialogSalasMP");
+	obterSalasMP();
 	//carregarJogoMP();
 }
 function conectarLobby(_servidor = null,_porta = null) {

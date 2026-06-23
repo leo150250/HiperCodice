@@ -8,6 +8,21 @@ $listaSalas = [
 	"numSalas"=>0,
 	"salas"=>[]
 ];
+
+//Estrutura JSON de cada sala
+/*
+{
+	"porta": 15000,
+	"nome": "Sala 1",
+	"deque": 1,
+	"nomeDeque": "Deque 1",
+	"maxJogadores": 4,
+	"jogadores": 2,
+	"emExecucao": false,
+	"senha": null
+}
+*/
+
 if (file_exists($path."salas.json")) {
 	$arquivo = fopen($path."salas.json","r");
 	if (flock($arquivo,LOCK_SH)) {
