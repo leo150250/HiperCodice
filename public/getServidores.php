@@ -6,7 +6,7 @@ include_once $path.".interno/funcoes.php";
 $listaServidores = [
 	[
 		"host"=>"localhost",
-		"api"=>"/hipercodice/server/",
+		"api"=>"/hipercodice/server",
 		"ssl"=>false
 	]
 ];

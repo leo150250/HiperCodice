@@ -55,6 +55,7 @@ var dequeLobby = null;
 
 var servidorMPSelecionado = null;
 var portaMPSelecionada = null;
+carregarServidores();
 
 var cookies = decodeURIComponent(document.cookie).split(";");
 cookies.forEach(_cookie=>{

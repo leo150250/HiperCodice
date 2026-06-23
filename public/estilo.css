@@ -1030,11 +1030,43 @@ input[type="checkbox"]:checked + label {
 }
 
 #listaPartidasMP {
-	max-width: calc(100vw - 2em);
-    width: 20em;
-	height: 200px;
+	max-width: calc(100vw - 2em - 2px);
+	height: 30vh;
 	overflow-y: scroll;
 	border: 1px solid #8884;
+	margin-top: 1em;
+}
+#listaPartidasMP table {
+	width: 100%;
+	min-width: 50em;
+	border-collapse: collapse;
+}
+#listaPartidasMP table tr {
+	border-bottom: 1px solid #8884;
+	height: 2em;
+	box-sizing: border-box;
+}
+#listaPartidasMP table tr:first-child:has(th) {
+	position: sticky;
+	top: 0px;
+}
+#listaPartidasMP table tr:has(td):hover {
+	background-color: #8882;
+	cursor: pointer;
+}
+#listaPartidasMP table tr th {
+	background-color: #444;
+	padding: 0.5em;
+	text-align: left;
+}
+#listaPartidasMP table tr th:not(:first-child) {
+	border-left: 1px solid #8884;
+}
+#listaPartidasMP table tr td {
+	padding: 0.5em;
+}
+#listaPartidasMP table tr td:not(:first-child) {
+	border-left: 1px solid #8884;
 }
 
 @media only screen and (max-width: 800px) {

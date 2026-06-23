@@ -1,5 +1,6 @@
 var deque = null;
 var jogadores = [];
+var servidores = [];
 
 class Deque {
 	constructor(_id,_nome,_descricao="") {
@@ -544,4 +545,60 @@ function gerarDequeJSON(_json) {
 
 	//console.log(deque);
 	//deque.info();
+}
+class Servidor {
+	constructor(_host,_api,_ssl) {
+		this.host = _host;
+		this.api = _api;
+		this.ssl = _ssl;
+		this.url = `${(this.ssl?"https":"http")}://${this.host}${this.api}/api/`;
+		this.ativo = false;
+		this.ping();
+		servidores.push(this);
+	}
+	obterComm(_endpoint,_callback,_post = {}) {
+		const url = `${this.url}${_endpoint}.php`;
+		fetch(url, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(_post)
+		})
+			.then(response => response.json())
+			.then(data => {
+				if (typeof _callback === "function") {
+					_callback(data);
+				}
+			})
+			.catch(error => {
+				console.error("Erro ao obterComm:", error);
+				if (typeof _callback === "function") {
+					_callback(null, error);
+				}
+			});
+	}
+	salas(_callback) {
+		this.obterComm("salas",_callback);
+	}
+	ping() {
+		this.obterComm("ping",(_resposta)=>{
+			if (_resposta !== null) {
+				this.ativo = true;
+			} else {
+				console.warn(`Servidor ${this.host} não respondeu.`);
+			}
+		});
+	}
+}
+function carregarServidores() {
+	servidores = [];
+	fetch("getServidores.php")
+		.then(response => response.json())
+		.then(data => {
+			for (let i = 0; i < data.length; i++) {
+				new Servidor(data[i].host,data[i].api,data[i].ssl);
+			}
+			console.log(`${data.length} servidor(es) carregado(s)`);
+		})
 }
