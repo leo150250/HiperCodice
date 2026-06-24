@@ -229,8 +229,9 @@ function obterSalasMP() {
 	
 	let numPartidas = 0;
 	let tbodyPartidasMP = tabelaPartidasMP.children[0];
-	for (let i = 1; i < tbodyPartidasMP.children.length; i++) {
-		tbodyPartidasMP.children[i].remove();
+	let numCriancasTbody = tbodyPartidasMP.children.length;
+	for (let i = 1; i < numCriancasTbody; i++) {
+		tbodyPartidasMP.children[1].remove();
 	}
 	let numRespostas = 0;
 	
@@ -275,6 +276,50 @@ function obterSalasMP() {
 			}
 		})
 	});
+}
+function criarSalaMP(_localhost = false) {
+	exibirCarregamento("Conectando");
+
+	if (typeof servidores === "undefined" || servidores == null || servidores.length === 0) {
+		exibirMensagem("Nenhum servidor disponível");
+		return;
+	}
+
+	let servidoresAtivos = servidores.filter(_servidor => _servidor.ativo);
+	if (servidoresAtivos.length === 0) {
+		exibirMensagem("Nenhum servidor disponível");
+		return;
+	}
+
+	const isLocalhost = (_servidor) => {
+		const host = _servidor.host ?? _servidor.servidor ?? _servidor.endereco ?? _servidor.ip ?? "";
+		return host === "localhost" || host === "127.0.0.1" || host === "::1";
+	};
+
+	let servidorEscolhido = null;
+	if (servidoresAtivos.length === 1) {
+		servidorEscolhido = servidoresAtivos[0];
+	} else {
+		if (!_localhost) {
+			servidorEscolhido = servidoresAtivos.find(_servidor => !isLocalhost(_servidor));
+		}
+		if (servidorEscolhido == null) {
+			servidorEscolhido = servidoresAtivos[0];
+		}
+	}
+
+	const host = servidorEscolhido.host ?? servidorEscolhido.servidor ?? servidorEscolhido.endereco ?? servidorEscolhido.ip;
+	const porta = servidorEscolhido.porta ?? servidorEscolhido.puerto ?? servidorEscolhido.port;
+
+	if (!host || !porta) {
+		console.error("Servidor selecionado não possui host ou porta válidos", servidorEscolhido);
+		exibirMensagem("Erro ao selecionar servidor para criar sala");
+		return;
+	}
+
+	servidorMPSelecionado = host;
+	portaMPSelecionada = porta;
+	conectarLobby(host, porta);
 }
 function carregarImagensMenu() {
 	fetch('getFundo.php')

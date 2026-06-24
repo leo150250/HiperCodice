@@ -27,7 +27,7 @@
 			</div>
 			<div id="menuMP" class="menu">
 				<button onclick="exibirDialogo('dialogSalasMP'); obterSalasMP()" onmouseenter="executarSom('hover.wav')">Entrar em sala</button>
-				<button disabled onmouseenter="executarSom('hover.wav')">Iniciar sala</button>
+				<button onclick="exibirDialogo('dialogCriarSalaMP')" onmouseenter="executarSom('hover.wav')">Criar nova sala</button>
 				<button disabled onmouseenter="executarSom('hover.wav')">Iniciar modo party</button>
 				<button onclick="abrirMenu('Inicio')" onmouseenter="executarSom('hover.wav')">Voltar</button>
 			</div>
@@ -121,8 +121,18 @@
 		<p>Deque: <span id="spanSalasMPDeque"></span></p>
 		<div class="botoes">
 			<button disabled id="buttonSalasMPConectar" onclick="conectarLobby()">Conectar</button>
+			<button onclick="esconderTodosDialogos(); exibirDialogo('dialogCriarSalaMP')">Criar nova sala</button>
+			<button onclick="esconderTodosDialogos()">Voltar</button>
+		</div>
+	</dialog>
+	<dialog id="dialogCriarSalaMP">
+		<h1>Criar nova partida multiplayer</h1>
+		<p><label for="nomeNovaSalaMP">Nome da sala:</label><input type="text" name="nomeNovaSalaMP" id="nomeNovaSalaMP"></p>
+		<p><label for="numJogadoresNovaSalaMP">Nº de jogadores:</label><input type="number" name="numJogadoresNovaSalaMP" id="numJogadoresNovaSalaMP" min="2" max="8" value="4"></p>
+		<p><label for="senhaNovaSalaMP">Senha para acesso particular:</label><input type="text" name="senhaNovaSalaMP" id="senhaNovaSalaMP" placeholder="Deixe em branco para torná-la pública"></p>
+		<div class="botoes">
 			<button onclick="criarSalaMP()">Criar nova sala</button>
-			<button onclick="reiniciarJogo()">Voltar</button>
+			<button onclick="esconderTodosDialogos()">Voltar</button>
 		</div>
 	</dialog>
 	<dialog id="dialogLobby">

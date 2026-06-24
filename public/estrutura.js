@@ -594,6 +594,14 @@ class Servidor {
 			}
 		},undefined,true);
 	}
+	criarSala(_callback,_nomeSala,_jogadores,_senha=null) {
+		let POSTSala = {
+			nome:_nomeSala,
+			jogadores:parseInt(_jogadores),
+			senha:_senha
+		}
+		this.obterComm("novaSala",_callback,POSTSala);
+	}
 }
 function carregarServidores() {
 	servidores = [];
