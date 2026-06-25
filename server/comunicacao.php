@@ -341,11 +341,84 @@ function iniciarSala($_porta) {
 		}
 	}
 	stream_set_blocking($server, false);
+	//Registrar sala criada
 	verbose("Sala iniciada na porta $_porta. Aguardando jogadores...\n");
+	$porta = (int)$_porta;
+	registrarSala();
 	$clientes = array($server);
 	$comm = new Comm();
-	$porta = $_porta;
 }
+function registrarSala() {
+	global $path, $Deque, $porta, $idSala, $maxJogadores, $senha, $pid;
+	verbose("Registrando... ");
+	if (file_exists($path."salas.json")) {
+		$arquivo = fopen($path."salas.json","r+");
+		if (flock($arquivo,LOCK_EX)) {
+			$conteudo = stream_get_contents($arquivo);
+			$listaSalas = json_decode($conteudo);
+			$novaSala = [
+				"porta"=>$porta,
+				"pid"=>$pid,
+				"nome"=>$idSala,
+				"deque"=>$Deque->id,
+				"nomeDeque"=>$Deque->nome,
+				"maxJogadores"=>$maxJogadores,
+				"jogadores"=>0,
+				"emExecucao"=>false,
+				"senha"=>$senha
+			];
+			$listaSalas->salas[] = $novaSala;
+			$listaSalas->numSalas++;
+			$listaSalas->proximaSala++;
+			if ($listaSalas->proximaSala > 15999) {
+				$listaSalas->proximaSala = 15000;
+			}
+			rewind($arquivo);
+			ftruncate($arquivo,0);
+			fwrite($arquivo,json_encode($listaSalas,JSON_PRETTY_PRINT));
+			flock($arquivo,LOCK_UN);
+		}
+		fclose($arquivo);
+		verbose("OK\n");
+		register_shutdown_function("desregistrarSala");
+	} else {
+		die("Arquivo salas.json não encontrado!");
+	}
+}
+function desregistrarSala() {
+	global $path, $pid;
+	verbose("Desregistrando...");
+	if (file_exists($path."salas.json")) {
+		$arquivo = fopen($path."salas.json","r+");
+		if (flock($arquivo,LOCK_EX)) {
+			$conteudo = stream_get_contents($arquivo);
+			$listaSalas = json_decode($conteudo);
+			$indiceSala = null;
+			$numSalas = count($listaSalas->salas);
+			for ($i = 0; $i < $numSalas; $i++) {
+				$salaAtual = $listaSalas->salas[$i];
+				if ($salaAtual->pid == $pid) {
+					$indiceSala = $i;
+					break;
+				}
+			}
+			if ($indiceSala !== null) {
+				array_splice($listaSalas->salas, $indiceSala, 1);
+			} else {
+				verbose("ERRO: Não foi encontrado PID $pid registrado!");
+			}
+			rewind($arquivo);
+			ftruncate($arquivo,0);
+			fwrite($arquivo,json_encode($listaSalas,JSON_PRETTY_PRINT));
+			flock($arquivo,LOCK_UN);
+		}
+		fclose($arquivo);
+		verbose("OK\n");
+	} else {
+		die("Arquivo salas.json não encontrado!");
+	}
+}
+
 function checarConexoes() {
 	global $clientes, $server, $pendingHandshakes, $comm, $porta;
 

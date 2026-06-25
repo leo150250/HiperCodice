@@ -1,36 +1,5 @@
 {
-    "proximaSala": 15000,
-    "numSalas": 0,
-    "salas": [
-		{
-			"porta": 15000,
-			"nome": "Sala 1",
-			"deque": 1,
-			"nomeDeque": "Deque 1",
-			"maxJogadores": 4,
-			"jogadores": 2,
-			"emExecucao": false,
-			"senha": null
-		},
-		{
-			"porta": 15001,
-			"nome": "Sala Rodando",
-			"deque": 3,
-			"nomeDeque": "Deque 3",
-			"maxJogadores": 3,
-			"jogadores": 3,
-			"emExecucao": true,
-			"senha": null
-		},
-		{
-			"porta": 15002,
-			"nome": "Sala 3",
-			"deque": 3,
-			"nomeDeque": "Deque 3",
-			"maxJogadores": 8,
-			"jogadores": 4,
-			"emExecucao": false,
-			"senha": "aaaaaaaaa"
-		}
-	]
+    "proximaSala": 15034,
+    "numSalas": 34,
+    "salas": []
 }
