@@ -15,11 +15,12 @@ function verbose($_verbose) {
 	}
 }
 function outBuffer($_buffer) {
+	global $path;
 	$_buffer = "Buffer ".date("Y-m-d H:i:s")."\n----------\n".$_buffer;
-	file_put_contents("outBuffer.txt",$_buffer);
+	file_put_contents($path."outBuffer.txt",$_buffer);
 	return $_buffer;
 }
-function registrarBuffer($_arquivo = "") {
+function registrarBuffer() {
 	ob_start("outBuffer",0,PHP_OUTPUT_HANDLER_STDFLAGS ^ PHP_OUTPUT_HANDLER_REMOVABLE);
 }
 

@@ -349,7 +349,7 @@ function iniciarSala($_porta) {
 	$comm = new Comm();
 }
 function registrarSala() {
-	global $path, $Deque, $porta, $idSala, $maxJogadores, $senha, $pid;
+	global $path, $Deque, $porta, $nomeLobby, $maxJogadores, $senha, $pid;
 	verbose("Registrando... ");
 	if (file_exists($path."salas.json")) {
 		$arquivo = fopen($path."salas.json","r+");
@@ -359,7 +359,7 @@ function registrarSala() {
 			$novaSala = [
 				"porta"=>$porta,
 				"pid"=>$pid,
-				"nome"=>$idSala,
+				"nome"=>$nomeLobby,
 				"deque"=>$Deque->id,
 				"nomeDeque"=>$Deque->nome,
 				"maxJogadores"=>$maxJogadores,
@@ -414,6 +414,38 @@ function desregistrarSala() {
 		}
 		fclose($arquivo);
 		verbose("OK\n");
+	} else {
+		die("Arquivo salas.json não encontrado!");
+	}
+}
+function atualizarSala() {
+	global $path, $porta, $pid, $nomeLobby, $Deque, $maxJogadores, $Jogadores, $emExecucao, $senha;
+	if (file_exists($path."salas.json")) {
+		$arquivo = fopen($path."salas.json","r+");
+		if (flock($arquivo,LOCK_EX)) {
+			$conteudo = stream_get_contents($arquivo);
+			$listaSalas = json_decode($conteudo);
+			$indiceSala = null;
+			$numSalas = count($listaSalas->salas);
+			for ($i = 0; $i < $numSalas; $i++) {
+				$salaAtual = $listaSalas->salas[$i];
+				if ($salaAtual->pid == $pid) {
+					$indiceSala = $i;
+					break;
+				}
+			}
+			$listaSalas[$indiceSala]->nome = $nomeLobby;
+			$listaSalas[$indiceSala]->deque = $Deque->id;
+			$listaSalas[$indiceSala]->nomeDeque = $Deque->nome;
+			$listaSalas[$indiceSala]->maxJogadores = $maxJogadores;
+			$listaSalas[$indiceSala]->jogadores = count($Jogadores);
+			$listaSalas[$indiceSala]->emExecucao = $emExecucao;
+			rewind($arquivo);
+			ftruncate($arquivo,0);
+			fwrite($arquivo,json_encode($listaSalas,JSON_PRETTY_PRINT));
+			flock($arquivo,LOCK_UN);
+		}
+		fclose($arquivo);
 	} else {
 		die("Arquivo salas.json não encontrado!");
 	}
@@ -563,6 +595,7 @@ function checarRodada() {
 				$timerProntidao = -1;
 				embaralharEDistribuirCartas();
 				exibirCartasJogadores();
+				atualizarSala();
 				foreach ($Jogadores as $jogador) {
 					$comm->enviarComm($jogador->conexao,"deque",$Deque->json());
 				}
@@ -697,6 +730,7 @@ function enviarInfoLobby() {
 			"jogadores"=>$infoJogadores
 		]);
 	}
+	atualizarSala();
 }
 function registrarJogadoresProntos() {
 	global $Jogadores, $timerInatividade;

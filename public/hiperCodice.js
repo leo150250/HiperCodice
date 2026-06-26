@@ -22,6 +22,12 @@ const divLobbyMsgs = document.getElementById("lobbyMsgs");
 const inputLobbyChat = document.getElementById("inputLobbyChat");
 const buttonLobbyPronto = document.getElementById("buttonLobbyPronto");
 const divListaPartidasMP = document.getElementById("listaPartidasMP");
+const spanSalasMPNome = document.getElementById("spanSalasMPNome");
+const spanSalasMPJogadores = document.getElementById("spanSalasMPJogadores");
+const spanSalasMPDeque = document.getElementById("spanSalasMPDeque");
+const inputNomeNovaSalaMP = document.getElementById("inputNomeNovaSalaMP");
+const inputNumJogadoresNovaSalaMP = document.getElementById("inputNumJogadoresNovaSalaMP");
+const inputSenhaNovaSalaMP = document.getElementById("inputSenhaNovaSalaMP");
 
 var cores = [
 	["#F44336","#8b0000f8","#4f0000f8"],
@@ -244,11 +250,17 @@ function obterSalasMP() {
 			numRespostas++;
 			_salas.salas.forEach(_sala=>{
 				if (_sala.emExecucao) return;
+				console.log(_sala);
 				if (numPartidas == 0) {
 					loaderPartidasMP.remove();
 					divListaPartidasMP.appendChild(tabelaPartidasMP);
 				}
 				let trNovaSala = document.createElement("tr");
+				trNovaSala.onclick = ()=>{
+					spanSalasMPNome.textContent = _sala.nome;
+					spanSalasMPJogadores.textContent = `${_sala.jogadores}/${_sala.maxJogadores}`;
+					spanSalasMPDeque.textContent = _sala.nomeDeque;
+				}
 				let tdDisp = document.createElement("td");
 				tdDisp.textContent = (_sala.senha==null)?"🌎":"🔐";
 				trNovaSala.appendChild(tdDisp);
@@ -308,18 +320,24 @@ function criarSalaMP(_localhost = false) {
 		}
 	}
 
-	const host = servidorEscolhido.host ?? servidorEscolhido.servidor ?? servidorEscolhido.endereco ?? servidorEscolhido.ip;
-	const porta = servidorEscolhido.porta ?? servidorEscolhido.puerto ?? servidorEscolhido.port;
+	const host = servidorEscolhido.host;	
 
-	if (!host || !porta) {
-		console.error("Servidor selecionado não possui host ou porta válidos", servidorEscolhido);
-		exibirMensagem("Erro ao selecionar servidor para criar sala");
-		return;
+	let nomeNovaSalaMP = inputNomeNovaSalaMP.value;
+	let numJogadoresNovaSalaMP = parseInt(inputNumJogadoresNovaSalaMP.value);
+	let senhaNovaSalaMP = inputSenhaNovaSalaMP.value;
+	if (senhaNovaSalaMP == "") {
+		senhaNovaSalaMP = null;
 	}
 
 	servidorMPSelecionado = host;
-	portaMPSelecionada = porta;
-	conectarLobby(host, porta);
+
+	servidorEscolhido.criarSala((_resposta)=>{
+		if (_resposta == "ERRO") {
+			exibirMensagem("Não foi possível criar a sala: Erro no servidor.");
+		} else {
+			conectarLobby(host, _resposta);
+		}
+	},nomeNovaSalaMP,numJogadoresNovaSalaMP,senhaNovaSalaMP);
 }
 function carregarImagensMenu() {
 	fetch('getFundo.php')

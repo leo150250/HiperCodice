@@ -10,8 +10,8 @@ include $path.".interno/estrutura.php";
 include $path."comunicacao.php";
 $logFile = __DIR__ . "/logs/sala_" . date("Y-m-d_H-i-s") . ".txt";
 verbose(true);
+registrarBuffer();
 $porta = 0;
-$idSala = null;
 $maxJogadores = 4;
 $senha = null;
 $pid = getmypid();
@@ -22,7 +22,7 @@ foreach ($argv as $chave => $valor) {
 		$porta = $argv[$chave+1];
 	}
 	if ($valor == "-n") {
-		$idSala = $argv[$chave+1];
+		$nomeLobby = $argv[$chave+1];
 	}
 	if ($valor == "-j") {
 		$maxJogadores = $argv[$chave+1];
@@ -33,9 +33,6 @@ foreach ($argv as $chave => $valor) {
 }
 if ($porta == 0) {
 	die("Precisa especificar a porta");
-}
-if ($idSala == null) {
-	$idSala = "Sala#".str_pad(rand(0,999),3,"0",STR_PAD_LEFT);
 }
 $timer = 0;
 construirDeque(1,6);
