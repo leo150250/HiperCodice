@@ -421,7 +421,7 @@ function desregistrarSala() {
 	}
 }
 function atualizarSala() {
-	global $path, $porta, $pid, $nomeLobby, $Deque, $maxJogadores, $Jogadores, $emExecucao, $senha;
+	global $path, $pid, $nomeLobby, $Deque, $maxJogadores, $Jogadores, $emExecucao;
 	verbose("Atualizando registro da sala... ");
 	if (file_exists($path."salas.json")) {
 		$arquivo = fopen($path."salas.json","r+");
@@ -437,19 +437,19 @@ function atualizarSala() {
 					break;
 				}
 			}
-			$listaSalas[$indiceSala]->nome = $nomeLobby;
-			$listaSalas[$indiceSala]->deque = $Deque->id;
-			$listaSalas[$indiceSala]->nomeDeque = $Deque->nome;
-			$listaSalas[$indiceSala]->maxJogadores = $maxJogadores;
-			$listaSalas[$indiceSala]->jogadores = count($Jogadores);
-			$listaSalas[$indiceSala]->emExecucao = $emExecucao;
+			$listaSalas->salas[$indiceSala]->nome = $nomeLobby;
+			$listaSalas->salas[$indiceSala]->deque = $Deque->id;
+			$listaSalas->salas[$indiceSala]->nomeDeque = $Deque->nome;
+			$listaSalas->salas[$indiceSala]->maxJogadores = $maxJogadores;
+			$listaSalas->salas[$indiceSala]->jogadores = count($Jogadores);
+			$listaSalas->salas[$indiceSala]->emExecucao = $emExecucao;
 			rewind($arquivo);
 			ftruncate($arquivo,0);
 			fwrite($arquivo,json_encode($listaSalas,JSON_PRETTY_PRINT));
 			flock($arquivo,LOCK_UN);
-			verbose("OK\n");
 		}
 		fclose($arquivo);
+		verbose("OK\n");
 	} else {
 		die("Arquivo salas.json não encontrado!");
 	}
