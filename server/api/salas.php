@@ -33,7 +33,9 @@ if (file_exists($path."salas.json")) {
 	}
 	fclose($arquivo);
 } else {
-	file_put_contents($path."salas.json",json_encode($listaSalas,JSON_PRETTY_PRINT),LOCK_EX);
+	$jsonSalas = json_encode($listaSalas,JSON_PRETTY_PRINT);
+	file_put_contents($path."salas.json",$jsonSalas,LOCK_EX);
+	$listaSalas = json_decode($jsonSalas,false);
 }
 foreach ($listaSalas->salas as $sala) {
 	if ($sala->senha !== null) {
