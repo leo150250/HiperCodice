@@ -389,7 +389,7 @@ function registrarSala() {
 }
 function desregistrarSala() {
 	global $path, $pid;
-	verbose("Desregistrando...");
+	verbose("Desregistrando... ");
 	if (file_exists($path."salas.json")) {
 		$arquivo = fopen($path."salas.json","r+");
 		if (flock($arquivo,LOCK_EX)) {
@@ -422,6 +422,7 @@ function desregistrarSala() {
 }
 function atualizarSala() {
 	global $path, $porta, $pid, $nomeLobby, $Deque, $maxJogadores, $Jogadores, $emExecucao, $senha;
+	verbose("Atualizando registro da sala... ");
 	if (file_exists($path."salas.json")) {
 		$arquivo = fopen($path."salas.json","r+");
 		if (flock($arquivo,LOCK_EX)) {
@@ -446,6 +447,7 @@ function atualizarSala() {
 			ftruncate($arquivo,0);
 			fwrite($arquivo,json_encode($listaSalas,JSON_PRETTY_PRINT));
 			flock($arquivo,LOCK_UN);
+			verbose("OK\n");
 		}
 		fclose($arquivo);
 	} else {
