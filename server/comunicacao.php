@@ -316,7 +316,9 @@ function iniciarSala($_porta) {
 			die("Falha ao iniciar a sala SSL: extensão OpenSSL do PHP não está habilitada.\n");
 		}
 		if (!file_exists($sslCertFile)) {
-			die("Falha ao iniciar a sala: certificado SSL não encontrado em $sslCertFile (Permissão do usuário {get_current_user()} | {posix_getpwuid(posix_geteuid())['name']}?)\n");
+			$usuarioAtual = get_current_user();
+			$usuarioPosix = posix_getpwuid(posix_geteuid());
+			die("Falha ao iniciar a sala: certificado SSL não encontrado em $sslCertFile (Permissão do usuário {$usuarioAtual} | {$usuarioPosix['name']}?)\n");
 		}
 		if (!file_exists($sslKeyFile)) {
 			die("Falha ao iniciar a sala: chave privada SSL não encontrada em $sslKeyFile\n");
