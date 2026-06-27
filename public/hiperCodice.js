@@ -433,8 +433,6 @@ function paginaCarregada() {
 			abrirMenu("Inicio");
 		}
 	},2000);
-	exibirDialogo("dialogSalasMP");
-	obterSalasMP();
 	//carregarJogoMP();
 }
 function exibirSolicitacaoSenha() {
