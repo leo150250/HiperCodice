@@ -21,6 +21,15 @@ const divLobbyDeque = document.getElementById("lobbyDeque");
 const divLobbyMsgs = document.getElementById("lobbyMsgs");
 const inputLobbyChat = document.getElementById("inputLobbyChat");
 const buttonLobbyPronto = document.getElementById("buttonLobbyPronto");
+const divListaPartidasMP = document.getElementById("listaPartidasMP");
+const spanSalasMPNome = document.getElementById("spanSalasMPNome");
+const spanSalasMPJogadores = document.getElementById("spanSalasMPJogadores");
+const spanSalasMPDeque = document.getElementById("spanSalasMPDeque");
+const buttonSalasMPConectar = document.getElementById("buttonSalasMPConectar");
+const inputSenhaConectarMP = document.getElementById("inputSenhaConectarMP");
+const inputNomeNovaSalaMP = document.getElementById("inputNomeNovaSalaMP");
+const inputNumJogadoresNovaSalaMP = document.getElementById("inputNumJogadoresNovaSalaMP");
+const inputSenhaNovaSalaMP = document.getElementById("inputSenhaNovaSalaMP");
 
 var cores = [
 	["#F44336","#8b0000f8","#4f0000f8"],
@@ -29,9 +38,9 @@ var cores = [
 	["#2196F3","#002c8bf8","#00204ff8"]
 ];
 var nomesAleatorios = [
-	"Gato","Cão","Rã","Tatu","Lobo","Urso","Leão","Tigre","Puma","Boi",
-	"Vaca","Porco","Veado","Raposa","Foca","Baleia","Cobra","Corvo","Pato","Galo",
-	"Ema","Puma","Mico","Zebu","Anta","Onça","Guaxinim","Coala","Cabra","Ovelha"
+	"Rosa","Lírio","Íris","Tulipa","Violeta","Dália","Jasmim","Cravo","Camélia","Gerânio",
+	"Petúnia","Azaléia","Lavanda","Begônia","Orquídea","Narciso","Lótus","Malva",
+	"Jacinto","Magnólia","Amarílis","Açucena","Gardênia","Hortênsia"
 ];
 var menuAberto = null;
 var timerDequePesquisa = null;
@@ -52,6 +61,12 @@ var pronto = false;
 var meuId = 0;
 var nomeLobby = "";
 var dequeLobby = null;
+
+var servidorMPSelecionado = null;
+var portaMPSelecionada = null;
+var senhaMPrequerida = false;
+var senhaMP = null;
+carregarServidores();
 
 var cookies = decodeURIComponent(document.cookie).split(";");
 cookies.forEach(_cookie=>{
@@ -211,10 +226,126 @@ function exibirLobby(_servidor=null,_porta=null) {
 		return;
 	}
 	divLobbyMsgs.innerHTML="";
+	buttonLobbyPronto.classList.remove("pronto");
 	if (_servidor!=null) {		
 		inputLobbyLinkSala.value = `${document.URL}?sala=${_servidor}${(_porta!=null)?":"+_porta:""}`;
 	}
 	exibirDialogo("dialogLobby");
+}
+function obterSalasMP() {
+	let tabelaPartidasMP = divListaPartidasMP.getElementsByTagName("table")[0];
+	divListaPartidasMP.innerHTML = "";
+	let loaderPartidasMP = gerarLoader(divListaPartidasMP);
+	
+	let numPartidas = 0;
+	let tbodyPartidasMP = tabelaPartidasMP.children[0];
+	let numCriancasTbody = tbodyPartidasMP.children.length;
+	for (let i = 1; i < numCriancasTbody; i++) {
+		tbodyPartidasMP.children[1].remove();
+	}
+	let numRespostas = 0;
+	
+	servidores.forEach(_servidor=>{
+		if (!_servidor.ativo) {
+			numRespostas++;
+			return;
+		}
+		_servidor.salas((_salas)=>{
+			numRespostas++;
+			_salas.salas.forEach(_sala=>{
+				if (_sala.emExecucao) return;
+				console.log(_sala);
+				if (numPartidas == 0) {
+					loaderPartidasMP.remove();
+					divListaPartidasMP.appendChild(tabelaPartidasMP);
+				}
+				let trNovaSala = document.createElement("tr");
+				trNovaSala.onclick = ()=>{
+					servidorMPSelecionado = _servidor.host;
+					portaMPSelecionada = _sala.porta;
+					senhaMPrequerida = _sala.senha!==null;
+					buttonSalasMPConectar.removeAttribute("disabled");
+					spanSalasMPNome.textContent = _sala.nome;
+					spanSalasMPJogadores.textContent = `${_sala.jogadores}/${_sala.maxJogadores}`;
+					spanSalasMPDeque.textContent = _sala.nomeDeque;
+				}
+				let tdDisp = document.createElement("td");
+				tdDisp.textContent = (_sala.senha==null)?"🌎":"🔐";
+				trNovaSala.appendChild(tdDisp);
+				let tdSala = document.createElement("td");
+				tdSala.textContent = _sala.nome;
+				trNovaSala.appendChild(tdSala);
+				let tdDeque = document.createElement("td");
+				tdDeque.textContent = _sala.nomeDeque
+				trNovaSala.appendChild(tdDeque);
+				let tdJogadores = document.createElement("td");
+				tdJogadores.textContent = `${_sala.jogadores}/${_sala.maxJogadores}`;
+				trNovaSala.appendChild(tdJogadores);
+				tbodyPartidasMP.appendChild(trNovaSala);
+				numPartidas++;
+			});
+			if (numPartidas == 0 && numRespostas == servidores.length) {
+				loaderPartidasMP.remove();
+				let trNenhumaPartida = document.createElement("tr");
+				let tdNenhumaPartida = document.createElement("td");
+				tdNenhumaPartida.colSpan = 4;
+				tdNenhumaPartida.textContent = "Nenhuma partida online em aberto. Crie uma você mesmo!";
+				trNenhumaPartida.appendChild(tdNenhumaPartida);
+				tbodyPartidasMP.appendChild(trNenhumaPartida);
+				divListaPartidasMP.appendChild(tabelaPartidasMP);
+			}
+		})
+	});
+}
+function criarSalaMP(_localhost = false) {
+	exibirCarregamento("Conectando");
+
+	if (typeof servidores === "undefined" || servidores == null || servidores.length === 0) {
+		exibirMensagem("Nenhum servidor disponível");
+		return;
+	}
+
+	let servidoresAtivos = servidores.filter(_servidor => _servidor.ativo);
+	if (servidoresAtivos.length === 0) {
+		exibirMensagem("Nenhum servidor disponível");
+		return;
+	}
+
+	const isLocalhost = (_servidor) => {
+		const host = _servidor.host ?? _servidor.servidor ?? _servidor.endereco ?? _servidor.ip ?? "";
+		return host === "localhost" || host === "127.0.0.1" || host === "::1";
+	};
+
+	let servidorEscolhido = null;
+	if (servidoresAtivos.length === 1) {
+		servidorEscolhido = servidoresAtivos[0];
+	} else {
+		if (!_localhost) {
+			servidorEscolhido = servidoresAtivos.find(_servidor => !isLocalhost(_servidor));
+		}
+		if (servidorEscolhido == null) {
+			servidorEscolhido = servidoresAtivos[0];
+		}
+	}
+
+	const host = servidorEscolhido.host;	
+
+	let nomeNovaSalaMP = inputNomeNovaSalaMP.value;
+	let numJogadoresNovaSalaMP = parseInt(inputNumJogadoresNovaSalaMP.value);
+	let senhaNovaSalaMP = inputSenhaNovaSalaMP.value;
+	if (senhaNovaSalaMP == "") {
+		senhaNovaSalaMP = null;
+	}
+	senhaMP = senhaNovaSalaMP;
+	servidorMPSelecionado = host;
+
+	servidorEscolhido.criarSala((_resposta)=>{
+		if (_resposta == "ERRO") {
+			exibirMensagem("Não foi possível criar a sala: Erro no servidor.");
+		} else {
+			conectarLobby(host, _resposta);
+		}
+	},nomeNovaSalaMP,numJogadoresNovaSalaMP,senhaNovaSalaMP);
 }
 function carregarImagensMenu() {
 	fetch('getFundo.php')
@@ -304,8 +435,25 @@ function paginaCarregada() {
 	},2000);
 	//carregarJogoMP();
 }
-function conectarLobby(_servidor,_porta) {
+function exibirSolicitacaoSenha() {
+	esconderTodosDialogos();
+	exibirDialogo("dialogSenhaMP");
+}
+function conectarLobby(_servidor = null,_porta = null,_senha = null) {
 	exibirCarregamento("Conectando");
+	if (_servidor == null && _porta == null) {
+		_servidor = servidorMPSelecionado;
+		_porta = portaMPSelecionada;
+		if (_senha === null) {
+			_senha = senhaMP;
+		} else {
+			senhaMP = _senha;
+		}
+		if ((senhaMPrequerida) && (_senha === null)) {
+			exibirSolicitacaoSenha();
+			return;
+		}
+	}
 	new Comm(_servidor,_porta,()=>{
 		exibirLobby(_servidor,_porta);
 	});

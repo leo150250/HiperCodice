@@ -2,24 +2,33 @@
 if (!isset($argv)) {
 	die("Este arquivo precisa ser executado diretamente no servidor.");
 }
-$path = "";
+date_default_timezone_set("America/Sao_Paulo");
+$path = __DIR__."/";
 include $path.".interno/conexaoBD.php";
 include $path.".interno/funcoes.php";
 include $path.".interno/estrutura.php";
 include $path."comunicacao.php";
-//registrarBuffer();
-//$logFile = $path . "logs/sala_" . date("Y-m-d_H-i-s") . ".txt";
-
-
-
-$idSala = 0;
-
+$logFile = __DIR__ . "/logs/sala_" . date("Y-m-d_H-i-s") . ".txt";
 verbose(true);
+registrarBuffer();
 $porta = 0;
+$maxJogadores = 4;
+$senha = null;
+$pid = getmypid();
+verbose("Registro sala PID $pid\n");
 verbose($argv);
 foreach ($argv as $chave => $valor) {
 	if ($valor == "-p") {
 		$porta = $argv[$chave+1];
+	}
+	if ($valor == "-n") {
+		$nomeLobby = $argv[$chave+1];
+	}
+	if ($valor == "-j") {
+		$maxJogadores = $argv[$chave+1];
+	}
+	if ($valor == "-s") {
+		$senha = $argv[$chave+1];
 	}
 }
 if ($porta == 0) {
@@ -54,5 +63,5 @@ while ($jogoRodando) {
 }
 
 fclose($server);
-verbose("Fim da sala!");
+verbose("Fim da sala!\n");
 ?>

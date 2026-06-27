@@ -224,8 +224,14 @@ class Jogador {
 		return $listagemCartas;
 	}
 	public function renomear(string $_novoNome) {
-		verbose("Jogador ".$this->nome." renomeado para ".$_novoNome."\n");
-		$this->nome = $_novoNome;
+		if ($_novoNome != $this->nome) {
+			$_novoNome = trim($_novoNome);
+			$_novoNome = str_replace(["\n","\r"], "", $_novoNome);
+			$_novoNome = substr($_novoNome, 0, 16);
+			$_novoNome = filtrarString($_novoNome);
+			verbose("Jogador ".$this->nome." renomeado para ".$_novoNome."\n");
+			$this->nome = $_novoNome;
+		}
 	}
 }
 

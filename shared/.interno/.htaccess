@@ -1,5 +1,5 @@
-# Bloquear acesso a arquivos .sql e .json
-<FilesMatch "\.(sql|json)$">
+# Bloquear acesso a arquivos
+<FilesMatch "\.(sql|json|txt)$">
 	Order allow,deny
 	Deny from all
 </FilesMatch>

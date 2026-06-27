@@ -1,5 +1,6 @@
 var deque = null;
 var jogadores = [];
+var servidores = [];
 
 class Deque {
 	constructor(_id,_nome,_descricao="") {
@@ -351,9 +352,12 @@ class Comm {
 		this.pronto = false;
 		this.callbacks = [];
 		console.log(this.filaMensagem);
-
 		console.log(`Conectando em ${this.servidor}:${this.porta}...`);
-		this.socket = new WebSocket(`wss://${this.servidor}:${this.porta}`);
+		if (window.location.protocol === "https:") {
+			this.socket = new WebSocket(`wss://${this.servidor}:${this.porta}`);
+		} else {
+			this.socket = new WebSocket(`ws://${this.servidor}:${this.porta}`);
+		}
 		this.socket.onopen = () => {
 			console.log("Conectado!");
 			this.pronto = true;
@@ -383,6 +387,13 @@ class Comm {
 			case "welcome": {
 				meuId = resposta.conteudo.resourceId;
 				this.enviarMensagem(`\\thnx ${configNome}`);
+			} break;
+			case "pass": {
+				if (senhaMP != null) {
+					this.enviarMensagem(`\\pass ${senhaMP}`);
+				} else {
+					this.socket.close();
+				}
 			} break;
 			case "lobby": {
 				nomeLobby = resposta.conteudo.nome;
@@ -541,4 +552,72 @@ function gerarDequeJSON(_json) {
 
 	//console.log(deque);
 	//deque.info();
+}
+class Servidor {
+	constructor(_host,_api,_ssl) {
+		this.host = _host;
+		this.api = _api;
+		this.ssl = _ssl;
+		this.url = `${(this.ssl?"https":"http")}://${this.host}${this.api}/api/`;
+		this.ativo = false;
+		this.ping();
+		servidores.push(this);
+	}
+	obterComm(_endpoint,_callback,_post = {},_bypassAtivo = false) {
+		if (!_bypassAtivo && !this.ativo) {
+			console.info(`${this.host} inativo.`)
+			return null;
+		}
+		const url = `${this.url}${_endpoint}.php`;
+		fetch(url, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify(_post)
+		})
+			.then(response => response.json())
+			.then(data => {
+				if (typeof _callback === "function") {
+					_callback(data);
+				}
+			})
+			.catch(error => {
+				console.error("Erro ao obterComm:", error);
+				if (typeof _callback === "function") {
+					_callback(null, error);
+				}
+			});
+	}
+	salas(_callback) {
+		this.obterComm("salas",_callback);
+	}
+	ping() {
+		this.obterComm("ping",(_resposta)=>{
+			if (_resposta !== null) {
+				this.ativo = true;
+			} else {
+				console.warn(`Servidor ${this.host} não respondeu.`);
+			}
+		},undefined,true);
+	}
+	criarSala(_callback,_nomeSala,_jogadores,_senha=null) {
+		let POSTSala = {
+			nome:_nomeSala,
+			jogadores:parseInt(_jogadores),
+			senha:_senha
+		}
+		this.obterComm("novaSala",_callback,POSTSala);
+	}
+}
+function carregarServidores() {
+	servidores = [];
+	fetch("getServidores.php")
+		.then(response => response.json())
+		.then(data => {
+			for (let i = 0; i < data.length; i++) {
+				new Servidor(data[i].host,data[i].api,data[i].ssl);
+			}
+			console.log(`${data.length} servidor(es) carregado(s)`);
+		})
 }

@@ -21,9 +21,18 @@ class Comm {
     }
 
     public function onOpen($conn) {
-        global $emExecucao;
+        global $emExecucao, $senha, $Jogadores, $maxJogadores;
 		$this->clients[(int)$conn->resourceId] = $conn;
 		verbose("Nova conexão: ({$conn->resourceId})\n");
+		if (count($Jogadores) >= $maxJogadores) {
+			$conn->send(json_encode([
+				'tipo' => 'goaway',
+				'conteudo' => [
+					'msg' => 'Máximo de jogadores conectados atingido.'
+				]
+			]));
+			return false;
+		}
 		if ($emExecucao) {
 			$conn->send(json_encode([
 				'tipo' => 'goaway',
@@ -33,12 +42,21 @@ class Comm {
 			]));
 			return false;
 		}
-		$conn->send(json_encode([
-			'tipo' => 'welcome',
-			'conteudo' => [
-				'resourceId' => $conn->resourceId
-			]
-		]));
+		if ($senha == null) {
+			$conn->send(json_encode([
+				'tipo' => 'welcome',
+				'conteudo' => [
+					'resourceId' => $conn->resourceId
+				]
+			]));
+		} else {
+			$conn->send(json_encode([
+				'tipo' => 'pass',
+				'conteudo' => [
+					'resourceId' => $conn->resourceId
+				]
+			]));
+		}
 		return true;
     }
 
@@ -50,6 +68,29 @@ class Comm {
             $args = array_slice($parts, 1);
             verbose(sprintf("Comando recebido de %d: %s\n", $from->resourceId, $msg));
             switch ($command) {
+				case "pass":
+					global $senha;
+					verbose("Conexão {$from->resourceId} informou senha... ");
+					$senhaInformada = md5(implode(" ",$args));
+					if ($senha === $senhaInformada) {
+						$from->send(json_encode([
+							'tipo' => 'welcome',
+							'conteudo' => [
+								'resourceId' => $from->resourceId
+							]
+						]));
+						verbose("OK\n");
+					} else {
+						$from->send(json_encode([
+							'tipo' => 'goaway',
+							'conteudo' => [
+								'msg' => 'Senha incorreta.'
+							]
+						]));
+						verbose("INCORRETA!\n");
+						unset($this->clients[(int)$from->resourceId]);
+					}
+					break;
 				case "thnx":
 					verbose("Conexão {$from->resourceId} está acordada e ativa.\n");
 					$novoJogador = new Jogador("Jogador {$from->resourceId}");
@@ -125,14 +166,15 @@ class Comm {
 					registrarJogadoresProntos();
 					break;
 				case "msg":
-					verbose("Mensagem de {$from->resourceId}: ".implode(" ",$args)."\n");
+					$texto = filtrarString(implode(" ",$args));
+					verbose("Mensagem de {$from->resourceId}: ".$texto."\n");
 						foreach ($this->clients as $client) {
 							if ($from !== $client) {
 								$client->send(json_encode([
 									"tipo"=>"msg",
 									"conteudo"=>[
 										"remetente"=>$from->resourceId,
-										"msg"=>implode(" ",$args)
+										"msg"=>$texto
 									]
 								]));
 							}
@@ -154,12 +196,12 @@ class Comm {
 		if ($jogadorSaiu !== null) {
 			global $emExecucao, $timerInatividade;
 			$timerInatividade->resetar(10000);
-			if (!$emExecucao) {
-				registrarJogadoresProntos();
-			}
 			verbose("Conexão ({$conn->resourceId}) fechada\n");
 			$this->enviarMensagemTodos("{$jogadorSaiu->nome} saiu da sala.");
 			$jogadorSaiu->quitar();
+			if (!$emExecucao) {
+				registrarJogadoresProntos();
+			}
 		}
         unset($this->clients[(int)$conn->resourceId]);
     }
@@ -308,17 +350,25 @@ function iniciarSala($_porta) {
 	if ($_porta == 0) {
 		$_porta = intval(readline("Digite o número da porta: "));
 	}
-	verbose("Iniciando sala na porta $_porta...\n");
 	$context = null;
 	if ($ssl) {
+		verbose("Iniciando sala COM SSL na porta $_porta...\n");
+		$usuarioAtual = "win";
+		$usuarioPosix = [
+			'name'=>"win"
+		];
+		if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
+			$usuarioAtual = get_current_user();
+			$usuarioPosix = posix_getpwuid(posix_geteuid());
+		}
 		if (!extension_loaded('openssl')) {
 			die("Falha ao iniciar a sala SSL: extensão OpenSSL do PHP não está habilitada.\n");
 		}
 		if (!file_exists($sslCertFile)) {
-			die("Falha ao iniciar a sala: certificado SSL não encontrado em $sslCertFile\n");
+			verbose("AVISO: certificado SSL não encontrado em $sslCertFile (Permissão do usuário {$usuarioAtual} | {$usuarioPosix['name']}?)\n");
 		}
 		if (!file_exists($sslKeyFile)) {
-			die("Falha ao iniciar a sala: chave privada SSL não encontrada em $sslKeyFile\n");
+			verbose("AVISO: chave privada SSL não encontrada em $sslKeyFile\n");
 		}
 		$context = stream_context_create(["ssl" => [
 			"local_cert" => $sslCertFile,
@@ -333,6 +383,7 @@ function iniciarSala($_porta) {
 			die("Falha ao iniciar a sala SSL: $errstr ($errno)");
 		}
 	} else {
+		verbose("Iniciando sala na porta $_porta...\n");
 		$context = stream_context_create();
 		$server = stream_socket_server("tcp://0.0.0.0:$_porta", $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
 		if (!$server) {
@@ -340,11 +391,119 @@ function iniciarSala($_porta) {
 		}
 	}
 	stream_set_blocking($server, false);
-	verbose("Sala iniciada na porta $_porta. Aguardando jogadores...\n");
+	//Registrar sala criada
+	$porta = (int)$_porta;
+	registrarSala();
 	$clientes = array($server);
 	$comm = new Comm();
-	$porta = $_porta;
+	verbose("Sala iniciada na porta $_porta. Aguardando jogadores...\n");
 }
+function registrarSala() {
+	global $path, $Deque, $porta, $nomeLobby, $maxJogadores, $senha, $pid;
+	verbose("Registrando... ");
+	if (file_exists($path."salas.json")) {
+		$arquivo = fopen($path."salas.json","r+");
+		if (flock($arquivo,LOCK_EX)) {
+			$conteudo = stream_get_contents($arquivo);
+			$listaSalas = json_decode($conteudo);
+			$novaSala = [
+				"porta"=>$porta,
+				"pid"=>$pid,
+				"nome"=>$nomeLobby,
+				"deque"=>$Deque->id,
+				"nomeDeque"=>$Deque->nome,
+				"maxJogadores"=>$maxJogadores,
+				"jogadores"=>0,
+				"emExecucao"=>false,
+				"senha"=>$senha
+			];
+			$listaSalas->salas[] = $novaSala;
+			$listaSalas->numSalas++;
+			$listaSalas->proximaSala++;
+			if ($listaSalas->proximaSala > 15999) {
+				$listaSalas->proximaSala = 15000;
+			}
+			rewind($arquivo);
+			ftruncate($arquivo,0);
+			fwrite($arquivo,json_encode($listaSalas,JSON_PRETTY_PRINT));
+			flock($arquivo,LOCK_UN);
+		}
+		fclose($arquivo);
+		verbose("OK\n");
+		register_shutdown_function("desregistrarSala");
+	} else {
+		die("Arquivo salas.json não encontrado!");
+	}
+}
+function desregistrarSala() {
+	global $path, $pid;
+	verbose("Desregistrando... ");
+	if (file_exists($path."salas.json")) {
+		$arquivo = fopen($path."salas.json","r+");
+		if (flock($arquivo,LOCK_EX)) {
+			$conteudo = stream_get_contents($arquivo);
+			$listaSalas = json_decode($conteudo);
+			$indiceSala = null;
+			$numSalas = count($listaSalas->salas);
+			for ($i = 0; $i < $numSalas; $i++) {
+				$salaAtual = $listaSalas->salas[$i];
+				if ($salaAtual->pid == $pid) {
+					$indiceSala = $i;
+					break;
+				}
+			}
+			if ($indiceSala !== null) {
+				array_splice($listaSalas->salas, $indiceSala, 1);
+				$listaSalas->numSalas--;
+			} else {
+				verbose("ERRO: Não foi encontrado PID $pid registrado!");
+			}
+			rewind($arquivo);
+			ftruncate($arquivo,0);
+			fwrite($arquivo,json_encode($listaSalas,JSON_PRETTY_PRINT));
+			flock($arquivo,LOCK_UN);
+		}
+		fclose($arquivo);
+		verbose("OK\n");
+	} else {
+		die("Arquivo salas.json não encontrado!");
+	}
+}
+function atualizarSala() {
+	global $path, $pid, $nomeLobby, $Deque, $maxJogadores, $Jogadores, $emExecucao;
+	verbose("Atualizando registro da sala... ");
+	if (file_exists($path."salas.json")) {
+		$arquivo = fopen($path."salas.json","r+");
+		if (flock($arquivo,LOCK_EX)) {
+			$conteudo = stream_get_contents($arquivo);
+			$listaSalas = json_decode($conteudo);
+			$indiceSala = null;
+			$numSalas = count($listaSalas->salas);
+			for ($i = 0; $i < $numSalas; $i++) {
+				$salaAtual = $listaSalas->salas[$i];
+				if ($salaAtual->pid == $pid) {
+					$indiceSala = $i;
+					break;
+				}
+			}
+			$listaSalas->salas[$indiceSala]->nome = $nomeLobby;
+			$listaSalas->salas[$indiceSala]->deque = $Deque->id;
+			$listaSalas->salas[$indiceSala]->nomeDeque = $Deque->nome;
+			$listaSalas->salas[$indiceSala]->maxJogadores = $maxJogadores;
+			$listaSalas->salas[$indiceSala]->jogadores = count($Jogadores);
+			$listaSalas->salas[$indiceSala]->emExecucao = $emExecucao;
+			rewind($arquivo);
+			ftruncate($arquivo,0);
+			fwrite($arquivo,json_encode($listaSalas,JSON_PRETTY_PRINT));
+			flock($arquivo,LOCK_UN);
+		}
+		fclose($arquivo);
+		verbose("OK\n");
+	} else {
+		die("Arquivo salas.json não encontrado!");
+	}
+}
+
 function checarConexoes() {
 	global $clientes, $server, $pendingHandshakes, $comm, $porta;
 
@@ -489,6 +648,7 @@ function checarRodada() {
 				$timerProntidao = -1;
 				embaralharEDistribuirCartas();
 				exibirCartasJogadores();
+				atualizarSala();
 				foreach ($Jogadores as $jogador) {
 					$comm->enviarComm($jogador->conexao,"deque",$Deque->json());
 				}
@@ -623,6 +783,7 @@ function enviarInfoLobby() {
 			"jogadores"=>$infoJogadores
 		]);
 	}
+	atualizarSala();
 }
 function registrarJogadoresProntos() {
 	global $Jogadores, $timerInatividade;
