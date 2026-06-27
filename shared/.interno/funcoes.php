@@ -49,7 +49,6 @@ function carregarPalavrasProibidas() {
 	}
 	//print_r($palavrasProibidas);
 }
-carregarPalavrasProibidas();
 
 function filtrarString($_string) {
 	global $palavrasProibidas;

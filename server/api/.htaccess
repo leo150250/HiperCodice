@@ -1,0 +1,10 @@
+<IfModule mod_headers.c>
+    Header always set Access-Control-Allow-Origin "https://hipercodice.leandrogabriel.net"
+    Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header always set Access-Control-Allow-Headers "Content-Type"
+</IfModule>
+
+# Responder OPTIONS sem redirecionar
+RewriteEngine On
+RewriteCond %{REQUEST_METHOD} =OPTIONS
+RewriteRule ^ - [L]

@@ -1,5 +1,5 @@
 <?php
-$path = "../";
+$path = __DIR__."/../";
 include $path.".interno/conexaoBD.php";
 include $path.".interno/funcoes.php";
 
@@ -43,5 +43,6 @@ foreach ($listaSalas->salas as $sala) {
 	}
 }
 header('Content-Type: application/json');
+http_response_code(200);
 echo json_encode($listaSalas);
 ?>
