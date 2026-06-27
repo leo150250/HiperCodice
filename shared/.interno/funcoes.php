@@ -5,6 +5,9 @@ if (!isset($path)) {
 $logFile = $path."log.txt";
 function verbose($_verbose) {
 	global $logFile;
+	if (!is_dir(__DIR__."/logs")) {
+		mkdir(__DIR__."/logs");
+	}
 	if ($_verbose === true) {
 		file_put_contents($logFile,"Iniciando log em ".date("Y-m-d H:i:s")."\n----------\n",LOCK_EX);
 	} else {
