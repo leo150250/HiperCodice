@@ -21,7 +21,7 @@ class Comm {
     }
 
     public function onOpen($conn) {
-        global $emExecucao;
+        global $emExecucao, $senha;
 		$this->clients[(int)$conn->resourceId] = $conn;
 		verbose("Nova conexão: ({$conn->resourceId})\n");
 		if ($emExecucao) {
@@ -33,12 +33,21 @@ class Comm {
 			]));
 			return false;
 		}
-		$conn->send(json_encode([
-			'tipo' => 'welcome',
-			'conteudo' => [
-				'resourceId' => $conn->resourceId
-			]
-		]));
+		if ($senha == null) {
+			$conn->send(json_encode([
+				'tipo' => 'welcome',
+				'conteudo' => [
+					'resourceId' => $conn->resourceId
+				]
+			]));
+		} else {
+			$conn->send(json_encode([
+				'tipo' => 'pass',
+				'conteudo' => [
+					'resourceId' => $conn->resourceId
+				]
+			]));
+		}
 		return true;
     }
 
@@ -50,6 +59,27 @@ class Comm {
             $args = array_slice($parts, 1);
             verbose(sprintf("Comando recebido de %d: %s\n", $from->resourceId, $msg));
             switch ($command) {
+				case "pass":
+					global $senha;
+					verbose("Conexão {$from->resourceId} informou senha...\n");
+					$senhaInformada = md5(implode(" ",$args));
+					if ($senha === $senhaInformada) {
+						$from->send(json_encode([
+							'tipo' => 'welcome',
+							'conteudo' => [
+								'resourceId' => $from->resourceId
+							]
+						]));
+					} else {
+						$from->send(json_encode([
+							'tipo' => 'goaway',
+							'conteudo' => [
+								'msg' => 'Senha incorreta.'
+							]
+						]));
+						$from->close();
+					}
+					break;
 				case "thnx":
 					verbose("Conexão {$from->resourceId} está acordada e ativa.\n");
 					$novoJogador = new Jogador("Jogador {$from->resourceId}");
