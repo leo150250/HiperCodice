@@ -5,7 +5,7 @@ $path = "../";
 include $path.".interno/funcoes.php";
 carregarConfigSSL();
 if ($ssl) {
-	echo shell_exec("sudo -u www-data cat {$sslCertFile} 2>&1");
+	echo shell_exec("cat {$sslCertFile} 2>&1");
 } else {
 	echo "SSL não habilitado para este servidor.";
 }
