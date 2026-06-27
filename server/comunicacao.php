@@ -312,16 +312,16 @@ function iniciarSala($_porta) {
 	verbose("Iniciando sala na porta $_porta...\n");
 	$context = null;
 	if ($ssl) {
+		$usuarioAtual = get_current_user();
+		$usuarioPosix = posix_getpwuid(posix_geteuid());
 		if (!extension_loaded('openssl')) {
 			die("Falha ao iniciar a sala SSL: extensão OpenSSL do PHP não está habilitada.\n");
 		}
 		if (!file_exists($sslCertFile)) {
-			$usuarioAtual = get_current_user();
-			$usuarioPosix = posix_getpwuid(posix_geteuid());
-			die("Falha ao iniciar a sala: certificado SSL não encontrado em $sslCertFile (Permissão do usuário {$usuarioAtual} | {$usuarioPosix['name']}?)\n");
+			verbose("AVISO: certificado SSL não encontrado em $sslCertFile (Permissão do usuário {$usuarioAtual} | {$usuarioPosix['name']}?)\n");
 		}
 		if (!file_exists($sslKeyFile)) {
-			die("Falha ao iniciar a sala: chave privada SSL não encontrada em $sslKeyFile\n");
+			verbose("AVISO: chave privada SSL não encontrada em $sslKeyFile\n");
 		}
 		$context = stream_context_create(["ssl" => [
 			"local_cert" => $sslCertFile,
