@@ -121,6 +121,7 @@
 		<p>Deque: <span id="spanSalasMPDeque"></span></p>
 		<div class="botoes">
 			<button disabled id="buttonSalasMPConectar" onclick="conectarLobby()">Conectar</button>
+			<button onclick="obterSalasMP()">Atualizar</button>
 			<button onclick="esconderTodosDialogos(); exibirDialogo('dialogCriarSalaMP')">Criar nova sala</button>
 			<button onclick="esconderTodosDialogos()">Voltar</button>
 		</div>
@@ -175,6 +176,14 @@
 		<p id="mensagemDialogMsg"></p>
 		<div class="botoes">
 			<button onclick="reiniciarJogo()">OK</button>
+		</div>
+	</dialog>
+	<dialog id="dialogSenhaMP">
+		<h1>Conectando</h1>
+		<p><label for="inputSenhaConectarMP">Digite a senha para conectar:</label><input type="text" name="inputSenhaConectarMP" id="inputSenhaConectarMP"></p>
+		<div class="botoes">
+			<button onclick="conectarLobby(null,null,inputSenhaConectarMP.value)">Conectar</button>
+			<button onclick="esconderTodosDialogos()">Cancelar</button>
 		</div>
 	</dialog>
 	<div class="holderAds">

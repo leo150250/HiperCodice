@@ -53,7 +53,7 @@ if (file_exists($path."salas.json")) {
 		}
 		$listaSalas->numSalas++;
 		$listaSalas->proximaSala++;
-		if ($listaSalas->proximaSala > 15999) {
+		if ($listaSalas->proximaSala > 15099) {
 			$listaSalas->proximaSala = 15000;
 		}
 		$command = "php";

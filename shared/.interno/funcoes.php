@@ -4,9 +4,10 @@ if (!isset($path)) {
 }
 $logFile = $path."log.txt";
 function verbose($_verbose) {
-	global $logFile;
-	if (!is_dir(__DIR__."/logs")) {
-		mkdir(__DIR__."/logs");
+	global $logFile, $path;
+	if (!is_dir($path."/logs")) {
+		echo "O diretório de logs não existe. Criando...\n";
+		mkdir($path."/logs");
 	}
 	if ($_verbose === true) {
 		file_put_contents($logFile,"Iniciando log em ".date("Y-m-d H:i:s")."\n----------\n",LOCK_EX);
@@ -214,12 +215,10 @@ function carregarConfigSSL() {
 	if (file_exists($path.".interno/ssl.json")) {
 		$configSSL = file_get_contents($path.".interno/ssl.json");
 		$configSSL = json_decode($configSSL);
-		if ($configSSL->useSSL) {
-			$ssl = true;
-			$sslCertFile = $configSSL->certFile;
-			$sslKeyFile = $configSSL->keyFile;
-			$sslPassphrase = $configSSL->passphrase;
-		}
+		$ssl = $configSSL->useSSL;
+		$sslCertFile = $configSSL->certFile;
+		$sslKeyFile = $configSSL->keyFile;
+		$sslPassphrase = $configSSL->passphrase;
 	} else {
 		verbose("Arquivo de configuração SSL não encontrado, usando configurações padrão (sem SSL).\n");
 		$configSSL = json_encode([
@@ -229,7 +228,7 @@ function carregarConfigSSL() {
 			"passphrase" => ""
 		]);
 		$configSSL = json_decode($configSSL);
-		$ssl = true;
+		$ssl = $configSSL->useSSL;
 		$sslCertFile = $configSSL->certFile;
 		$sslKeyFile = $configSSL->keyFile;
 		$sslPassphrase = $configSSL->passphrase;

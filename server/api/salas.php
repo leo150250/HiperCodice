@@ -29,11 +29,16 @@ if (file_exists($path."salas.json")) {
 	if (flock($arquivo,LOCK_SH)) {
 		$conteudo = stream_get_contents($arquivo);
 		flock($arquivo,LOCK_UN);
-		$listaSalas = json_decode($conteudo,true);
+		$listaSalas = json_decode($conteudo,false);
 	}
 	fclose($arquivo);
 } else {
 	file_put_contents($path."salas.json",json_encode($listaSalas,JSON_PRETTY_PRINT),LOCK_EX);
+}
+foreach ($listaSalas->salas as $sala) {
+	if ($sala->senha !== null) {
+		$sala->senha = true;
+	}
 }
 header('Content-Type: application/json');
 echo json_encode($listaSalas);

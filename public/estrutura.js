@@ -388,6 +388,13 @@ class Comm {
 				meuId = resposta.conteudo.resourceId;
 				this.enviarMensagem(`\\thnx ${configNome}`);
 			} break;
+			case "pass": {
+				if (senhaMP != null) {
+					this.enviarMensagem(`\\pass ${senhaMP}`);
+				} else {
+					this.socket.close();
+				}
+			} break;
 			case "lobby": {
 				nomeLobby = resposta.conteudo.nome;
 				divLobbyDeque.innerHTML = "";

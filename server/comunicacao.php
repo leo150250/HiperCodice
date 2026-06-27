@@ -21,9 +21,18 @@ class Comm {
     }
 
     public function onOpen($conn) {
-        global $emExecucao, $senha;
+        global $emExecucao, $senha, $Jogadores, $maxJogadores;
 		$this->clients[(int)$conn->resourceId] = $conn;
 		verbose("Nova conexão: ({$conn->resourceId})\n");
+		if (count($Jogadores) >= $maxJogadores) {
+			$conn->send(json_encode([
+				'tipo' => 'goaway',
+				'conteudo' => [
+					'msg' => 'Máximo de jogadores conectados atingido.'
+				]
+			]));
+			return false;
+		}
 		if ($emExecucao) {
 			$conn->send(json_encode([
 				'tipo' => 'goaway',
@@ -61,7 +70,7 @@ class Comm {
             switch ($command) {
 				case "pass":
 					global $senha;
-					verbose("Conexão {$from->resourceId} informou senha...\n");
+					verbose("Conexão {$from->resourceId} informou senha... ");
 					$senhaInformada = md5(implode(" ",$args));
 					if ($senha === $senhaInformada) {
 						$from->send(json_encode([
@@ -70,6 +79,7 @@ class Comm {
 								'resourceId' => $from->resourceId
 							]
 						]));
+						verbose("OK\n");
 					} else {
 						$from->send(json_encode([
 							'tipo' => 'goaway',
@@ -77,7 +87,8 @@ class Comm {
 								'msg' => 'Senha incorreta.'
 							]
 						]));
-						$from->close();
+						verbose("INCORRETA!\n");
+						unset($this->clients[(int)$from->resourceId]);
 					}
 					break;
 				case "thnx":
@@ -339,11 +350,17 @@ function iniciarSala($_porta) {
 	if ($_porta == 0) {
 		$_porta = intval(readline("Digite o número da porta: "));
 	}
-	verbose("Iniciando sala na porta $_porta...\n");
 	$context = null;
 	if ($ssl) {
-		$usuarioAtual = get_current_user();
-		$usuarioPosix = posix_getpwuid(posix_geteuid());
+		verbose("Iniciando sala COM SSL na porta $_porta...\n");
+		$usuarioAtual = "win";
+		$usuarioPosix = [
+			'name'=>"win"
+		];
+		if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
+			$usuarioAtual = get_current_user();
+			$usuarioPosix = posix_getpwuid(posix_geteuid());
+		}
 		if (!extension_loaded('openssl')) {
 			die("Falha ao iniciar a sala SSL: extensão OpenSSL do PHP não está habilitada.\n");
 		}
@@ -366,6 +383,7 @@ function iniciarSala($_porta) {
 			die("Falha ao iniciar a sala SSL: $errstr ($errno)");
 		}
 	} else {
+		verbose("Iniciando sala na porta $_porta...\n");
 		$context = stream_context_create();
 		$server = stream_socket_server("tcp://0.0.0.0:$_porta", $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context);
 		if (!$server) {
@@ -374,11 +392,11 @@ function iniciarSala($_porta) {
 	}
 	stream_set_blocking($server, false);
 	//Registrar sala criada
-	verbose("Sala iniciada na porta $_porta. Aguardando jogadores...\n");
 	$porta = (int)$_porta;
 	registrarSala();
 	$clientes = array($server);
 	$comm = new Comm();
+	verbose("Sala iniciada na porta $_porta. Aguardando jogadores...\n");
 }
 function registrarSala() {
 	global $path, $Deque, $porta, $nomeLobby, $maxJogadores, $senha, $pid;
@@ -436,6 +454,7 @@ function desregistrarSala() {
 			}
 			if ($indiceSala !== null) {
 				array_splice($listaSalas->salas, $indiceSala, 1);
+				$listaSalas->numSalas--;
 			} else {
 				verbose("ERRO: Não foi encontrado PID $pid registrado!");
 			}

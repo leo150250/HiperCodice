@@ -1030,7 +1030,8 @@ input[type="checkbox"]:checked + label {
 }
 
 #listaPartidasMP {
-	max-width: calc(100vw - 2em - 2px);
+	max-width: calc(100% - 2px);
+	width: 80em;
 	height: 30vh;
 	overflow-y: scroll;
 	border: 1px solid #8884;
@@ -1038,7 +1039,6 @@ input[type="checkbox"]:checked + label {
 }
 #listaPartidasMP table {
 	width: 100%;
-	min-width: 50em;
 	border-collapse: collapse;
 }
 #listaPartidasMP table tr {

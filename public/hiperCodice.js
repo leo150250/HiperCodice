@@ -25,6 +25,8 @@ const divListaPartidasMP = document.getElementById("listaPartidasMP");
 const spanSalasMPNome = document.getElementById("spanSalasMPNome");
 const spanSalasMPJogadores = document.getElementById("spanSalasMPJogadores");
 const spanSalasMPDeque = document.getElementById("spanSalasMPDeque");
+const buttonSalasMPConectar = document.getElementById("buttonSalasMPConectar");
+const inputSenhaConectarMP = document.getElementById("inputSenhaConectarMP");
 const inputNomeNovaSalaMP = document.getElementById("inputNomeNovaSalaMP");
 const inputNumJogadoresNovaSalaMP = document.getElementById("inputNumJogadoresNovaSalaMP");
 const inputSenhaNovaSalaMP = document.getElementById("inputSenhaNovaSalaMP");
@@ -36,9 +38,9 @@ var cores = [
 	["#2196F3","#002c8bf8","#00204ff8"]
 ];
 var nomesAleatorios = [
-	"Gato","Cão","Rã","Tatu","Lobo","Urso","Leão","Tigre","Puma","Boi",
-	"Vaca","Porco","Veado","Raposa","Foca","Baleia","Cobra","Corvo","Pato","Galo",
-	"Ema","Puma","Mico","Zebu","Anta","Onça","Guaxinim","Coala","Cabra","Ovelha"
+	"Rosa","Lírio","Íris","Tulipa","Violeta","Dália","Jasmim","Cravo","Camélia","Gerânio",
+	"Petúnia","Azaléia","Lavanda","Begônia","Orquídea","Narciso","Lótus","Malva",
+	"Jacinto","Magnólia","Amarílis","Açucena","Gardênia","Hortênsia"
 ];
 var menuAberto = null;
 var timerDequePesquisa = null;
@@ -62,6 +64,8 @@ var dequeLobby = null;
 
 var servidorMPSelecionado = null;
 var portaMPSelecionada = null;
+var senhaMPrequerida = false;
+var senhaMP = null;
 carregarServidores();
 
 var cookies = decodeURIComponent(document.cookie).split(";");
@@ -257,6 +261,10 @@ function obterSalasMP() {
 				}
 				let trNovaSala = document.createElement("tr");
 				trNovaSala.onclick = ()=>{
+					servidorMPSelecionado = _servidor.host;
+					portaMPSelecionada = _sala.porta;
+					senhaMPrequerida = _sala.senha!==null;
+					buttonSalasMPConectar.removeAttribute("disabled");
 					spanSalasMPNome.textContent = _sala.nome;
 					spanSalasMPJogadores.textContent = `${_sala.jogadores}/${_sala.maxJogadores}`;
 					spanSalasMPDeque.textContent = _sala.nomeDeque;
@@ -328,7 +336,7 @@ function criarSalaMP(_localhost = false) {
 	if (senhaNovaSalaMP == "") {
 		senhaNovaSalaMP = null;
 	}
-
+	senhaMP = senhaNovaSalaMP;
 	servidorMPSelecionado = host;
 
 	servidorEscolhido.criarSala((_resposta)=>{
@@ -429,11 +437,24 @@ function paginaCarregada() {
 	obterSalasMP();
 	//carregarJogoMP();
 }
-function conectarLobby(_servidor = null,_porta = null) {
+function exibirSolicitacaoSenha() {
+	esconderTodosDialogos();
+	exibirDialogo("dialogSenhaMP");
+}
+function conectarLobby(_servidor = null,_porta = null,_senha = null) {
 	exibirCarregamento("Conectando");
 	if (_servidor == null && _porta == null) {
 		_servidor = servidorMPSelecionado;
 		_porta = portaMPSelecionada;
+		if (_senha === null) {
+			_senha = senhaMP;
+		} else {
+			senhaMP = _senha;
+		}
+		if ((senhaMPrequerida) && (_senha === null)) {
+			exibirSolicitacaoSenha();
+			return;
+		}
 	}
 	new Comm(_servidor,_porta,()=>{
 		exibirLobby(_servidor,_porta);
