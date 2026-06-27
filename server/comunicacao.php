@@ -155,12 +155,12 @@ class Comm {
 		if ($jogadorSaiu !== null) {
 			global $emExecucao, $timerInatividade;
 			$timerInatividade->resetar(10000);
-			if (!$emExecucao) {
-				registrarJogadoresProntos();
-			}
 			verbose("Conexão ({$conn->resourceId}) fechada\n");
 			$this->enviarMensagemTodos("{$jogadorSaiu->nome} saiu da sala.");
 			$jogadorSaiu->quitar();
+			if (!$emExecucao) {
+				registrarJogadoresProntos();
+			}
 		}
         unset($this->clients[(int)$conn->resourceId]);
     }
