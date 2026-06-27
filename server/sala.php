@@ -16,6 +16,7 @@ $maxJogadores = 4;
 $senha = null;
 $pid = getmypid();
 verbose("Registro sala PID $pid\n");
+carregarPalavrasProibidas();
 verbose($argv);
 foreach ($argv as $chave => $valor) {
 	if ($valor == "-p") {

@@ -1,5 +1,5 @@
 <?php
-$path = "../";
+$path = __DIR__."/../";
 include $path.".interno/conexaoBD.php";
 include $path.".interno/funcoes.php";
 
