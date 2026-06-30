@@ -90,6 +90,7 @@ function destacarJogador(_idProximoJogador) {
 
 function exibirCarta(_id) {
 	divCartaJogador.innerHTML="";
+	divAmbiente.style.flexBasis = null;
 	if (typeof _id != "object") {
 		for (let i = 0; i < deque.cartas.length; i++) {
 			if (deque.cartas[i].id == _id) {
@@ -135,6 +136,7 @@ function escolherAtributo(_id) {
 }
 
 function destacarAtributo(_id) {
+	divAmbiente.style.flexBasis = "100%";
 	let divAtributo = document.getElementById(`atributo${_id}`);
 	divAtributo.classList.add("selecionado");
 }
