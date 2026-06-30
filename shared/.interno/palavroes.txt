@@ -1,5 +1,9 @@
 /2g1c/iu -20
+/1c2g/iu -20
 /2.girls.1.cup/iu -20
+/1.cup.2.girls/iu -20
+/1g1j/iu -20
+/1j1g/iu -20
 
 /aborto/iu -10
 /acrotomophilia/iu -20
@@ -141,84 +145,6 @@
 /cunt/iu -20
 
 /dar.o.rabo/iu -10
-/dum.raio/iu -10
-
-/esporra/iu -20
-
-/fecal/iu -10
-/filho.da.puta/iu -20
-/foda-se/iu -20
-/foda/iu -10
-/foder/iu -10
-
-/gozar/iu -10
-/grelho/iu -10
-
-/heroína/iu -10
-/heterosexual/iu -10
-/homem.gay/iu -10
-/homoerótico/iu -10
-/homosexual/iu -10
-
-/inferno/iu -10
-
-/lésbica/iu -10
-/lolita/iu -10
-
-/mama/iu -10
-/merda/iu -10
-
-/paneleiro/iu -10
-/passar.um.cheque/iu -10
-/pau/iu -10
-/pausa/iu 10
-/peid./iu -10
-/p.nis/iu -10
-/piroca/iu -10
-/pica/iu -10
-/pinto/iu -10
-/porra/iu -20
-/pqp/iu -20
-/puta/iu -10
-/mputad/iu 10 1 
-/deputad/iu 10 2
-/reputac/iu 10 2
-/putativ/iu 10
-/puta.que.pariu/iu -20
-/puta.que.te.pariu/iu -20
-
-/queca/iu -10
-
-/sacanagem/iu -10
-/saco/iu -10
-/sex/iu -10
-/sext[ao]/iu 10
-
-/torneira/iu -10
-/transar/iu -10
-
-/vadia/iu -10
-/vai-te.foder/iu -20
-/vai.tomar.no.cu/iu -20
-/veado/iu -10
-/viado/iu -10
-/traviado/iu 10 3
-/vibrador/iu -10
-
-/xana/iu -10
-/xochota/iu -10
-/xoxota/iu -10
-
-
-
-
-
-
-
-
-
-
-
 /darkie/iu -20
 /date.rape/iu -20
 /daterape/iu -20
@@ -245,26 +171,35 @@
 /double.penetration/iu -20
 /dp.action/iu -20
 /dry.hump/iu -20
+/dum.raio/iu -10
 /dvda/iu -20
+
 /eat.my.ass/iu -20
 /ecchi/iu -20
 /ejaculation/iu -20
 /erotic/iu -20
 /erotism/iu -20
 /escort/iu -20
+/esporra/iu -20
 /eunuch/iu -20
+
 /fag/iu -20
 /faggot/iu -20
-/fecal/iu -20
+/fecal/iu -10
 /felch/iu -20
 /fellatio/iu -20
 /feltch/iu -20
 /female.squirting/iu -20
 /femdom/iu -20
 /figging/iu -20
+/filho.da.puta/iu -20
+/fdp/iu -20
 /fingerbang/iu -20
 /fingering/iu -20
 /fisting/iu -20
+/foda-se/iu -20
+/foda/iu -10
+/foder/iu -10
 /foot.fetish/iu -20
 /footjob/iu -20
 /frotting/iu -20
@@ -276,6 +211,7 @@
 /fudge.packer/iu -20
 /fudgepacker/iu -20
 /futanari/iu -20
+
 /gangbang/iu -20
 /gang.bang/iu -20
 /gay.sex/iu -20
@@ -292,16 +228,26 @@
 /goodpoop/iu -20
 /goo.girl/iu -20
 /goregasm/iu -20
+/gozar/iu -10
+/grelho/iu -10
+/grelo/iu -10
 /grope/iu -20
 /group.sex/iu -20
 /g-spot/iu -20
 /guro/iu -20
+
 /hand.job/iu -20
 /handjob/iu -20
 /hard.core/iu -20
 /hardcore/iu -20
 /hentai/iu -20
+/heroína/iu -10
+/heterosexual/iu -10
+/homem.gay/iu -10
 /homoerotic/iu -20
+/homo/iu -10
+/homoerótico/iu -10
+/homosexual/iu -10
 /honkey/iu -20
 /hooker/iu -20
 /horny/iu -20
@@ -311,8 +257,11 @@
 /how.to.murder/iu -20
 /huge.fat/iu -20
 /humping/iu -20
+
 /incest/iu -20
+/inferno/iu -10
 /intercourse/iu -20
+
 /jack.off/iu -20
 /jail.bait/iu -20
 /jailbait/iu -20
@@ -323,23 +272,27 @@
 /jiggerboo/iu -20
 /jizz/iu -20
 /juggs/iu -20
+
 /kike/iu -20
 /kinbaku/iu -20
 /kinkster/iu -20
 /kinky/iu -20
 /knobbing/iu -20
+
 /leather.restraint/iu -20
 /leather.straight.jacket/iu -20
 /lemon.party/iu -20
+/lésbica/iu -10
 /livesex/iu -20
-/lolita/iu -20
+/lolita/iu -10
 /lovemaking/iu -20
+
 /make.me.come/iu -20
 /male.squirting/iu -20
-/masturbate/iu -20
-/masturbating/iu -20
-/masturbation/iu -20
+/mama/iu -10
+/masturba/iu -20
 /menage.a.trois/iu -20
+/merda/iu -10
 /milf/iu -20
 /missionary.position/iu -20
 /mong/iu -20
@@ -348,6 +301,7 @@
 /mr.hands/iu -20
 /muff.diver/iu -20
 /muffdiving/iu -20
+
 /nambla/iu -20
 /nawashi/iu -20
 /negro/iu -20
@@ -365,23 +319,33 @@
 /nutten/iu -20
 /nympho/iu -20
 /nymphomania/iu -20
+
 /octopussy/iu -20
 /omorashi/iu -20
 /one.cup.two.girls/iu -20
 /one.guy.one.jar/iu -20
 /orgasm/iu -20
 /orgy/iu -20
+
 /paedophile/iu -20
 /paki/iu -20
+/paneleiro/iu -10
 /panties/iu -20
 /panty/iu -20
+/passar.um.cheque/iu -10
+/pau/iu -10
+/pausa/iu 10
 /pedobear/iu -20
 /pedophile/iu -20
 /pegging/iu -20
-/penis/iu -20
+/peid./iu -10
+/p.nis/iu -10
 /phone.sex/iu -20
+/pica/iu -10
 /piece.of.shit/iu -20
 /pikey/iu -20
+/pinto/iu -10
+/piroca/iu -10
 /pissing/iu -20
 /piss.pig/iu -20
 /pisspig/iu -20
@@ -392,19 +356,30 @@
 /poof/iu -20
 /poon/iu -20
 /poontang/iu -20
-/punany/iu -20
 /poop.chute/iu -20
 /poopchute/iu -20
 /porn/iu -20
-/porno/iu -20
 /pornography/iu -20
+/porra/iu -20
+/pqp/iu -20
 /prince.albert.piercing/iu -20
 /pthc/iu -20
 /pubes/iu -20
+/punany/iu -20
 /pussy/iu -20
+/puta/iu -10
+/mputad/iu 10 1 
+/deputad/iu 10 2
+/reputac/iu 10 2
+/putativ/iu 10
+/puta.que.pariu/iu -20
+/puta.que.te.pariu/iu -20
+
 /queaf/iu -20
+/queca/iu -10
 /queef/iu -20
 /quim/iu -20
+
 /raghead/iu -20
 /raging.boner/iu -20
 /rape/iu -20
@@ -417,13 +392,17 @@
 /rosy.palm/iu -20
 /rosy.palm.and.her.5.sisters/iu -20
 /rusty.trombone/iu -20
+
+/sacanagem/iu -10
+/saco/iu -10
 /sadism/iu -20
 /santorum/iu -20
 /scat/iu -20
 /schlong/iu -20
 /scissoring/iu -20
 /semen/iu -20
-/sex/iu -20
+/sex/iu -10
+/sext[ao]/iu 10
 /sexcam/iu -20
 /sexo/iu -20
 /sexy/iu -20
@@ -443,7 +422,8 @@
 /slanteye/iu -20
 /slut/iu -20
 /s&m/iu -20
-/smut/iu -20
+/smut/iu -10
+/nsmut[a]/iu 10 1
 /snatch/iu -20
 /snowballing/iu -20
 /sodomize/iu -20
@@ -466,6 +446,7 @@
 /sultry.women/iu -20
 /swastika/iu -20
 /swinger/iu -20
+
 /tainted.love/iu -20
 /taste.my/iu -20
 /tea.bagging/iu -20
@@ -478,11 +459,16 @@
 /tits/iu -20
 /titties/iu -20
 /titty/iu -20
+/tnc/iu -20
+/tmnc/iu -20
 /tongue.in.a/iu -20
 /topless/iu -20
+/torneira/iu -10
 /tosser/iu -20
 /towelhead/iu -20
 /tranny/iu -20
+/trans/iu -10
+/trans[flm]/iu 10
 /tribadism/iu -20
 /tub.girl/iu -20
 /tubgirl/iu -20
@@ -491,20 +477,30 @@
 /twink/iu -20
 /twinkie/iu -20
 /two.girls.one.cup/iu -20
+
 /undressing/iu -20
 /upskirt/iu -20
 /urethra.play/iu -20
 /urophilia/iu -20
+
+/vadia/iu -10
 /vagina/iu -20
+/vai-te.foder/iu -20
+/vai.tomar.no.cu/iu -20
 /venus.mound/iu -20
+/v[ei]ado/iu -10
 /viagra/iu -20
-/vibrator/iu -20
+/vibra[dt]or/iu -20
 /violet.wand/iu -20
 /vorarephilia/iu -20
 /voyeur/iu -20
 /voyeurweb/iu -20
 /voyuer/iu -20
+/vtnc/iu -20
+/vtmnc/iu -20
 /vulva/iu -20
+/traviado/iu 10 3
+
 /wank/iu -20
 /wetback/iu -20
 /wet.dream/iu -20
@@ -513,12 +509,20 @@
 /worldsex/iu -20
 /wrapping.men/iu -20
 /wrinkled.starfish/iu -20
+
+/xana/iu -10
+/xochota/iu -10
+/xoxota/iu -10
 /xx/iu -20
 /xxx/iu -20
+
 /yaoi/iu -20
 /yellow.showers/iu -20
 /yiffy/iu -20
-/zoophilia/iu -20
-/🖕/iu -20
 
+/zoophilia/iu -20
+
+/🖕/iu -100
 /hitler/iu -100
+/\skkk\s/iu -100 1
+/klu.klux.klan/iu -100

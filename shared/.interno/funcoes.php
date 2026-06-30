@@ -29,11 +29,11 @@ function registrarBuffer() {
 }
 
 $palavrasProibidas = [];
-function carregarPalavrasProibidas() {
+function carregarPalavrasProibidas($_debug = false) {
 	global $path, $palavrasProibidas;
-	$arquivo = $path.".interno/palavroes.txt";
-	if (file_exists($arquivo)) {
-		$palavrasProibidas = file($arquivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+	$arquivoPalavroes = $path.".interno/palavroes.txt";
+	if (file_exists($arquivoPalavroes)) {
+		$palavrasProibidas = file($arquivoPalavroes, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 		$palavrasProibidas = array_map('trim', $palavrasProibidas);
 		foreach ($palavrasProibidas as $chave => $palavra) {
 			$novaPalavra = new stdClass();
@@ -50,7 +50,7 @@ function carregarPalavrasProibidas() {
 	//print_r($palavrasProibidas);
 }
 
-function filtrarString($_string) {
+function filtrarString($_string, $_debug = false) {
 	global $palavrasProibidas;
 
 	// Converte os números para letras, pra tentar encontrar slangs ocultos
@@ -127,7 +127,9 @@ function filtrarString($_string) {
 	$matches = array_values($consolidados);
 	unset($consolidados);
 
-	//print_r($matches);
+	if ($_debug) {
+		print_r($matches);
+	}
 
 	// aplica máscaras para cada ocorrência cujo score for negativo
 	foreach ($matches as $m) {
