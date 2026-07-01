@@ -17,6 +17,7 @@
 /apeshit/iu -20
 /aranha/iu -10
 /ariano/iu -10
+/arrombad[oa]/iu -10
 /arsehole/iu -20
 /ass/iu -20
 /asshole/iu -20
@@ -69,7 +70,7 @@
 /blow.your.load/iu -20
 /blue.waffle/iu -20
 /blumpkin/iu -20
-/b[ou]ceta/iu -20
+/b[ou][cs]et([ao]|(uda)|(ona))/iu -20
 /bct/iu - 20
 /bollocks/iu -20
 /bondage/iu -20
@@ -86,6 +87,8 @@
 /bullet.vibe/iu -20
 /bullshit/iu -20
 /bumbum/iu -10
+/bund[aioã]/iu -10
+/bundle/iu 10
 /bung.hole/iu -20
 /bunghole/iu -20
 /busty/iu -20
@@ -101,7 +104,8 @@
 /camisinha/iu -10
 /camslut/iu -20
 /camwhore/iu -20
-/caralho/iu -20
+/[ck][a]ralh[aeiou]/iu -20
+/[ck]rl/iu -20
 /carpet.muncher/iu -20
 /carpetmuncher/iu -20
 /cerveja/iu -10
@@ -130,6 +134,7 @@
 /cornhole/iu -20
 /corno/iu -10
 /creampie/iu -20
+/[ck]rio[u]?lo/iu -20
 /cu/iu -20
 /cultura/iu 20
 /cuidado/iu 20
@@ -228,9 +233,10 @@
 /goodpoop/iu -20
 /goo.girl/iu -20
 /goregasm/iu -20
-/gozar/iu -10
+/goz[ao][r]?/iu -10
+/gozor/iu 10
 /grelho/iu -10
-/grelo/iu -10
+/grel[ou]/iu -10
 /grope/iu -20
 /group.sex/iu -20
 /g-spot/iu -20
@@ -304,10 +310,10 @@
 
 /nambla/iu -20
 /nawashi/iu -20
-/negro/iu -20
+/neg[r]?[aão]/iu -20
 /neonazi/iu -20
-/nigga/iu -20
-/nigger/iu -20
+/nigg[a]?/iu -20
+/nigg[e]?r/iu -20
 /nig.nog/iu -20
 /nimphomania/iu -20
 /nipple/iu -20
@@ -389,6 +395,7 @@
 /reverse.cowgirl/iu -20
 /rimjob/iu -20
 /rimming/iu -20
+/rola/iu -10
 /rosy.palm/iu -20
 /rosy.palm.and.her.5.sisters/iu -20
 /rusty.trombone/iu -20
@@ -487,8 +494,9 @@
 /vagina/iu -20
 /vai-te.foder/iu -20
 /vai.tomar.no.cu/iu -20
+/v[ei]ad[oa]/iu -10
 /venus.mound/iu -20
-/v[ei]ado/iu -10
+/verga/iu -10
 /viagra/iu -20
 /vibra[dt]or/iu -20
 /violet.wand/iu -20
@@ -511,6 +519,7 @@
 /wrinkled.starfish/iu -20
 
 /xana/iu -10
+/xibi[ou]/iu -10
 /xochota/iu -10
 /xoxota/iu -10
 /xx/iu -20
