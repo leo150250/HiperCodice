@@ -367,19 +367,18 @@
 /porn/iu -20
 /pornography/iu -20
 /porra/iu -20
-/pqp/iu -20
 /prince.albert.piercing/iu -20
 /pthc/iu -20
 /pubes/iu -20
 /punany/iu -20
 /pussy/iu -20
-/puta/iu -10
+/put[aio]/iu -10
 /mputad/iu 10 1 
 /deputad/iu 10 2
 /reputac/iu 10 2
 /putativ/iu 10
-/puta.que.pariu/iu -20
-/puta.que.te.pariu/iu -20
+/put[ao].que.(te.)?pariu/iu -20
+/pqp/iu -20
 
 /queaf/iu -20
 /queca/iu -10
@@ -519,6 +518,7 @@
 /wrinkled.starfish/iu -20
 
 /xana/iu -10
+/xavasca/iu -20
 /xibi[ou]/iu -10
 /xochota/iu -10
 /xoxota/iu -10
